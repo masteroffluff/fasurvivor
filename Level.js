@@ -23,7 +23,7 @@ let weaponsData = {
   }
 }
 
-weapons = ['fireball']
+weapons = ['fireball'];
 class Level extends Phaser.Scene {
   constructor() {
     super({ key: 'Level' })
@@ -47,27 +47,27 @@ class Level extends Phaser.Scene {
 
     cursors = this.input.keyboard.createCursorKeys();
     enemies = this.physics.add.group();
-    
+
 
     this.physics.add.collider(enemies.children.entries, enemies.children.entries);
 
-    gameState.enemyBoundingBox = new Phaser.Geom.Rectangle(
+    gameState.playArea = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x - enemyBoundsOffset,
       this.cameras.main.worldView.y - enemyBoundsOffset,
       this.cameras.main.worldView.width + enemyBoundsOffset + enemyBoundsOffset,
       this.cameras.main.worldView.height + enemyBoundsOffset + enemyBoundsOffset
-    )
+    );
     gameState.cameraView = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x,
       this.cameras.main.worldView.y,
       this.cameras.main.worldView.width,
       this.cameras.main.worldView.height
-    )
+    );
     function generateEnemy() {
       if (enemies.countActive() <= maxEnemies) {
 
         gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
-        const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(gameState.enemyBoundingBox, gameState.cameraView)
+        const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(gameState.playArea, gameState.cameraView)
         // const lrtb = Math.floor(Math.random() * 4)
         // let xCoord, yCoord
         // switch (lrtb){
@@ -89,34 +89,49 @@ class Level extends Phaser.Scene {
         //   break;
         //   default:
         //     // this should not happen
-        // } 
+        // } ;
 
         let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
         //enemies.create(xCoord, yCoord, randomEnemy)
-        enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
+        const enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
+        enemy.deadTween= this.tweens.add({
+          targets: enemy,
+          paused: true,
+          scaleX: 0,
+          scaleY: 0,
+          yoyo: false,
+          duration: 150,
+          onComplete:()=>{
+            enemy.destroy()
+          }
+      })
       }
-    }
+    };
 
     const enemyGenLoop = this.time.addEvent({
       callback: generateEnemy,
       delay: 100,
       callbackScope: this,
       loop: true,
-    })
+    });
     //Weapons 
     weapons = this.physics.add.group();
-    function fireWeapon(){
+    this.physics.add.collider(weapons, enemies, (w, e) => {
+
+      w.destroy()
+      e.deadTween.restart()
+    })
+
+    function fireWeapon() {
       const weapon1 = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2)
       const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
       weapon1.damage = 1
-      
+
       this.physics.moveToObject(weapon1, targeted, 100);
     }
 
     const weaponLoop = (weaponName) => {
       //const weapon2 = weaponsData[weaponName]
-      
-
       return this.time.addEvent({
         callback: fireWeapon,
         delay: 750,
@@ -151,18 +166,24 @@ class Level extends Phaser.Scene {
     gameState.player.setVelocityX(dX * playerSpeed);
     gameState.player.setVelocityY(dY * playerSpeed);
 
+    
+    // set an area for weapons and enemies to exist any item outside this box gets deleted
+    gameState.playArea.setPosition(this.cameras.main.worldView.x - enemyBoundsOffset, this.cameras.main.worldView.y - enemyBoundsOffset)
     // Enemies
-
-
     // enemy controls
-    gameState.enemyBoundingBox.setPosition(this.cameras.main.worldView.x - enemyBoundsOffset, this.cameras.main.worldView.y - enemyBoundsOffset)
+    
     enemies.children.each((enemy) => {
-      if (Phaser.Geom.Rectangle.Contains(gameState.enemyBoundingBox, enemy.x, enemy.y)) {
+      if (Phaser.Geom.Rectangle.Contains(gameState.playArea, enemy.x, enemy.y)) {
         this.physics.moveToObject(enemy, gameState.player, 50);
       } else {
         enemy.destroy()
       }
 
+    })
+    weapons.children.each((weapon) => {
+      if (!Phaser.Geom.Rectangle.Contains(gameState.playArea, weapon.x, weapon.y)) {
+        weapon.destroy()
+      }
     })
 
 

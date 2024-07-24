@@ -5,15 +5,11 @@ const gameState = {
   height: 2000,
 };
 
-
-
-
-
 const config = {
 	type: Phaser.AUTO,
 	width: 500,
 	height: 600,
-	backgroundColor: "000000",
+	backgroundColor: "aaaaaa",
 	physics: {
 		default: 'arcade',
 		arcade: {
