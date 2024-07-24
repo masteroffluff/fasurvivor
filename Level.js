@@ -1,5 +1,6 @@
 
 let enemies
+let weapons
 let enemy
 let playerSpeed = 100
 let cursors;
@@ -11,28 +12,116 @@ const enemyBoundsOffset = 50;
 
 
 
-
-let weaponsData = {
+const weaponsData = {
   fireball: {
+    name: 'fireball',
     type: 'projectile', // melee, area, special
     spriteName: 'fireball',
     damage: 1,
+    velocity: 100,
+    delay: 750,
+    pen: 1,
+  },
+  sword: {
+    name: 'sword',
+    type: 'melee',
+    spriteName: 'sword',
+    damage: 1,
     velocity: 2,
-    delay: 100,
-    callback: 'shootFireball'
+    delay: 1000,
+    pen: Infinity,
   }
 }
+function getWeaponCallback(weaponName) {
+  switch (weaponName) {
+    case 'fireball':
+      return function shootFireball() {
+        const { pen, damage } = weaponsData['fireball']
+        const fireball = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2)
+        fireball.damage = damage
+        fireball.pen = pen
+        const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
+        this.physics.moveToObject(fireball, targeted, 100);
 
-weapons = ['fireball'];
+      }
+    case 'sword':
+      return function swingSword() {
+        const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
+        const { pen, damage } = weaponsData['sword']
+        console.log(sword.body.center)
+        const bodyRadius = 15
+        sword.body.setCircle(bodyRadius, sword.width-bodyRadius*2,-(sword.height/2+bodyRadius)/2)
+        //console.log(sword.displayOriginX,sword.displayOriginX,sword.displayOriginY)
+        console.log(sword.center)
+
+        sword.damage = damage
+        sword.pen = pen
+        this.tweens.add({
+          targets: sword,
+          paused: false,
+          angle: 360,
+          yoyo: false,
+          duration: 2000,
+          onComplete: () => {
+            sword.destroy()
+          },
+          onUpdate: () => {
+   // Update sword position to match player position
+   sword.x = gameState.player.x;
+   sword.y = gameState.player.y;
+
+   // Radius of the path traced by the sword's tip
+   const pathRadius = sword.width; // Adjust as needed for your sword's path
+
+
+   //const bodyRadius = 20; // set further up the code now
+
+   // Calculate the sword's rotation
+   const rotation = sword.rotation;
+
+   // Calculate the tip position using the sword's rotation
+   const tipX = pathRadius * Math.cos(rotation);
+   const tipY = pathRadius * Math.sin(rotation);
+
+   // The body's center should be positioned so that its edge is aligned with the tip's path
+   // The offset is calculated by translating the body's center back from the tip's position
+   const offsetX = tipX - bodyRadius * Math.cos(rotation)-bodyRadius;
+   const offsetY = tipY - bodyRadius * Math.sin(rotation)+(sword.height/2)-bodyRadius;
+
+   // Debug output to check calculated values
+   console.log(`Rotation: ${rotation}, TipX: ${Math.floor(tipX)}, TipY: ${Math.floor(tipY)}`);
+   console.log(`OffsetX: ${Math.floor(offsetX)}, OffsetY: ${Math.floor(offsetY)}`);
+
+   // Set the new offset for the sword's body
+   sword.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
+
+
+
+          }
+        })
+      }
+    default:
+  }
+
+}
+
+const heldWeapons = ['fireball', 'sword'];
+
+
+
 class Level extends Phaser.Scene {
   constructor() {
     super({ key: 'Level' })
   }
 
+
+
   preload() {
     this.load.image('enemy1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png');
     this.load.image('player', 'https://content.codecademy.com/courses/learn-phaser/codey.png')
     this.load.image('fireball', './imgs/fireball.png')
+    this.load.image('sword', './imgs/sword3.png')
+
   }
   create() {
     const graphics = this.add.graphics();
@@ -68,43 +157,22 @@ class Level extends Phaser.Scene {
 
         gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
         const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(gameState.playArea, gameState.cameraView)
-        // const lrtb = Math.floor(Math.random() * 4)
-        // let xCoord, yCoord
-        // switch (lrtb){
-        //   case 0: // left
-        //   xCoord = 10;
-        //   yCoord = Math.random() * 600;
-        //   break;
-        //   case 1: // right
-        //   xCoord = 490;
-        //   yCoord = Math.random() * 600; 
-        //   break;
-        //   case 2: // top
-        //   xCoord = Math.random() * 500;
-        //   yCoord = 10;
-        //   break;
-        //   case 3: // bottom
-        //   xCoord = Math.random() * 500;
-        //   yCoord = 590;
-        //   break;
-        //   default:
-        //     // this should not happen
-        // } ;
 
         let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
         //enemies.create(xCoord, yCoord, randomEnemy)
         const enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
-        enemy.deadTween= this.tweens.add({
+        enemy.life = 1;
+        enemy.deadTween = this.tweens.add({
           targets: enemy,
           paused: true,
           scaleX: 0,
           scaleY: 0,
           yoyo: false,
           duration: 150,
-          onComplete:()=>{
+          onComplete: () => {
             enemy.destroy()
           }
-      })
+        })
       }
     };
 
@@ -116,31 +184,40 @@ class Level extends Phaser.Scene {
     });
     //Weapons 
     weapons = this.physics.add.group();
-    this.physics.add.collider(weapons, enemies, (w, e) => {
+    this.physics.add.overlap(weapons, enemies, (w, e) => {
+      //if(!e.dead){
+      w.pen--
+      e.life--
+      if (w.pen <= 0) {
+        w.destroy();
+      }
 
-      w.destroy()
-      e.deadTween.restart()
+      if (e.life <= 0) {
+        //e.disableBody(e.body) 
+        e.body.destroy()
+        e.dead = true;
+        e.deadTween.restart()
+      }
+      //}
     })
 
-    function fireWeapon() {
-      const weapon1 = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2)
-      const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
-      weapon1.damage = 1
 
-      this.physics.moveToObject(weapon1, targeted, 100);
-    }
 
     const weaponLoop = (weaponName) => {
-      //const weapon2 = weaponsData[weaponName]
+      console.log(weaponsData, weaponName)
+      const weapon2 = weaponsData[weaponName];
       return this.time.addEvent({
-        callback: fireWeapon,
-        delay: 750,
+        callback: getWeaponCallback(weapon2.name),
+        delay: weapon2.delay,
         callbackScope: this,
         loop: true,
 
       })
     }
-    weaponLoop(weapons[0])
+    heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
+      weaponLoop(w)
+    })
+
   }
   update() {
     // player controls
@@ -166,15 +243,20 @@ class Level extends Phaser.Scene {
     gameState.player.setVelocityX(dX * playerSpeed);
     gameState.player.setVelocityY(dY * playerSpeed);
 
-    
+
     // set an area for weapons and enemies to exist any item outside this box gets deleted
     gameState.playArea.setPosition(this.cameras.main.worldView.x - enemyBoundsOffset, this.cameras.main.worldView.y - enemyBoundsOffset)
     // Enemies
     // enemy controls
-    
+
     enemies.children.each((enemy) => {
       if (Phaser.Geom.Rectangle.Contains(gameState.playArea, enemy.x, enemy.y)) {
-        this.physics.moveToObject(enemy, gameState.player, 50);
+        if (enemy.life > 0) {
+          this.physics.moveToObject(enemy, gameState.player, 50);
+
+        } else {
+          //enemy.deadTween.restart()
+        }
       } else {
         enemy.destroy()
       }
