@@ -12,6 +12,7 @@ const enemyBoundsOffset = 50;
 
 
 
+
 const weaponsData = {
   fireball: {
     name: 'fireball',
@@ -28,7 +29,7 @@ const weaponsData = {
     spriteName: 'sword',
     damage: 1,
     velocity: 2,
-    delay: 1000,
+    delay: 3000,
     pen: Infinity,
   }
 }
@@ -42,60 +43,50 @@ function getWeaponCallback(weaponName) {
         fireball.pen = pen
         const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
         this.physics.moveToObject(fireball, targeted, 100);
-
       }
+
     case 'sword':
       return function swingSword() {
         const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
         const { pen, damage } = weaponsData['sword']
         console.log(sword.body.center)
         const bodyRadius = 15
-        sword.body.setCircle(bodyRadius, sword.width-bodyRadius*2,-(sword.height/2+bodyRadius)/2)
-        //console.log(sword.displayOriginX,sword.displayOriginX,sword.displayOriginY)
-        console.log(sword.center)
-
+        sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
         sword.damage = damage
         sword.pen = pen
         this.tweens.add({
           targets: sword,
           paused: false,
-          angle: 360,
+          angle: -360,
           yoyo: false,
-          duration: 2000,
+          duration: 750,
           onComplete: () => {
             sword.destroy()
           },
           onUpdate: () => {
-   // Update sword position to match player position
-   sword.x = gameState.player.x;
-   sword.y = gameState.player.y;
+            // Update sword position to match player position
+            sword.x = gameState.player.x;
+            sword.y = gameState.player.y;
 
-   // Radius of the path traced by the sword's tip
-   const pathRadius = sword.width; // Adjust as needed for your sword's path
+            // Radius of the path traced by the sword's tip
+            const pathRadius = sword.width; // Adjust as needed for your sword's path
 
+            //const bodyRadius = 20; // set further up the code now
 
-   //const bodyRadius = 20; // set further up the code now
+            // Calculate the sword's rotation
+            const rotation = sword.rotation;
 
-   // Calculate the sword's rotation
-   const rotation = sword.rotation;
+            // Calculate the tip position using the sword's rotation
+            const tipX = pathRadius * Math.cos(rotation);
+            const tipY = pathRadius * Math.sin(rotation);
 
-   // Calculate the tip position using the sword's rotation
-   const tipX = pathRadius * Math.cos(rotation);
-   const tipY = pathRadius * Math.sin(rotation);
+            // The body's center should be positioned so that its edge is aligned with the tip's path
+            // The offset is calculated by translating the body's center back from the tip's position
+            const offsetX = tipX - bodyRadius * Math.cos(rotation) - bodyRadius;
+            const offsetY = tipY - bodyRadius * Math.sin(rotation) + (sword.height / 2) - bodyRadius;
 
-   // The body's center should be positioned so that its edge is aligned with the tip's path
-   // The offset is calculated by translating the body's center back from the tip's position
-   const offsetX = tipX - bodyRadius * Math.cos(rotation)-bodyRadius;
-   const offsetY = tipY - bodyRadius * Math.sin(rotation)+(sword.height/2)-bodyRadius;
-
-   // Debug output to check calculated values
-   console.log(`Rotation: ${rotation}, TipX: ${Math.floor(tipX)}, TipY: ${Math.floor(tipY)}`);
-   console.log(`OffsetX: ${Math.floor(offsetX)}, OffsetY: ${Math.floor(offsetY)}`);
-
-   // Set the new offset for the sword's body
-   sword.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
-
-
+            // Set the new offset for the sword's body
+            sword.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
 
           }
         })
@@ -126,7 +117,7 @@ class Level extends Phaser.Scene {
   create() {
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-    graphics.fillRect(0, 0, gameState.width, gameState.height)
+    graphics.fillRect(-50, -50, gameState.width, gameState.height)
 
     gameState.player = this.physics.add.sprite(100, 450, 'player')
     gameState.player.body.setSize(32, 32, true)//.setOffset(gameState.player.width/2,gameState.player.height/2)
@@ -176,12 +167,7 @@ class Level extends Phaser.Scene {
       }
     };
 
-    const enemyGenLoop = this.time.addEvent({
-      callback: generateEnemy,
-      delay: 100,
-      callbackScope: this,
-      loop: true,
-    });
+
     //Weapons 
     weapons = this.physics.add.group();
     this.physics.add.overlap(weapons, enemies, (w, e) => {
@@ -214,12 +200,46 @@ class Level extends Phaser.Scene {
 
       })
     }
+    // **** game starting conditions *****
+    const enemyGenLoop = this.time.addEvent({
+      callback: generateEnemy,
+      delay: 100,
+      callbackScope: this,
+      loop: true,
+    });
     heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
       weaponLoop(w)
     })
 
+
+
+    // ***** pause mode ****
+    // Initialize a flag to track paused state
+    this.paused = false;
+
+    const keyObject = this.input.keyboard.addKey('P');  // Get key object
+
+    keyObject.on('down', () => {
+      if (!this.paused) {
+        this.physics.pause();  // Pause the physics
+        this.scene.pause();  // Pause the current scene
+        this.scene.launch('PauseScene', { level: 'Level' });  // Start the PauseScene
+        this.paused = true;
+      }
+    });
+
+    // Correctly bind the 'resume' event on this scene
+    this.events.on('resume', () => {
+      if (this.paused) {
+        this.physics.resume();  // Resume the physics
+        this.paused = false;
+      }
+    }, this);  // Bind the context
   }
+
+  //// ***** UPDATE FUNCTION *******
   update() {
+
     // player controls
     // use dx and dy to control the player velocity initially zero as not moving
     let dX = 0, dY = 0
@@ -240,6 +260,7 @@ class Level extends Phaser.Scene {
 
     }
     // we then multiply dx and dy by the velocityx and velovity y times the speed
+
     gameState.player.setVelocityX(dX * playerSpeed);
     gameState.player.setVelocityY(dY * playerSpeed);
 
@@ -267,7 +288,6 @@ class Level extends Phaser.Scene {
         weapon.destroy()
       }
     })
-
 
 
 

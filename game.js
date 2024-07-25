@@ -14,7 +14,7 @@ const config = {
 		default: 'arcade',
 		arcade: {
 			enableBody: true,
-			debug: true,
+			//debug: true,
 		}
 	},
 	scale: {
@@ -23,7 +23,7 @@ const config = {
 		// Center vertically and horizontally
 		autoCenter: Phaser.Scale.CENTER_BOTH
 	},
-	scene: [StartScene, Level]
+	scene: [StartScene, Level, PauseScene]
 };
 
 const game = new Phaser.Game(config);
