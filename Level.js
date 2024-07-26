@@ -8,7 +8,7 @@ let emitter;
 let particles;
 let enemyPool = ['enemy1']
 let maxEnemies = 15
-const enemyBoundsOffset = 50;
+const playAreaOffset = 50;
 
 
 
@@ -33,6 +33,7 @@ const weaponsData = {
     pen: Infinity,
   }
 }
+// TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
   switch (weaponName) {
     case 'fireball':
@@ -49,11 +50,11 @@ function getWeaponCallback(weaponName) {
       return function swingSword() {
         const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
         const { pen, damage } = weaponsData['sword']
-        console.log(sword.body.center)
-        const bodyRadius = 15
-        sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
         sword.damage = damage
         sword.pen = pen
+        
+        const bodyRadius = 15
+        sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
         this.tweens.add({
           targets: sword,
           paused: false,
@@ -106,7 +107,7 @@ class Level extends Phaser.Scene {
   }
 
 
-
+//// ***** PRELOAD FUNCTION *******
   preload() {
     this.load.image('enemy1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png');
     this.load.image('player', 'https://content.codecademy.com/courses/learn-phaser/codey.png')
@@ -114,9 +115,10 @@ class Level extends Phaser.Scene {
     this.load.image('sword', './imgs/sword3.png')
 
   }
+  //// ***** CREATE FUNCTION *******
   create() {
     const graphics = this.add.graphics();
-    graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+    graphics.fillGradientStyle(0x00ffff, 0xff0000, 0xff00ff, 0x00ff00, 1);
     graphics.fillRect(-50, -50, gameState.width, gameState.height)
 
     gameState.player = this.physics.add.sprite(100, 450, 'player')
@@ -132,10 +134,10 @@ class Level extends Phaser.Scene {
     this.physics.add.collider(enemies.children.entries, enemies.children.entries);
 
     gameState.playArea = new Phaser.Geom.Rectangle(
-      this.cameras.main.worldView.x - enemyBoundsOffset,
-      this.cameras.main.worldView.y - enemyBoundsOffset,
-      this.cameras.main.worldView.width + enemyBoundsOffset + enemyBoundsOffset,
-      this.cameras.main.worldView.height + enemyBoundsOffset + enemyBoundsOffset
+      this.cameras.main.worldView.x - playAreaOffset,
+      this.cameras.main.worldView.y - playAreaOffset,
+      this.cameras.main.worldView.width + playAreaOffset + playAreaOffset,
+      this.cameras.main.worldView.height + playAreaOffset + playAreaOffset
     );
     gameState.cameraView = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x,
@@ -143,6 +145,7 @@ class Level extends Phaser.Scene {
       this.cameras.main.worldView.width,
       this.cameras.main.worldView.height
     );
+
     function generateEnemy() {
       if (enemies.countActive() <= maxEnemies) {
 
@@ -183,6 +186,8 @@ class Level extends Phaser.Scene {
         e.body.destroy()
         e.dead = true;
         e.deadTween.restart()
+        gameState.score++
+        
       }
       //}
     })
@@ -201,6 +206,9 @@ class Level extends Phaser.Scene {
       })
     }
     // **** game starting conditions *****
+    // start hud
+    this.scene.launch('HudScene')
+    // initalise the enemy genrator
     const enemyGenLoop = this.time.addEvent({
       callback: generateEnemy,
       delay: 100,
@@ -266,7 +274,7 @@ class Level extends Phaser.Scene {
 
 
     // set an area for weapons and enemies to exist any item outside this box gets deleted
-    gameState.playArea.setPosition(this.cameras.main.worldView.x - enemyBoundsOffset, this.cameras.main.worldView.y - enemyBoundsOffset)
+    gameState.playArea.setPosition(this.cameras.main.worldView.x - playAreaOffset, this.cameras.main.worldView.y - playAreaOffset)
     // Enemies
     // enemy controls
 
