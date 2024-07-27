@@ -3,6 +3,7 @@ let enemies
 let weapons
 let enemy
 let playerSpeed = 100
+let playerMaxHitpoints = 100
 let cursors;
 let emitter;
 let particles;
@@ -10,8 +11,22 @@ let enemyPool = ['enemy1']
 let maxEnemies = 15
 const playAreaOffset = 50;
 
+const enemyData ={'enemy1': {
+  name:'enemy1',
+  life:1,
+  damage:1,
+}}
 
 
+const playerStats = {
+  playerSpeed: 100,
+  maxHitpoints: 100,
+  armour: 0,
+  collectionRadius:0,
+  projectileSpeed:1,
+  damageBonus:0,
+  goldBonus:0
+}
 
 const weaponsData = {
   fireball: {
@@ -35,6 +50,7 @@ const weaponsData = {
 }
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
+  
   switch (weaponName) {
     case 'fireball':
       return function shootFireball() {
@@ -117,12 +133,19 @@ class Level extends Phaser.Scene {
   }
   //// ***** CREATE FUNCTION *******
   create() {
+    delete(gameState.player)
+    console.log(gameState)
+    
+    this.gameState = {}
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xff0000, 0xff00ff, 0x00ff00, 1);
     graphics.fillRect(-50, -50, gameState.width, gameState.height)
 
     gameState.player = this.physics.add.sprite(100, 450, 'player')
-    gameState.player.body.setSize(32, 32, true)//.setOffset(gameState.player.width/2,gameState.player.height/2)
+    gameState.player.body.setSize(32, 32, true)// make the hitbox a touch smaller to make it a bit fairer
+    gameState.player.stats =playerStats // dump all the stats into the player
+    gameState.player.hitpoints = playerStats.maxHitpoints // initialise hitpoints as the current max
+    gameState.player.immune = false
 
     //this.cameras.main.setBounds(0, 0, 2000, 2000);
     this.cameras.main.startFollow(gameState.player);
@@ -131,15 +154,42 @@ class Level extends Phaser.Scene {
     enemies = this.physics.add.group();
 
 
-    this.physics.add.collider(enemies.children.entries, enemies.children.entries);
+    this.physics.add.collider(enemies.children.entries, enemies.children.entries); // collider added to stiop the enemies clumping up
+    this.physics.add.overlap(enemies, gameState.player,(pl,enemy)=>{
+      if(!gameState.player.immune){
+      pl.setTint(0xff0000)
+      gameState.player.immune = true
+      //console.log(enemy)
+      pl.hitpoints -= enemy.data.damage
+      if (pl.hitpoints<=0){
+        // player dead
+        //alert("lol u died")
+        this.scene.launch('YouDiedScene')
+        this.scene.pause()
+        
 
-    gameState.playArea = new Phaser.Geom.Rectangle(
+      }
+      this.time.addEvent({
+        delay: 10,
+        callbackScope: this,
+        loop: false,
+        callback:()=>{
+          pl.immune = false
+          pl.clearTint()
+        }
+      });
+    }
+
+
+    });
+
+    this.gameState.playArea = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x - playAreaOffset,
       this.cameras.main.worldView.y - playAreaOffset,
       this.cameras.main.worldView.width + playAreaOffset + playAreaOffset,
       this.cameras.main.worldView.height + playAreaOffset + playAreaOffset
     );
-    gameState.cameraView = new Phaser.Geom.Rectangle(
+    this.gameState.cameraView = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x,
       this.cameras.main.worldView.y,
       this.cameras.main.worldView.width,
@@ -149,13 +199,17 @@ class Level extends Phaser.Scene {
     function generateEnemy() {
       if (enemies.countActive() <= maxEnemies) {
 
-        gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
-        const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(gameState.playArea, gameState.cameraView)
+        this.gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
+        const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(this.gameState.playArea, this.gameState.cameraView)
 
         let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
         //enemies.create(xCoord, yCoord, randomEnemy)
-        const enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
-        enemy.life = 1;
+        let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
+        enemy.data = {...enemyData[randomEnemy]}
+        enemy.on('destroy', ()=>{
+          delete(enemy.data)
+        }) 
+        //enemy.life = 1;
         enemy.deadTween = this.tweens.add({
           targets: enemy,
           paused: true,
@@ -163,7 +217,8 @@ class Level extends Phaser.Scene {
           scaleY: 0,
           yoyo: false,
           duration: 150,
-          onComplete: () => {
+          onComplete: function() {
+            //delete(enemy.data)
             enemy.destroy()
           }
         })
@@ -176,26 +231,28 @@ class Level extends Phaser.Scene {
     this.physics.add.overlap(weapons, enemies, (w, e) => {
       //if(!e.dead){
       w.pen--
-      e.life--
+      e.data.life--
       if (w.pen <= 0) {
         w.destroy();
       }
 
-      if (e.life <= 0) {
+      if (e.data.life <= 0) {
         //e.disableBody(e.body) 
+        
         e.body.destroy()
         e.dead = true;
         e.deadTween.restart()
-        gameState.score++
+        this.gameState.score++
         
       }
-      //}
+      
+      //console.log(e.data) //}
     })
 
 
 
     const weaponLoop = (weaponName) => {
-      console.log(weaponsData, weaponName)
+      //console.log(weaponsData, weaponName)
       const weapon2 = weaponsData[weaponName];
       return this.time.addEvent({
         callback: getWeaponCallback(weapon2.name),
@@ -269,34 +326,36 @@ class Level extends Phaser.Scene {
     }
     // we then multiply dx and dy by the velocityx and velovity y times the speed
 
-    gameState.player.setVelocityX(dX * playerSpeed);
-    gameState.player.setVelocityY(dY * playerSpeed);
+    gameState.player.setVelocityX(dX * gameState.player.stats.playerSpeed);
+    gameState.player.setVelocityY(dY * gameState.player.stats.playerSpeed);
 
 
     // set an area for weapons and enemies to exist any item outside this box gets deleted
-    gameState.playArea.setPosition(this.cameras.main.worldView.x - playAreaOffset, this.cameras.main.worldView.y - playAreaOffset)
+    this.gameState.playArea.setPosition(this.cameras.main.worldView.x - playAreaOffset, this.cameras.main.worldView.y - playAreaOffset)
     // Enemies
     // enemy controls
 
     enemies.children.each((enemy) => {
-      if (Phaser.Geom.Rectangle.Contains(gameState.playArea, enemy.x, enemy.y)) {
-        if (enemy.life > 0) {
+      if (Phaser.Geom.Rectangle.Contains(this.gameState.playArea, enemy.x, enemy.y)) {
+
+        if (enemy.data.life > 0) {
           this.physics.moveToObject(enemy, gameState.player, 50);
 
         } else {
           //enemy.deadTween.restart()
         }
       } else {
+        //delete(enemy.data)
         enemy.destroy()
       }
 
     })
     weapons.children.each((weapon) => {
-      if (!Phaser.Geom.Rectangle.Contains(gameState.playArea, weapon.x, weapon.y)) {
+      if (!Phaser.Geom.Rectangle.Contains(this.gameState.playArea, weapon.x, weapon.y)) {
         weapon.destroy()
       }
     })
-
+    
 
 
   }
