@@ -14,16 +14,22 @@ class YouDiedScene extends Phaser.Scene {
 				wordWrap: { width: 280, useAdvancedWrap: true }, 
 				align: 'center' 
 		};
-
-		const pauseText = this.add.text(
+		let message ='';
+		if(gameState.score>gameState.highScore){
+			message = "but you got the high score!"
+			gameState.highScore=gameState.score
+		} else {
+			message = "lol lol you died"
+		}
+		const messageText = this.add.text(
 				130, 
 				250, 
-				'Lol You Died', 
+				`LOL You Died!\n${message}`, 
 				textStyle
 		);
 
 		// Adding debug outline to see the bounding box of the text
-		//pauseText.setStroke('#ff0000', 2);
+		messageText.setStroke('#aaa', 1);
 
 		this.input.on('pointerdown', () => {
 				this.scene.stop('Level');  // Stop the Level scene

@@ -3,6 +3,7 @@ const gameState = {
 	money: 0,
 	width: 2000,
   height: 2000,
+	highScore:100,
 };
 
 const config = {
@@ -14,7 +15,7 @@ const config = {
 		default: 'arcade',
 		arcade: {
 			enableBody: true,
-			debug: true,
+			//debug: true,
 		}
 	},
 	scale: {

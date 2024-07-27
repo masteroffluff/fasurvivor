@@ -133,17 +133,22 @@ class Level extends Phaser.Scene {
   }
   //// ***** CREATE FUNCTION *******
   create() {
-    delete(gameState.player)
+    if(gameState.player){
+      delete(gameState.player.stats)
+      gameState.player.destroy
+    }
+    
     console.log(gameState)
     
     this.gameState = {}
+    //this.debugGraphics = this.add.graphics();
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xff0000, 0xff00ff, 0x00ff00, 1);
-    graphics.fillRect(-50, -50, gameState.width, gameState.height)
+    graphics.fillRect(-100, -100, gameState.width, gameState.height)
 
-    gameState.player = this.physics.add.sprite(100, 450, 'player')
+    gameState.player = this.physics.add.sprite(200, 450, 'player')
     gameState.player.body.setSize(32, 32, true)// make the hitbox a touch smaller to make it a bit fairer
-    gameState.player.stats =playerStats // dump all the stats into the player
+    gameState.player.stats ={...playerStats} // dump all the stats into the player
     gameState.player.hitpoints = playerStats.maxHitpoints // initialise hitpoints as the current max
     gameState.player.immune = false
 
@@ -182,24 +187,36 @@ class Level extends Phaser.Scene {
 
 
     });
-
+    // Access game config bounds
+    const gameConfig = this.game.config;
+    const gameWidth = gameConfig.width;
+    const gameHeight = gameConfig.height;
+    console.log(playAreaOffset,
+      this.cameras.main.worldView.x - playAreaOffset,
+      this.cameras.main.worldView.y - playAreaOffset,
+      this.cameras.main.worldView.width,
+      this.cameras.main.worldView.height
+    )
     this.gameState.playArea = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x - playAreaOffset,
       this.cameras.main.worldView.y - playAreaOffset,
-      this.cameras.main.worldView.width + playAreaOffset + playAreaOffset,
-      this.cameras.main.worldView.height + playAreaOffset + playAreaOffset
+      gameWidth + playAreaOffset + playAreaOffset,
+      gameHeight + playAreaOffset + playAreaOffset
     );
-    this.gameState.cameraView = new Phaser.Geom.Rectangle(
-      this.cameras.main.worldView.x,
-      this.cameras.main.worldView.y,
-      this.cameras.main.worldView.width,
-      this.cameras.main.worldView.height
-    );
+    // this.gameState.cameraView = new Phaser.Geom.Rectangle(
+    //   this.cameras.main.worldView.x,
+    //   this.cameras.main.worldView.y,
+    //   this.cameras.main.worldView.width,
+    //   this.cameras.main.worldView.height
+    // );
+    this.gameState.cameraView = this.cameras.main.worldView
+
+
 
     function generateEnemy() {
       if (enemies.countActive() <= maxEnemies) {
 
-        this.gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
+        //this.gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
         const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(this.gameState.playArea, this.gameState.cameraView)
 
         let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
@@ -242,7 +259,7 @@ class Level extends Phaser.Scene {
         e.body.destroy()
         e.dead = true;
         e.deadTween.restart()
-        this.gameState.score++
+        gameState.score++
         
       }
       
@@ -304,7 +321,14 @@ class Level extends Phaser.Scene {
 
   //// ***** UPDATE FUNCTION *******
   update() {
-
+    // this.debugGraphics.clear()
+    // this.debugGraphics.lineStyle(2, 0xff0000);
+    // this.debugGraphics.strokeRectShape(this.gameState.playArea);
+    // this.debugGraphics.lineStyle(2, 0x0000ff);
+    // this.debugGraphics.strokeRectShape(this.gameState.cameraView);
+    // this.debugGraphics.lineStyle(2, 0xffff00);
+    // this.debugGraphics.strokeRectShape(this.cameras.main.worldView);
+    
     // player controls
     // use dx and dy to control the player velocity initially zero as not moving
     let dX = 0, dY = 0
@@ -331,6 +355,7 @@ class Level extends Phaser.Scene {
 
 
     // set an area for weapons and enemies to exist any item outside this box gets deleted
+    
     this.gameState.playArea.setPosition(this.cameras.main.worldView.x - playAreaOffset, this.cameras.main.worldView.y - playAreaOffset)
     // Enemies
     // enemy controls

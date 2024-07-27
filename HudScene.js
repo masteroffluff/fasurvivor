@@ -4,20 +4,27 @@ class HudScene extends Phaser.Scene {
 	}
 
 	create() {
-		gameState.scoreText = this.add.text( 0, 0, `Killed:0`, {
+		this.scoreText = this.add.text( 10, 0, `Killed:0`, {
       fontSize: "15px",
       fill: "#000000",
 			opacity:0,
     });
-		gameState.healthText = this.add.text( 0, 25, `Health:${gameState.player.hitpoints}`, {
+		this.healthText = this.add.text( 10, 25, `Health:${gameState.player.hitpoints}`, {
       fontSize: "15px",
-      fill: "#aaa",
+      fill: "#000",
 			opacity:0,
     });
-		gameState.scoreText.setStroke('#ff0000', 2);
+		this.hiScoreText = this.add.text( 10, 50, `Hi Score:${gameState.highScore}`, {
+      fontSize: "15px",
+      fill: "#000",
+			opacity:0,
+    });
+		this.scoreText.setStroke('#ff0000', 2);
+		this.healthText.setStroke('#ff0000', 2);
+		this.hiScoreText.setStroke('#ff0000', 2);
 	}
 	update(){
-		gameState.scoreText.setText(`Killed:${gameState.score}`);
-		gameState.healthText.setText(`Health:${gameState.player.hitpoints}`);
+		this.scoreText.setText(`Killed:${gameState.score}`);
+		this.healthText.setText(`Health:${gameState.player.hitpoints}`);
 	}
 }
