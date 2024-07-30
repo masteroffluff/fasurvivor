@@ -19,7 +19,12 @@ class HudScene extends Phaser.Scene {
       fill: "#000",
 			opacity:0,
     });
-		this.xpText = this.add.text( 150, 0, `XP:${gameState.player.xp}`, {
+		this.xpText = this.add.text( 150, 0, `XP:${gameState.player.xp}/${gameState.player.nextLevel}`, {
+      fontSize: "15px",
+      fill: "#000",
+			opacity:0,
+    });
+		this.levelText = this.add.text( 150, 25, `Level:${gameState.player.level}`, {
       fontSize: "15px",
       fill: "#000",
 			opacity:0,
@@ -28,10 +33,12 @@ class HudScene extends Phaser.Scene {
 		this.healthText.setStroke('#ff0000', 2);
 		this.hiScoreText.setStroke('#ff0000', 2);
 		this.xpText.setStroke('#ff0000', 2);
+		this.levelText.setStroke('#ff0000', 2);
 	}
 	update(){
 		this.scoreText.setText(`Killed:${gameState.score}`);
 		this.healthText.setText(`Health:${gameState.player.hitpoints}`);
-		this.xpText.setText(`XP:${gameState.player.xp}`);
+		this.xpText.setText(`XP:${gameState.player.xp}/${gameState.player.nextLevel}`);
+		this.levelText.setText(`Level:${gameState.player.level}`);
 	}
 }

@@ -12,11 +12,18 @@ let enemyPool = ['enemy1']
 let maxEnemies = 15
 const playAreaOffset = 50;
 
+const backgroundDepth = -999;
+const floorItemDepth = -99;
+const playerDepth = 0;
+const enemyDepth = 99;
+
+
 const enemyData = {
   'enemy1': {
     name: 'enemy1',
     life: 1,
     damage: 1,
+    xpGiven:1
   }
 }
 
@@ -54,6 +61,7 @@ const weaponsData = {
 class Item {
   constructor(type, x, y) {
     this.item = itemPickups.create(x, y, type);
+    this.item.setDepth(floorItemDepth)
     this.type = this.item.type;
     this.x = this.item.x;
     this.y = this.item.y;
@@ -76,6 +84,11 @@ class Gem extends Item {
     this.item.onPickup = (player) => {
       console.log(player.xp, gameState.player.xp)
       player.xp += value;
+      if(player.xp>=player.nextLevel){
+        player.level++;
+        player.nextLevel += 10;
+        alert("Level Up!!")
+      }
       this.item.destroy();
     };
   }
@@ -89,6 +102,15 @@ class Weapon extends Item {
         player.heldWeapons.contains(push)
         weaponLoop(value)
       }
+      this.item.destroy();
+    };
+  }
+}
+class Chest extends Item {
+  constructor(x, y, value) {
+    super(value, x, y);
+    this.item.onPickup = (player) => {
+
       this.item.destroy();
     };
   }
@@ -191,7 +213,7 @@ class Level extends Phaser.Scene {
     //this.debugGraphics = this.add.graphics();
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xff0000, 0xff00ff, 0x00ff00, 1);
-    graphics.fillRect(-100, -100, gameState.width, gameState.height)
+    graphics.fillRect(-100, -100, gameState.width, gameState.height).setDepth(-999)
 
     // *player
     gameState.player = this.physics.add.sprite(200, 450, 'player')
@@ -200,6 +222,8 @@ class Level extends Phaser.Scene {
     gameState.player.hitpoints = playerStats.maxHitpoints // initialise hitpoints as the current max
     gameState.player.immune = false                  // set state for layer immunity
     gameState.player.xp = 0                          // set up xp 
+    gameState.player.nextLevel = 10                  // set next level xp
+    gameState.player.level = 0                       // set level
     gameState.player.heldWeapons = heldWeapons;      // load weapons array
     this.cameras.main.startFollow(gameState.player); // make the camera follow the character
     //this.cameras.main.setBounds(0, 0, 2000, 2000);
@@ -262,7 +286,7 @@ class Level extends Phaser.Scene {
     // );
     this.gameState.cameraView = this.cameras.main.worldView
 
-
+    // *enemies
 
     function generateEnemy() {
       if (enemies.countActive() <= maxEnemies) {
@@ -277,7 +301,7 @@ class Level extends Phaser.Scene {
         enemy.on('destroy', () => {
           delete (enemy.data)
         })
-
+        enemy.setDepth(enemyDepth)
         //enemy.life = 1;
         enemy.deadTween = this.tweens.add({
           targets: enemy,
