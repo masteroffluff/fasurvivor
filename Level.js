@@ -1,6 +1,7 @@
 
 let enemies
 let weapons
+let itemPickups
 let enemy
 let playerSpeed = 100
 let playerMaxHitpoints = 100
@@ -11,21 +12,23 @@ let enemyPool = ['enemy1']
 let maxEnemies = 15
 const playAreaOffset = 50;
 
-const enemyData ={'enemy1': {
-  name:'enemy1',
-  life:1,
-  damage:1,
-}}
+const enemyData = {
+  'enemy1': {
+    name: 'enemy1',
+    life: 1,
+    damage: 1,
+  }
+}
 
 
 const playerStats = {
   playerSpeed: 100,
   maxHitpoints: 100,
   armour: 0,
-  collectionRadius:0,
-  projectileSpeed:1,
-  damageBonus:0,
-  goldBonus:0
+  collectionRadius: 0,
+  projectileSpeed: 1,
+  damageBonus: 0,
+  goldBonus: 0
 }
 
 const weaponsData = {
@@ -48,9 +51,52 @@ const weaponsData = {
     pen: Infinity,
   }
 }
+class Item {
+  constructor(type, x, y) {
+    this.item = itemPickups.create(x, y, type);
+    this.type = this.item.type;
+    this.x = this.item.x;
+    this.y = this.item.y;
+  }
+}
+
+class Heart extends Item {
+  constructor(x, y, value) {
+    super('heart', x, y);
+    this.item.onPickup = () => {
+      gameState.player.hitpoints += value;
+      this.item.destroy();
+    };
+  }
+}
+
+class Gem extends Item {
+  constructor(x, y, value) {
+    super('gem1', x, y);
+    this.item.onPickup = (player) => {
+      console.log(player.xp, gameState.player.xp)
+      player.xp += value;
+      this.item.destroy();
+    };
+  }
+}
+
+class Weapon extends Item {
+  constructor(x, y, value) {
+    super(value, x, y);
+    this.item.onPickup = (player) => {
+      if (!player.heldWeapons.contains(value)){
+        player.heldWeapons.contains(push)
+        weaponLoop(value)
+      }
+      this.item.destroy();
+    };
+  }
+}
+
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
-  
+
   switch (weaponName) {
     case 'fireball':
       return function shootFireball() {
@@ -68,7 +114,7 @@ function getWeaponCallback(weaponName) {
         const { pen, damage } = weaponsData['sword']
         sword.damage = damage
         sword.pen = pen
-        
+
         const bodyRadius = 15
         sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
         this.tweens.add({
@@ -123,67 +169,72 @@ class Level extends Phaser.Scene {
   }
 
 
-//// ***** PRELOAD FUNCTION *******
+  //// ***** PRELOAD FUNCTION *******
   preload() {
     this.load.image('enemy1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png');
     this.load.image('player', 'https://content.codecademy.com/courses/learn-phaser/codey.png')
     this.load.image('fireball', './imgs/fireball.png')
     this.load.image('sword', './imgs/sword3.png')
+    this.load.image('gem1', './imgs/gem1.png')
+    this.load.image('heart', './imgs/heart.png')
 
   }
   //// ***** CREATE FUNCTION *******
   create() {
-    if(gameState.player){
-      delete(gameState.player.stats)
+    
+    //* initial setup
+    if (gameState.player) {
+      delete (gameState.player.stats)
       gameState.player.destroy
     }
-    
-    console.log(gameState)
-    
     this.gameState = {}
     //this.debugGraphics = this.add.graphics();
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xff0000, 0xff00ff, 0x00ff00, 1);
     graphics.fillRect(-100, -100, gameState.width, gameState.height)
 
+    // *player
     gameState.player = this.physics.add.sprite(200, 450, 'player')
     gameState.player.body.setSize(32, 32, true)// make the hitbox a touch smaller to make it a bit fairer
-    gameState.player.stats ={...playerStats} // dump all the stats into the player
+    gameState.player.stats = { ...playerStats } // dump all the stats into the player
     gameState.player.hitpoints = playerStats.maxHitpoints // initialise hitpoints as the current max
-    gameState.player.immune = false
-
+    gameState.player.immune = false                  // set state for layer immunity
+    gameState.player.xp = 0                          // set up xp 
+    gameState.player.heldWeapons = heldWeapons;      // load weapons array
+    this.cameras.main.startFollow(gameState.player); // make the camera follow the character
     //this.cameras.main.setBounds(0, 0, 2000, 2000);
-    this.cameras.main.startFollow(gameState.player);
+    
+    
 
     cursors = this.input.keyboard.createCursorKeys();
     enemies = this.physics.add.group();
 
 
     this.physics.add.collider(enemies.children.entries, enemies.children.entries); // collider added to stiop the enemies clumping up
-    this.physics.add.overlap(enemies, gameState.player,(pl,enemy)=>{
-      if(!gameState.player.immune){
-      pl.setTint(0xff0000)
-      gameState.player.immune = true
-      //console.log(enemy)
-      pl.hitpoints -= enemy.data.damage
-      if (pl.hitpoints<=0){
-        // player dead
-        //alert("lol u died")
-        this.scene.launch('YouDiedScene')
-        this.scene.pause()
-        
+    this.physics.add.overlap(enemies, gameState.player, (pl, enemy) => {
+      if (!gameState.player.immune) {
+        pl.setTint(0xff0000)
+        gameState.player.immune = true
+        //console.log(enemy)
+        pl.hitpoints -= enemy.data.damage
+        if (pl.hitpoints <= 0) {
+          // player dead
+          //alert("lol u died")
+          this.scene.launch('YouDiedScene')
+          this.scene.pause()
 
-      }
-      this.time.addEvent({
-        delay: 10,
-        callbackScope: this,
-        loop: false,
-        callback:()=>{
-          pl.immune = false
-          pl.clearTint()
+
         }
-      });
-    }
+        this.time.addEvent({
+          delay: 10,
+          callbackScope: this,
+          loop: false,
+          callback: () => {
+            pl.immune = false
+            pl.clearTint()
+          }
+        });
+      }
 
 
     });
@@ -222,10 +273,11 @@ class Level extends Phaser.Scene {
         let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
         //enemies.create(xCoord, yCoord, randomEnemy)
         let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
-        enemy.data = {...enemyData[randomEnemy]}
-        enemy.on('destroy', ()=>{
-          delete(enemy.data)
-        }) 
+        enemy.data = { ...enemyData[randomEnemy] }
+        enemy.on('destroy', () => {
+          delete (enemy.data)
+        })
+
         //enemy.life = 1;
         enemy.deadTween = this.tweens.add({
           targets: enemy,
@@ -234,7 +286,7 @@ class Level extends Phaser.Scene {
           scaleY: 0,
           yoyo: false,
           duration: 150,
-          onComplete: function() {
+          onComplete: function () {
             //delete(enemy.data)
             enemy.destroy()
           }
@@ -243,7 +295,7 @@ class Level extends Phaser.Scene {
     };
 
 
-    //Weapons 
+    //* Weapons 
     weapons = this.physics.add.group();
     this.physics.add.overlap(weapons, enemies, (w, e) => {
       //if(!e.dead){
@@ -255,14 +307,17 @@ class Level extends Phaser.Scene {
 
       if (e.data.life <= 0) {
         //e.disableBody(e.body) 
-        
+
         e.body.destroy()
         e.dead = true;
         e.deadTween.restart()
+        if(Math.random()>0.75){
+          new Gem(e.x,e.y, 5);
+        }
         gameState.score++
-        
+
       }
-      
+
       //console.log(e.data) //}
     })
 
@@ -279,6 +334,16 @@ class Level extends Phaser.Scene {
 
       })
     }
+
+    //* Pickups
+    itemPickups = this.physics.add.group();
+    
+    this.physics.add.collider(itemPickups,gameState.player,(player, item)=>{
+      console.log(item)
+      item.onPickup(player);
+
+    })
+
     // **** game starting conditions *****
     // start hud
     this.scene.launch('HudScene')
@@ -289,7 +354,7 @@ class Level extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
-    heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
+    gameState.player.heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
       weaponLoop(w)
     })
 
@@ -310,7 +375,6 @@ class Level extends Phaser.Scene {
       }
     });
 
-    // Correctly bind the 'resume' event on this scene
     this.events.on('resume', () => {
       if (this.paused) {
         this.physics.resume();  // Resume the physics
@@ -318,6 +382,8 @@ class Level extends Phaser.Scene {
       }
     }, this);  // Bind the context
   }
+
+
 
   //// ***** UPDATE FUNCTION *******
   update() {
@@ -328,7 +394,7 @@ class Level extends Phaser.Scene {
     // this.debugGraphics.strokeRectShape(this.gameState.cameraView);
     // this.debugGraphics.lineStyle(2, 0xffff00);
     // this.debugGraphics.strokeRectShape(this.cameras.main.worldView);
-    
+
     // player controls
     // use dx and dy to control the player velocity initially zero as not moving
     let dX = 0, dY = 0
@@ -355,7 +421,7 @@ class Level extends Phaser.Scene {
 
 
     // set an area for weapons and enemies to exist any item outside this box gets deleted
-    
+
     this.gameState.playArea.setPosition(this.cameras.main.worldView.x - playAreaOffset, this.cameras.main.worldView.y - playAreaOffset)
     // Enemies
     // enemy controls
@@ -380,7 +446,7 @@ class Level extends Phaser.Scene {
         weapon.destroy()
       }
     })
-    
+
 
 
   }
