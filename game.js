@@ -24,7 +24,7 @@ const config = {
 		// Center vertically and horizontally
 		autoCenter: Phaser.Scale.CENTER_BOTH
 	},
-	scene: [StartScene, Level, PauseScene, HudScene, YouDiedScene]
+	scene: [StartScene, GameScene, PauseScene, HudScene, YouDiedScene, LevelUpScene]
 };
 
 const game = new Phaser.Game(config);

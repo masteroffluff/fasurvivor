@@ -32,7 +32,7 @@ class YouDiedScene extends Phaser.Scene {
 		messageText.setStroke('#aaa', 1);
 
 		this.input.on('pointerdown', () => {
-				this.scene.stop('Level');  // Stop the Level scene
+				this.scene.stop('GameScene');  // Stop the Level scene
 				this.scene.stop('HudScene'); // the hud scene
 				this.scene.start('StartScene') // return to the front page
 				this.scene.stop();  // and this scene

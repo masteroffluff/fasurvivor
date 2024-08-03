@@ -23,10 +23,9 @@ const enemyData = {
     name: 'enemy1',
     life: 1,
     damage: 1,
-    xpGiven:1
+    xpGiven: 1
   }
 }
-
 
 const playerStats = {
   playerSpeed: 100,
@@ -35,7 +34,11 @@ const playerStats = {
   collectionRadius: 0,
   projectileSpeed: 1,
   damageBonus: 0,
-  goldBonus: 0
+  goldBonus: 0,
+  bonusDamage:0,
+  bonusPen:0,
+  bonusROF:0,
+  bonusProjectileSpeed:0,
 }
 
 const weaponsData = {
@@ -56,8 +59,18 @@ const weaponsData = {
     velocity: 2,
     delay: 3000,
     pen: Infinity,
+  },
+  bomb: {
+    name: 'bomb',
+    type: 'projectile',
+    spriteName: 'bomb',
+    damage: 1,
+    velocity: 2,
+    delay: 3000,
+    pen: 1,
   }
 }
+
 class Item {
   constructor(type, x, y) {
     this.item = itemPickups.create(x, y, type);
@@ -84,12 +97,15 @@ class Gem extends Item {
     this.item.onPickup = (player) => {
       console.log(player.xp, gameState.player.xp)
       player.xp += value;
-      if(player.xp>=player.nextLevel){
-        player.level++;
-        player.nextLevel += 10;
-        alert("Level Up!!")
-      }
       this.item.destroy();
+      if (player.xp >= player.nextLevel) {
+        player.level++;
+        player.nextLevel = Math.ceil(player.nextLevel * 1.2);
+        player.xp = 0;
+        return { scene: 'LevelUpScene' }
+      }
+      return false
+
     };
   }
 }
@@ -98,7 +114,7 @@ class Weapon extends Item {
   constructor(x, y, value) {
     super(value, x, y);
     this.item.onPickup = (player) => {
-      if (!player.heldWeapons.contains(value)){
+      if (!player.heldWeapons.contains(value)) {
         player.heldWeapons.contains(push)
         weaponLoop(value)
       }
@@ -183,13 +199,10 @@ function getWeaponCallback(weaponName) {
 
 const heldWeapons = ['fireball', 'sword'];
 
-
-
-class Level extends Phaser.Scene {
+class GameScene extends Phaser.Scene {
   constructor() {
-    super({ key: 'Level' })
+    super({ key: 'GameScene' })
   }
-
 
   //// ***** PRELOAD FUNCTION *******
   preload() {
@@ -203,7 +216,7 @@ class Level extends Phaser.Scene {
   }
   //// ***** CREATE FUNCTION *******
   create() {
-    
+
     //* initial setup
     if (gameState.player) {
       delete (gameState.player.stats)
@@ -217,18 +230,18 @@ class Level extends Phaser.Scene {
 
     // *player
     gameState.player = this.physics.add.sprite(200, 450, 'player')
-    gameState.player.body.setSize(32, 32, true)// make the hitbox a touch smaller to make it a bit fairer
-    gameState.player.stats = { ...playerStats } // dump all the stats into the player
+    gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
+    gameState.player.stats = { ...playerStats }           // dump all the stats into the player
     gameState.player.hitpoints = playerStats.maxHitpoints // initialise hitpoints as the current max
-    gameState.player.immune = false                  // set state for layer immunity
-    gameState.player.xp = 0                          // set up xp 
-    gameState.player.nextLevel = 10                  // set next level xp
-    gameState.player.level = 0                       // set level
-    gameState.player.heldWeapons = heldWeapons;      // load weapons array
-    this.cameras.main.startFollow(gameState.player); // make the camera follow the character
+    gameState.player.immune = false                       // set state for layer immunity
+    gameState.player.xp = 0                               // set up xp 
+    gameState.player.nextLevel = 5                        // set next level xp
+    gameState.player.level = 0                            // set level
+    gameState.player.heldWeapons = heldWeapons;           // load weapons array
+    this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
     //this.cameras.main.setBounds(0, 0, 2000, 2000);
-    
-    
+
+
 
     cursors = this.input.keyboard.createCursorKeys();
     enemies = this.physics.add.group();
@@ -335,8 +348,8 @@ class Level extends Phaser.Scene {
         e.body.destroy()
         e.dead = true;
         e.deadTween.restart()
-        if(Math.random()>0.75){
-          new Gem(e.x,e.y, 5);
+        if (Math.random() > 0.75) {
+          new Gem(e.x, e.y, e.data.xpGiven);
         }
         gameState.score++
 
@@ -361,10 +374,16 @@ class Level extends Phaser.Scene {
 
     //* Pickups
     itemPickups = this.physics.add.group();
-    
-    this.physics.add.collider(itemPickups,gameState.player,(player, item)=>{
+
+    this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
       console.log(item)
-      item.onPickup(player);
+      const r = item.onPickup(player)
+      if (r) {
+        this.physics.pause();  // Pause the physics
+        this.scene.pause();  // Pause the current scene
+        this.scene.launch(r.scene, { level: 'GameScene' });  // Start the PauseScene
+        this.paused = true;
+      }
 
     })
 
@@ -394,7 +413,7 @@ class Level extends Phaser.Scene {
       if (!this.paused) {
         this.physics.pause();  // Pause the physics
         this.scene.pause();  // Pause the current scene
-        this.scene.launch('PauseScene', { level: 'Level' });  // Start the PauseScene
+        this.scene.launch('PauseScene', { level: 'GameScene' });  // Start the PauseScene
         this.paused = true;
       }
     });
