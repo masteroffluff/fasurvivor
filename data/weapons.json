@@ -1,0 +1,29 @@
+{
+  "fireball": {
+    "name": "fireball",
+    "type": "projectile",
+    "spriteName": "fireball",
+    "damage": 1,
+    "velocity": 100,
+    "delay": 750,
+    "pen": 1
+  },
+  "sword": {
+    "name": "sword",
+    "type": "melee",
+    "spriteName": "sword",
+    "damage": 1,
+    "velocity": 2,
+    "delay": 3000,
+    "pen": "Infinity"
+  },
+  "bomb": {
+    "name": "bomb",
+    "type": "projectile",
+    "spriteName": "bomb",
+    "damage": 1,
+    "velocity": 2,
+    "delay": 3000,
+    "pen": 1
+  }
+}

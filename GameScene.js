@@ -12,6 +12,8 @@ let enemyPool = ['enemy1']
 let maxEnemies = 15
 const playAreaOffset = 50;
 
+
+
 const backgroundDepth = -999;
 const floorItemDepth = -99;
 const playerDepth = 0;
@@ -41,35 +43,6 @@ const playerStats = {
   bonusProjectileSpeed:0,
 }
 
-const weaponsData = {
-  fireball: {
-    name: 'fireball',
-    type: 'projectile', // melee, area, special
-    spriteName: 'fireball',
-    damage: 1,
-    velocity: 100,
-    delay: 750,
-    pen: 1,
-  },
-  sword: {
-    name: 'sword',
-    type: 'melee',
-    spriteName: 'sword',
-    damage: 1,
-    velocity: 2,
-    delay: 3000,
-    pen: Infinity,
-  },
-  bomb: {
-    name: 'bomb',
-    type: 'projectile',
-    spriteName: 'bomb',
-    damage: 1,
-    velocity: 2,
-    delay: 3000,
-    pen: 1,
-  }
-}
 
 class Item {
   constructor(type, x, y) {
@@ -110,7 +83,7 @@ class Gem extends Item {
   }
 }
 
-class Weapon extends Item {
+class WeaponPickup extends Item {
   constructor(x, y, value) {
     super(value, x, y);
     this.item.onPickup = (player) => {
@@ -132,6 +105,14 @@ class Chest extends Item {
   }
 }
 
+// class Weapon {
+//   constructor(damage, pen, scale, name){
+//     this.damage = damage
+//     this.pen = pen
+    
+//   }
+  
+// }
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
 
@@ -151,7 +132,7 @@ function getWeaponCallback(weaponName) {
         const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
         const { pen, damage } = weaponsData['sword']
         sword.damage = damage
-        sword.pen = pen
+        sword.pen = pen==="Infinity"?Infinity:pen
 
         const bodyRadius = 15
         sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
@@ -197,7 +178,7 @@ function getWeaponCallback(weaponName) {
 
 }
 
-const heldWeapons = ['fireball', 'sword'];
+const heldWeapons = ['fireball'];
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -206,18 +187,31 @@ class GameScene extends Phaser.Scene {
 
   //// ***** PRELOAD FUNCTION *******
   preload() {
+    this.load.json('bonuses', 'data/bonuses.json');
+    this.load.json('weapons', 'data/weapons.json');
+
+
     this.load.image('enemy1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png');
     this.load.image('player', 'https://content.codecademy.com/courses/learn-phaser/codey.png')
     this.load.image('fireball', './imgs/fireball.png')
     this.load.image('sword', './imgs/sword3.png')
     this.load.image('gem1', './imgs/gem1.png')
     this.load.image('heart', './imgs/heart.png')
+    this.load.pack('bonusesPack','./data/bonusesPack.json')
+    this.load.json('weaponsData','./data/weapons.json')
 
   }
   //// ***** CREATE FUNCTION *******
   create() {
+    
+    
 
     //* initial setup
+    bonusesData = this.cache.json.get('bonusesData');
+    weaponsData = this.cache.json.get('weaponsData');
+
+
+
     if (gameState.player) {
       delete (gameState.player.stats)
       gameState.player.destroy
@@ -239,7 +233,7 @@ class GameScene extends Phaser.Scene {
     gameState.player.level = 0                            // set level
     gameState.player.heldWeapons = heldWeapons;           // load weapons array
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
-    //this.cameras.main.setBounds(0, 0, 2000, 2000);
+
 
 
 
@@ -361,7 +355,7 @@ class GameScene extends Phaser.Scene {
 
 
     const weaponLoop = (weaponName) => {
-      //console.log(weaponsData, weaponName)
+      console.log(weaponsData, weaponName)
       const weapon2 = weaponsData[weaponName];
       return this.time.addEvent({
         callback: getWeaponCallback(weapon2.name),

@@ -1,0 +1,83 @@
+[
+  {
+      "name": "Explosives",
+      "stat": "bonusDamage",
+      "icon": "icon_explosives.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Add ing punch to you weapons increases damage"
+  },
+  {
+      "name": "Drilling",
+      "stat": "bonusPen",
+      "icon": "icon_drills.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Drill through enemies, penetrates through to the next enemy."
+  },
+  {
+      "name": "Air Cooled",
+      "stat": "bonusROF",
+      "icon": "icon_aircooling.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Air cooling for your equipment, increases ROF"
+  },
+  {
+      "name": "Running Shoes",
+      "stat": "playerSpeed",
+      "icon": "icon_runningShoe.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "run fast, increases player movement speed"
+  },
+  {
+      "name": "Vitamins",
+      "stat": "maxHitpoints",
+      "icon": "icon_vitamins.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Eat you vitamins! Increases max HP"
+  },
+  {
+      "name": "Kevlar",
+      "stat": "armour",
+      "icon": "icon_armour.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Armour for today, reduces damage."
+  },
+  {
+      "name": "Vacuum",
+      "stat": "collectionRadius",
+      "icon": "icon_hoover.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Vrooom increases collection distance."
+  },
+  {
+      "name": "Grease",
+      "stat": "projectileSpeed",
+      "icon": "icon_grease.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Its greaed lightning. Increases projectile speed"
+  },
+  {
+      "name": "Investments",
+      "stat": "goldBonus",
+      "icon": "icon_linegoup.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Invest wisely, give you more gold per coin picked up."
+  },
+  {
+      "name": "Zoom",
+      "stat": "bonusArea",
+      "icon": "icon_zoom.png",
+      "amt": "10.00%",
+      "max": 5,
+      "Desc": "Zoomed In, increases the size of weapons."
+  }
+]
+

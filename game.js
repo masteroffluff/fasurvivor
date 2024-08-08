@@ -1,3 +1,4 @@
+
 const gameState = {
 	score: 0,
 	money: 0,
@@ -5,6 +6,7 @@ const gameState = {
   height: 2000,
 	highScore:100,
 };
+let weaponsData, bonusesData
 
 const config = {
 	type: Phaser.AUTO,
@@ -27,4 +29,5 @@ const config = {
 	scene: [StartScene, GameScene, PauseScene, HudScene, YouDiedScene, LevelUpScene]
 };
 
-const game = new Phaser.Game(config);
+game = new Phaser.Game(config);
+
