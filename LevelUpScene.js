@@ -25,10 +25,14 @@ class LevelUpScene extends Phaser.Scene {
 		// Adding debug outline to see the bounding box of the text
 		messageText.setStroke('#ff0000', 2);
 
-		this.input.on('pointerdown', () => {
-				this.scene.resume(data.level);  // Resume the Level scene
-				this.scene.stop();  // Stop the PauseScene
-		});
-			
+		function resumeGame(){
+			this.scene.resume(data.level);  // Resume the Level scene
+			this.scene.stop();  // Stop the PauseScene
+		}
+		this.input.on('pointerdown', resumeGame, this)
+		const spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+		const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+		spaceBar.on('down', resumeGame, this)
+		enter.on('down', resumeGame, this)
 	}
 }

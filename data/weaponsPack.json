@@ -1,0 +1,53 @@
+{
+  "sprites":{
+    "path": "./imgs",
+    "files": [
+      {
+        "key": "bomb",
+        "type": "image",
+        "url": "bomb.png"
+      },
+      {
+        "key": "fireball",
+        "type": "image",
+        "url": "fireball.png"
+      },
+      {
+        "key": "sword",
+        "type": "image",
+        "url": "sword3.png"
+      }
+    ]
+  },
+  "icons":{
+    "path": "./imgs",
+    "files": [
+      {
+        "key": "icon_bomb",
+        "type": "image",
+        "url": "icon_bomb.png"
+      },
+      {
+        "key": "icon_fireball",
+        "type": "image",
+        "url": "icon_fireball.png"
+      },
+      {
+        "key": "icon_sword",
+        "type": "image",
+        "url": "icon_sword.png"
+      }
+    ]
+  },  
+  "data":{
+    "path": "./data",
+    "files": [
+      {
+        "key": "weaponsData",
+        "type": "data",
+        "url": "weaponsData.json"
+      }
+    ]
+  }
+}
+

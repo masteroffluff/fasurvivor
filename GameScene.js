@@ -2,6 +2,7 @@
 let enemies
 let weapons
 let itemPickups
+let crates
 let enemy
 let playerSpeed = 100
 let playerMaxHitpoints = 100
@@ -44,6 +45,18 @@ const playerStats = {
 }
 
 
+function weaponLoop(weaponName) {
+  const weapon2 = this.weaponsData[weaponName];
+  return this.time.addEvent({
+    callback: getWeaponCallback(weapon2.name),
+    delay: weapon2.delay,
+    callbackScope: this,
+    loop: true,
+
+  })
+}
+
+
 class Item {
   constructor(type, x, y) {
     this.item = itemPickups.create(x, y, type);
@@ -51,6 +64,7 @@ class Item {
     this.type = this.item.type;
     this.x = this.item.x;
     this.y = this.item.y;
+    this.item.onPickup = () => "";
   }
 }
 
@@ -84,26 +98,28 @@ class Gem extends Item {
 }
 
 class WeaponPickup extends Item {
-  constructor(x, y, value) {
-    super(value, x, y);
+  constructor(x, y, value, context) {
+    super(`icon_${value}`, x, y);
+    this.item.setScale(0.5)
+    this.type = value
     this.item.onPickup = (player) => {
-      if (!player.heldWeapons.contains(value)) {
-        player.heldWeapons.contains(push)
-        weaponLoop(value)
+      if (!player.heldWeapons.includes(value)) {
+        player.heldWeapons.push(value)
+        weaponLoop.call(context,value)
       }
       this.item.destroy();
     };
   }
 }
-class Chest extends Item {
-  constructor(x, y, value) {
-    super(value, x, y);
-    this.item.onPickup = (player) => {
+// class Chest extends Item {
+//   constructor(x, y, value) {
+//     super(value, x, y);
+//     this.item.onPickup = (player) => {
 
-      this.item.destroy();
-    };
-  }
-}
+//       this.item.destroy();
+//     };
+//   }
+// }
 
 // class Weapon {
 //   constructor(damage, pen, scale, name){
@@ -113,13 +129,14 @@ class Chest extends Item {
 //   }
   
 // }
+
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
 
   switch (weaponName) {
     case 'fireball':
       return function shootFireball() {
-        const { pen, damage } = weaponsData['fireball']
+        const { pen, damage } = this.weaponsData['fireball']
         const fireball = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2)
         fireball.damage = damage
         fireball.pen = pen
@@ -130,7 +147,7 @@ function getWeaponCallback(weaponName) {
     case 'sword':
       return function swingSword() {
         const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
-        const { pen, damage } = weaponsData['sword']
+        const { pen, damage } = this.weaponsData['sword']
         sword.damage = damage
         sword.pen = pen==="Infinity"?Infinity:pen
 
@@ -171,6 +188,32 @@ function getWeaponCallback(weaponName) {
             sword.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
 
           }
+          
+        })
+      }
+    case 'bomb':
+      return function throwbomb(){
+        const { pen, damage } = this.weaponsData['bomb']
+        const bomb = this.physics.add.sprite(gameState.player.x, gameState.player.y, 'bomb').setScale(0.2)
+        bomb.damage = damage
+        bomb.pen = pen
+        Phaser.Math.RandomXY(bomb.body.velocity, 100);
+        this.tweens.add({
+          targets: bomb,
+          paused: false,
+          angle: 360,
+          yoyo: false,
+          duration: 750,
+          onComplete:()=>{
+            const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion')
+            bombExplosion.on('animationcomplete', (e) => {
+              
+              bombExplosion.destroy()
+            })
+            bombExplosion.play('bombExplodes')
+            bomb.destroy()
+            
+          }
         })
       }
     default:
@@ -178,7 +221,7 @@ function getWeaponCallback(weaponName) {
 
 }
 
-const heldWeapons = ['fireball'];
+const heldWeapons = ['bomb'];
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -187,41 +230,69 @@ class GameScene extends Phaser.Scene {
 
   //// ***** PRELOAD FUNCTION *******
   preload() {
-    this.load.json('bonuses', 'data/bonuses.json');
-    this.load.json('weapons', 'data/weapons.json');
+    this.load.json('bonusesData', 'data/bonusesData.json');
+    this.load.json('weaponsData', 'data/weaponsData.json');
 
 
     this.load.image('enemy1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png');
     this.load.image('player', 'https://content.codecademy.com/courses/learn-phaser/codey.png')
-    this.load.image('fireball', './imgs/fireball.png')
-    this.load.image('sword', './imgs/sword3.png')
+    this.load.spritesheet( 'bombExplosion' , './imgs/bombExplosion.png', { frameWidth: 64, frameHeight: 64 });
     this.load.image('gem1', './imgs/gem1.png')
     this.load.image('heart', './imgs/heart.png')
+    this.load.image('crate', './imgs/crate.png')
+    this.load.image("background", "./imgs/grassTile.png");
     this.load.pack('bonusesPack','./data/bonusesPack.json')
-    this.load.json('weaponsData','./data/weapons.json')
+    this.load.pack('weaponsPack','./data/weaponsPack.json')
 
   }
   //// ***** CREATE FUNCTION *******
   create() {
-    
-    
+
+    console.log(this)
 
     //* initial setup
-    bonusesData = this.cache.json.get('bonusesData');
-    weaponsData = this.cache.json.get('weaponsData');
+    this.gameState = {}
+    this.bonusesData = this.cache.json.get('bonusesData');
+    this.weaponsData = this.cache.json.get('weaponsData');
+    // var background = this.add.tileSprite(0, 0, 2000, 2000, "background");
+    // background.setOrigin(0, 0);
+    
+    // Get the width and height of the game
+    const width = this.sys.game.config.width;
+    const height = this.sys.game.config.height;
 
-
+    // Create a tile sprite that covers the entire game area
+    this.background = this.add.tileSprite(0, 0, width, height, 'background');
+    this.background.setOrigin(0, 0);
+    this.background.setDepth(-999)
 
     if (gameState.player) {
       delete (gameState.player.stats)
       gameState.player.destroy
     }
-    this.gameState = {}
-    //this.debugGraphics = this.add.graphics();
-    const graphics = this.add.graphics();
-    graphics.fillGradientStyle(0x00ffff, 0xff0000, 0xff00ff, 0x00ff00, 1);
-    graphics.fillRect(-100, -100, gameState.width, gameState.height).setDepth(-999)
+    // * set up anims here 
+    this.anims.create({
+     key: 'bombExplodes',
+     frames: this.anims.generateFrameNumbers('bombExplosion', { start: 0, end: 4 }),
+     frameRate: 10,
+   });
+ 
 
+    //this.debugGraphics = this.add.graphics();
+
+    // *set up level
+    
+  //  const g  = [[0x00f,0x0ff,0x0f0],[0x0f0,0xff0,0xf00], [0x00f,0xf0f,0xf00]]
+  //   for(let i = -1;i<=1;i++){
+  //     for(let j = -1;j<=1;j++){
+  //       const graphics = this.add.graphics();
+  //       graphics.fillGradientStyle(g[i+1][j+1], g[i+1][j+1], g[i+1][j+1], g[i+1][j+1], 1);
+  //       console.log(i*gameState.width, j*gameState.height,(i+1)*gameState.width, (j+1)*gameState.height)
+  //       graphics.fillRect(i*gameState.width, j*gameState.height,(i+1)*gameState.width, (j+1)*gameState.height).setDepth(-999)
+  //     }
+  //   }
+    
+    
     // *player
     gameState.player = this.physics.add.sprite(200, 450, 'player')
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
@@ -233,12 +304,13 @@ class GameScene extends Phaser.Scene {
     gameState.player.level = 0                            // set level
     gameState.player.heldWeapons = heldWeapons;           // load weapons array
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
+    
 
-
-
-
+    // set up contols 
     cursors = this.input.keyboard.createCursorKeys();
+    // add groups for enemies and crates
     enemies = this.physics.add.group();
+    crates = this.physics.add.group();
 
 
     this.physics.add.collider(enemies.children.entries, enemies.children.entries); // collider added to stiop the enemies clumping up
@@ -293,39 +365,6 @@ class GameScene extends Phaser.Scene {
     // );
     this.gameState.cameraView = this.cameras.main.worldView
 
-    // *enemies
-
-    function generateEnemy() {
-      if (enemies.countActive() <= maxEnemies) {
-
-        //this.gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
-        const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(this.gameState.playArea, this.gameState.cameraView)
-
-        let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
-        //enemies.create(xCoord, yCoord, randomEnemy)
-        let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
-        enemy.data = { ...enemyData[randomEnemy] }
-        enemy.on('destroy', () => {
-          delete (enemy.data)
-        })
-        enemy.setDepth(enemyDepth)
-        //enemy.life = 1;
-        enemy.deadTween = this.tweens.add({
-          targets: enemy,
-          paused: true,
-          scaleX: 0,
-          scaleY: 0,
-          yoyo: false,
-          duration: 150,
-          onComplete: function () {
-            //delete(enemy.data)
-            enemy.destroy()
-          }
-        })
-      }
-    };
-
-
     //* Weapons 
     weapons = this.physics.add.group();
     this.physics.add.overlap(weapons, enemies, (w, e) => {
@@ -352,22 +391,9 @@ class GameScene extends Phaser.Scene {
       //console.log(e.data) //}
     })
 
-
-
-    const weaponLoop = (weaponName) => {
-      console.log(weaponsData, weaponName)
-      const weapon2 = weaponsData[weaponName];
-      return this.time.addEvent({
-        callback: getWeaponCallback(weapon2.name),
-        delay: weapon2.delay,
-        callbackScope: this,
-        loop: true,
-
-      })
-    }
-
     //* Pickups
     itemPickups = this.physics.add.group();
+    new WeaponPickup(500,500,'sword', this)
 
     this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
       console.log(item)
@@ -380,19 +406,57 @@ class GameScene extends Phaser.Scene {
       }
 
     })
+    // * controller function for game
+
+    function director() {
+      // * crates
+
+      // * enemies
+      if (enemies.countActive() <= maxEnemies) {
+
+        //this.gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
+        const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(this.gameState.playArea, this.gameState.cameraView)
+        // crates 
+
+        
+        let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
+        //enemies.create(xCoord, yCoord, randomEnemy)
+        let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
+        enemy.data = { ...enemyData[randomEnemy] }
+        enemy.on('destroy', () => {
+          delete (enemy.data)
+        })
+        enemy.setDepth(enemyDepth)
+        //enemy.life = 1;
+        enemy.deadTween = this.tweens.add({
+          targets: enemy,
+          paused: true,
+          scaleX: 0,
+          scaleY: 0,
+          yoyo: false,
+          duration: 150,
+          onComplete: function () {
+            //delete(enemy.data)
+            enemy.destroy()
+          }
+        })
+      }
+    };
 
     // **** game starting conditions *****
     // start hud
     this.scene.launch('HudScene')
     // initalise the enemy genrator
-    const enemyGenLoop = this.time.addEvent({
-      callback: generateEnemy,
+    const directorLoop = this.time.addEvent({
+      callback: director,
       delay: 100,
       callbackScope: this,
       loop: true,
     });
+    
+
     gameState.player.heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
-      weaponLoop(w)
+      weaponLoop.call(this, w)
     })
 
 
@@ -414,6 +478,7 @@ class GameScene extends Phaser.Scene {
 
     this.events.on('resume', () => {
       if (this.paused) {
+        this.input.keyboard.resetKeys()
         this.physics.resume();  // Resume the physics
         this.paused = false;
       }
@@ -456,6 +521,10 @@ class GameScene extends Phaser.Scene {
     gameState.player.setVelocityX(dX * gameState.player.stats.playerSpeed);
     gameState.player.setVelocityY(dY * gameState.player.stats.playerSpeed);
 
+    this.background.x = gameState.player.x - (this.sys.game.config.width/2)
+    this.background.y = gameState.player.y - (this.sys.game.config.height/2)
+    this.background.tilePositionX += gameState.player.body.velocity.x * this.sys.game.loop.delta / 1000;
+    this.background.tilePositionY += gameState.player.body.velocity.y * this.sys.game.loop.delta / 1000;
 
     // set an area for weapons and enemies to exist any item outside this box gets deleted
 
@@ -470,7 +539,7 @@ class GameScene extends Phaser.Scene {
           this.physics.moveToObject(enemy, gameState.player, 50);
 
         } else {
-          //enemy.deadTween.restart()
+          //enemy.deadTween.restart() 
         }
       } else {
         //delete(enemy.data)

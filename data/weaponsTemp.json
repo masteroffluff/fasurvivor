@@ -1,0 +1,10 @@
+{
+    "path": "./data",
+    "files": [
+      {
+        "key": "weaponsData", 
+        "type": "data",
+        "url": "weaponsData.json"
+      }
+    ]
+}

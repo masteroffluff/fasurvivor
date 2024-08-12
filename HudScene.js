@@ -29,6 +29,11 @@ class HudScene extends Phaser.Scene {
       fill: "#000",
 			opacity:0,
     });
+		this.weaponsText  = this.add.text( 150, 50, `Weapons:${gameState.player.heldWeapons.join(", ")}`, {
+      fontSize: "15px",
+      fill: "#000",
+			opacity:0,
+    });
 		this.scoreText.setStroke('#ff0000', 2);
 		this.healthText.setStroke('#ff0000', 2);
 		this.hiScoreText.setStroke('#ff0000', 2);
@@ -40,5 +45,6 @@ class HudScene extends Phaser.Scene {
 		this.healthText.setText(`Health:${gameState.player.hitpoints}`);
 		this.xpText.setText(`XP:${gameState.player.xp}/${gameState.player.nextLevel}`);
 		this.levelText.setText(`Level:${gameState.player.level}`);
+		this.weaponsText.setText(`Weapons:${gameState.player.heldWeapons.join(", ")}`)
 	}
 }

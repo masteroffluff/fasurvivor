@@ -50,9 +50,15 @@ class StartScene extends Phaser.Scene {
 			}
 		})
 		this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
-		this.input.on('pointerdown', () => {
+		function startGame(){
 			this.scene.stop('StartScene');
 			this.scene.start('GameScene');
-		})
+		}
+		this.input.on('pointerdown', startGame, this)
+		const spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+		const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+		spaceBar.on('down', startGame, this)
+		enter.on('down', startGame, this)
+
 	}
 }
