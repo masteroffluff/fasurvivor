@@ -6,7 +6,7 @@ let crates
 let enemy
 let playerSpeed = 100
 let playerMaxHitpoints = 100
-let cursors;
+//let cursors;
 let emitter;
 let particles;
 let enemyPool = ['enemy1']
@@ -82,7 +82,7 @@ class Gem extends Item {
   constructor(x, y, value) {
     super('gem1', x, y);
     this.item.onPickup = (player) => {
-      console.log(player.xp, gameState.player.xp)
+      //console.log(player.xp, gameState.player.xp)
       player.xp += value;
       this.item.destroy();
       if (player.xp >= player.nextLevel) {
@@ -206,6 +206,7 @@ function getWeaponCallback(weaponName) {
           duration: 750,
           onComplete:()=>{
             const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion')
+            bombExplosion.body.setCircle(bombExplosion.width/2)
             bombExplosion.on('animationcomplete', (e) => {
               
               bombExplosion.destroy()
@@ -248,7 +249,7 @@ class GameScene extends Phaser.Scene {
   //// ***** CREATE FUNCTION *******
   create() {
 
-    console.log(this)
+    //console.log(this)
 
     //* initial setup
     this.gameState = {}
@@ -266,10 +267,7 @@ class GameScene extends Phaser.Scene {
     this.background.setOrigin(0, 0);
     this.background.setDepth(-999)
 
-    if (gameState.player) {
-      delete (gameState.player.stats)
-      gameState.player.destroy
-    }
+
     // * set up anims here 
     this.anims.create({
      key: 'bombExplodes',
@@ -294,6 +292,10 @@ class GameScene extends Phaser.Scene {
     
     
     // *player
+    if (gameState.player) {
+      delete (gameState.player.stats)
+      gameState.player.destroy
+    }
     gameState.player = this.physics.add.sprite(200, 450, 'player')
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
     gameState.player.stats = { ...playerStats }           // dump all the stats into the player
@@ -302,12 +304,13 @@ class GameScene extends Phaser.Scene {
     gameState.player.xp = 0                               // set up xp 
     gameState.player.nextLevel = 5                        // set next level xp
     gameState.player.level = 0                            // set level
-    gameState.player.heldWeapons = heldWeapons;           // load weapons array
+    gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
+    gameState.player.heldBonuses = []
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
     
 
     // set up contols 
-    cursors = this.input.keyboard.createCursorKeys();
+    this.cursors = this.input.keyboard.createCursorKeys();
     // add groups for enemies and crates
     enemies = this.physics.add.group();
     crates = this.physics.add.group();
@@ -325,8 +328,6 @@ class GameScene extends Phaser.Scene {
           //alert("lol u died")
           this.scene.launch('YouDiedScene')
           this.scene.pause()
-
-
         }
         this.time.addEvent({
           delay: 10,
@@ -345,12 +346,12 @@ class GameScene extends Phaser.Scene {
     const gameConfig = this.game.config;
     const gameWidth = gameConfig.width;
     const gameHeight = gameConfig.height;
-    console.log(playAreaOffset,
-      this.cameras.main.worldView.x - playAreaOffset,
-      this.cameras.main.worldView.y - playAreaOffset,
-      this.cameras.main.worldView.width,
-      this.cameras.main.worldView.height
-    )
+    // console.log(playAreaOffset,
+    //   this.cameras.main.worldView.x - playAreaOffset,
+    //   this.cameras.main.worldView.y - playAreaOffset,
+    //   this.cameras.main.worldView.width,
+    //   this.cameras.main.worldView.height
+    // )
     this.gameState.playArea = new Phaser.Geom.Rectangle(
       this.cameras.main.worldView.x - playAreaOffset,
       this.cameras.main.worldView.y - playAreaOffset,
@@ -396,12 +397,12 @@ class GameScene extends Phaser.Scene {
     new WeaponPickup(500,500,'sword', this)
 
     this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
-      console.log(item)
+      //console.log(item)
       const r = item.onPickup(player)
       if (r) {
         this.physics.pause();  // Pause the physics
         this.scene.pause();  // Pause the current scene
-        this.scene.launch(r.scene, { level: 'GameScene' });  // Start the PauseScene
+        this.scene.launch(r.scene, { level: 'GameScene' });  // Start the level up scene
         this.paused = true;
       }
 
@@ -500,19 +501,19 @@ class GameScene extends Phaser.Scene {
     // player controls
     // use dx and dy to control the player velocity initially zero as not moving
     let dX = 0, dY = 0
-    if (cursors.left.isDown) {
+    if (this.cursors.left.isDown) {
       dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
       gameState.player.flipX = true
     }
-    if (cursors.right.isDown) {
+    if (this.cursors.right.isDown) {
       dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
       gameState.player.flipX = false
     }
-    if (cursors.up.isDown) {
+    if (this.cursors.up.isDown) {
       dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
 
     }
-    if (cursors.down.isDown) {
+    if (this.cursors.down.isDown) {
       dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
 
     }
