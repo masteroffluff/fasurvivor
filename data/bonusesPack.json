@@ -3,52 +3,52 @@
     "path": "./imgs",
     "files": [
       {
-        "key": "Explosives",
+        "key": "icon_explosives",
         "type": "image",
         "url": "icon_explosives.png"
       },
       {
-        "key": "Drilling",
+        "key": "icon_drills",
         "type": "image",
         "url": "icon_drills.png"
       },
       {
-        "key": "Air Cooled",
+        "key": "icon_aircooling",
         "type": "image",
         "url": "icon_aircooling.png"
       },
       {
-        "key": "Running Shoes",
+        "key": "icon_runningShoe",
         "type": "image",
         "url": "icon_runningShoe.png"
       },
       {
-        "key": "Vitamins",
+        "key": "icon_vitamins",
         "type": "image",
         "url": "icon_vitamins.png"
       },
       {
-        "key": "Kevlar",
+        "key": "icon_armour",
         "type": "image",
         "url": "icon_armour.png"
       },
       {
-        "key": "Vacuum",
+        "key": "icon_hoover",
         "type": "image",
         "url": "icon_hoover.png"
       },
       {
-        "key": "Grease",
+        "key": "icon_grease",
         "type": "image",
         "url": "icon_grease.png"
       },
       {
-        "key": "Investments",
+        "key": "icon_linegoup",
         "type": "image",
         "url": "icon_linegoup.png"
       },
       {
-        "key": "Zoom",
+        "key": "icon_zoom",
         "type": "image",
         "url": "icon_zoom.png"
       }

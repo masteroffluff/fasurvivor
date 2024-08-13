@@ -1,7 +1,8 @@
 {
   "fireball": {
     "name": "fireball",
-    "type": "projectile",
+    "type": "weapon",
+    "desc": "Fires bals of flames at the nearest enemy.",
     "spriteName": "fireball",
     "icon": "icon_fireball",
     "damage": 1,
@@ -11,7 +12,8 @@
   },
   "sword": {
     "name": "sword",
-    "type": "melee",
+    "type": "weapon",
+    "desc": "Sweeps around the player hitting all enemeys",
     "spriteName": "sword",
     "icon": "icon_sword",
     "damage": 1,
@@ -21,7 +23,8 @@
   },
   "bomb": {
     "name": "bomb",
-    "type": "projectile",
+    "type": "weapon",
+    "desc": "Travels a short distance and exlodes.",
     "spriteName": "bomb",
     "icon": "icon_bomb",
     "damage": 1,

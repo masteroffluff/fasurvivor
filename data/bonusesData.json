@@ -1,83 +1,93 @@
 [
   {
-      "name": "Explosives",
+      "name": "explosives",
+      "type": "bonus",
       "stat": "bonusDamage",
-      "icon": "icon_explosives.png",
+      "icon": "icon_explosives",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Add ing punch to you weapons increases damage"
+      "desc": "Add ing punch to you weapons increases damage"
   },
   {
-      "name": "Drilling",
+      "name": "drilling",
+      "type": "bonus",
       "stat": "bonusPen",
-      "icon": "icon_drills.png",
+      "icon": "icon_drills",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Drill through enemies, penetrates through to the next enemy."
+      "desc": "Drill through enemies, shot penetrates through to the next enemy."
   },
   {
-      "name": "Air Cooled",
+      "name": "air cooled",
+      "type": "bonus",
       "stat": "bonusROF",
-      "icon": "icon_aircooling.png",
+      "icon": "icon_aircooling",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Air cooling for your equipment, increases ROF"
+      "desc": "Air cooling for your equipment, increases ROF"
   },
   {
-      "name": "Running Shoes",
+      "name": "running shoes",
+      "type": "bonus",
       "stat": "playerSpeed",
-      "icon": "icon_runningShoe.png",
+      "icon": "icon_runningShoe",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "run fast, increases player movement speed"
+      "desc": "run fast, increases player movement speed"
   },
   {
-      "name": "Vitamins",
+      "name": "vitamins",
+      "type": "bonus",
       "stat": "maxHitpoints",
-      "icon": "icon_vitamins.png",
+      "icon": "icon_vitamins",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Eat you vitamins! Increases max HP"
+      "desc": "Eat you vitamins! Increases max HP"
   },
   {
-      "name": "Kevlar",
+      "name": "kevlar",
+      "type": "bonus",
       "stat": "armour",
-      "icon": "icon_armour.png",
+      "icon": "icon_armour",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Armour for today, reduces damage."
+      "desc": "Armour for today, reduces damage."
   },
   {
-      "name": "Vacuum",
+      "name": "vacuum",
+      "type": "bonus",
       "stat": "collectionRadius",
-      "icon": "icon_hoover.png",
+      "icon": "icon_hoover",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Vrooom increases collection distance."
+      "desc": "Vrooom increases collection distance."
   },
   {
-      "name": "Grease",
+      "name": "grease",
+      "type": "bonus",
       "stat": "projectileSpeed",
-      "icon": "icon_grease.png",
+      "icon": "icon_grease",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Its greaed lightning. Increases projectile speed"
+      "desc": "Its greaed lightning. Increases projectile speed"
   },
   {
-      "name": "Investments",
+      "name": "investments",
+      "type": "bonus",
       "stat": "goldBonus",
-      "icon": "icon_linegoup.png",
+      "icon": "icon_linegoup",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Invest wisely, give you more gold per coin picked up."
+      "desc": "Invest wisely, give you more gold per coin picked up."
   },
   {
-      "name": "Zoom",
+      "name": "zoom",
+      "type": "bonus",
       "stat": "bonusArea",
-      "icon": "icon_zoom.png",
+      "icon": "icon_zoom",
       "amt": "10.00%",
       "max": 5,
-      "Desc": "Zoomed In, increases the size of weapons."
+      "desc": "Zoomed In, increases the size of weapons."
   }
 ]
 

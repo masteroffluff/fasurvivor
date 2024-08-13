@@ -38,33 +38,33 @@ const playerStats = {
   projectileSpeed: 1,
   damageBonus: 0,
   goldBonus: 0,
-  bonusDamage:0,
-  bonusPen:0,
-  bonusROF:0,
-  bonusProjectileSpeed:0,
+  bonusDamage: 0,
+  bonusPen: 0,
+  bonusROF: 0,
+  bonusProjectileSpeed: 0,
 }
 
 
-function weaponLoop(weaponName) {
-  const weapon2 = this.weaponsData[weaponName];
-  return this.time.addEvent({
-    callback: getWeaponCallback(weapon2.name),
-    delay: weapon2.delay,
-    callbackScope: this,
-    loop: true,
-
-  })
-}
 
 
 class Item {
-  constructor(type, x, y) {
+  constructor(type, x, y, context) {
     this.item = itemPickups.create(x, y, type);
     this.item.setDepth(floorItemDepth)
     this.type = this.item.type;
     this.x = this.item.x;
     this.y = this.item.y;
     this.item.onPickup = () => "";
+    if (context) {
+      this.sceneTrigger = (r) => {
+        if (r) {
+          context.physics.pause();  // Pause the physics
+          context.scene.pause();  // Pause the current scene
+          context.scene.launch(r.scene, { level: 'GameScene' });  // Start the level up scene
+          context.paused = true;
+        }
+      }
+    }
   }
 }
 
@@ -79,19 +79,20 @@ class Heart extends Item {
 }
 
 class Gem extends Item {
-  constructor(x, y, value) {
-    super('gem1', x, y);
+  constructor(x, y, value, context) {
+    super('gem1', x, y, context);
     this.item.onPickup = (player) => {
       //console.log(player.xp, gameState.player.xp)
       player.xp += value;
       this.item.destroy();
-      if (player.xp >= player.nextLevel) {
+
+      while (player.xp >= player.nextLevel) {
         player.level++;
         player.nextLevel = Math.ceil(player.nextLevel * 1.2);
         player.xp = 0;
-        return { scene: 'LevelUpScene' }
+        this.sceneTrigger({ scene: 'LevelUpScene' })
+
       }
-      return false
 
     };
   }
@@ -105,7 +106,7 @@ class WeaponPickup extends Item {
     this.item.onPickup = (player) => {
       if (!player.heldWeapons.includes(value)) {
         player.heldWeapons.push(value)
-        weaponLoop.call(context,value)
+        context.events.emit ('weaponLoop',value)
       }
       this.item.destroy();
     };
@@ -125,9 +126,9 @@ class WeaponPickup extends Item {
 //   constructor(damage, pen, scale, name){
 //     this.damage = damage
 //     this.pen = pen
-    
+
 //   }
-  
+
 // }
 
 // TODO: turn this into a proper class 
@@ -149,7 +150,7 @@ function getWeaponCallback(weaponName) {
         const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
         const { pen, damage } = this.weaponsData['sword']
         sword.damage = damage
-        sword.pen = pen==="Infinity"?Infinity:pen
+        sword.pen = pen === "Infinity" ? Infinity : pen
 
         const bodyRadius = 15
         sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
@@ -188,11 +189,11 @@ function getWeaponCallback(weaponName) {
             sword.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
 
           }
-          
+
         })
       }
     case 'bomb':
-      return function throwbomb(){
+      return function throwbomb() {
         const { pen, damage } = this.weaponsData['bomb']
         const bomb = this.physics.add.sprite(gameState.player.x, gameState.player.y, 'bomb').setScale(0.2)
         bomb.damage = damage
@@ -204,16 +205,16 @@ function getWeaponCallback(weaponName) {
           angle: 360,
           yoyo: false,
           duration: 750,
-          onComplete:()=>{
+          onComplete: () => {
             const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion')
-            bombExplosion.body.setCircle(bombExplosion.width/2)
+            bombExplosion.body.setCircle(bombExplosion.width / 2)
             bombExplosion.on('animationcomplete', (e) => {
-              
+
               bombExplosion.destroy()
             })
             bombExplosion.play('bombExplodes')
             bomb.destroy()
-            
+
           }
         })
       }
@@ -237,18 +238,29 @@ class GameScene extends Phaser.Scene {
 
     this.load.image('enemy1', 'https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png');
     this.load.image('player', 'https://content.codecademy.com/courses/learn-phaser/codey.png')
-    this.load.spritesheet( 'bombExplosion' , './imgs/bombExplosion.png', { frameWidth: 64, frameHeight: 64 });
+    this.load.spritesheet('bombExplosion', './imgs/bombExplosion.png', { frameWidth: 64, frameHeight: 64 });
     this.load.image('gem1', './imgs/gem1.png')
     this.load.image('heart', './imgs/heart.png')
     this.load.image('crate', './imgs/crate.png')
     this.load.image("background", "./imgs/grassTile.png");
-    this.load.pack('bonusesPack','./data/bonusesPack.json')
-    this.load.pack('weaponsPack','./data/weaponsPack.json')
+    this.load.pack('bonusesPack', './data/bonusesPack.json')
+    this.load.pack('weaponsPack', './data/weaponsPack.json')
 
   }
   //// ***** CREATE FUNCTION *******
   create() {
-
+    function weaponLoop(weaponName, context) {
+      context = context||this
+      const weapon2 = context.weaponsData[weaponName];
+      return context.time.addEvent({
+        callback: getWeaponCallback(weapon2.name),
+        delay: weapon2.delay,
+        callbackScope: context,
+        loop: true,
+    
+      })
+    }
+    this.events.on('weaponLoop',(w)=>weaponLoop(w,this))
     //console.log(this)
 
     //* initial setup
@@ -257,7 +269,7 @@ class GameScene extends Phaser.Scene {
     this.weaponsData = this.cache.json.get('weaponsData');
     // var background = this.add.tileSprite(0, 0, 2000, 2000, "background");
     // background.setOrigin(0, 0);
-    
+
     // Get the width and height of the game
     const width = this.sys.game.config.width;
     const height = this.sys.game.config.height;
@@ -270,27 +282,27 @@ class GameScene extends Phaser.Scene {
 
     // * set up anims here 
     this.anims.create({
-     key: 'bombExplodes',
-     frames: this.anims.generateFrameNumbers('bombExplosion', { start: 0, end: 4 }),
-     frameRate: 10,
-   });
- 
+      key: 'bombExplodes',
+      frames: this.anims.generateFrameNumbers('bombExplosion', { start: 0, end: 4 }),
+      frameRate: 10,
+    });
+
 
     //this.debugGraphics = this.add.graphics();
 
     // *set up level
-    
-  //  const g  = [[0x00f,0x0ff,0x0f0],[0x0f0,0xff0,0xf00], [0x00f,0xf0f,0xf00]]
-  //   for(let i = -1;i<=1;i++){
-  //     for(let j = -1;j<=1;j++){
-  //       const graphics = this.add.graphics();
-  //       graphics.fillGradientStyle(g[i+1][j+1], g[i+1][j+1], g[i+1][j+1], g[i+1][j+1], 1);
-  //       console.log(i*gameState.width, j*gameState.height,(i+1)*gameState.width, (j+1)*gameState.height)
-  //       graphics.fillRect(i*gameState.width, j*gameState.height,(i+1)*gameState.width, (j+1)*gameState.height).setDepth(-999)
-  //     }
-  //   }
-    
-    
+
+    //  const g  = [[0x00f,0x0ff,0x0f0],[0x0f0,0xff0,0xf00], [0x00f,0xf0f,0xf00]]
+    //   for(let i = -1;i<=1;i++){
+    //     for(let j = -1;j<=1;j++){
+    //       const graphics = this.add.graphics();
+    //       graphics.fillGradientStyle(g[i+1][j+1], g[i+1][j+1], g[i+1][j+1], g[i+1][j+1], 1);
+    //       console.log(i*gameState.width, j*gameState.height,(i+1)*gameState.width, (j+1)*gameState.height)
+    //       graphics.fillRect(i*gameState.width, j*gameState.height,(i+1)*gameState.width, (j+1)*gameState.height).setDepth(-999)
+    //     }
+    //   }
+
+
     // *player
     if (gameState.player) {
       delete (gameState.player.stats)
@@ -307,7 +319,7 @@ class GameScene extends Phaser.Scene {
     gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
     gameState.player.heldBonuses = []
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
-    
+
 
     // set up contols 
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -383,7 +395,7 @@ class GameScene extends Phaser.Scene {
         e.dead = true;
         e.deadTween.restart()
         if (Math.random() > 0.75) {
-          new Gem(e.x, e.y, e.data.xpGiven);
+          new Gem(e.x, e.y, e.data.xpGiven, this);
         }
         gameState.score++
 
@@ -394,7 +406,7 @@ class GameScene extends Phaser.Scene {
 
     //* Pickups
     itemPickups = this.physics.add.group();
-    new WeaponPickup(500,500,'sword', this)
+
 
     this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
       //console.log(item)
@@ -419,7 +431,7 @@ class GameScene extends Phaser.Scene {
         const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(this.gameState.playArea, this.gameState.cameraView)
         // crates 
 
-        
+
         let randomEnemy = enemyPool[Math.floor(Math.random() * enemyPool.length)]
         //enemies.create(xCoord, yCoord, randomEnemy)
         let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy)
@@ -445,6 +457,9 @@ class GameScene extends Phaser.Scene {
     };
 
     // **** game starting conditions *****
+    // level specific setup
+    new WeaponPickup(500, 500, 'sword', this)
+    new Gem(250, 250, 50, this)
     // start hud
     this.scene.launch('HudScene')
     // initalise the enemy genrator
@@ -454,7 +469,7 @@ class GameScene extends Phaser.Scene {
       callbackScope: this,
       loop: true,
     });
-    
+
 
     gameState.player.heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
       weaponLoop.call(this, w)
@@ -522,8 +537,8 @@ class GameScene extends Phaser.Scene {
     gameState.player.setVelocityX(dX * gameState.player.stats.playerSpeed);
     gameState.player.setVelocityY(dY * gameState.player.stats.playerSpeed);
 
-    this.background.x = gameState.player.x - (this.sys.game.config.width/2)
-    this.background.y = gameState.player.y - (this.sys.game.config.height/2)
+    this.background.x = gameState.player.x - (this.sys.game.config.width / 2)
+    this.background.y = gameState.player.y - (this.sys.game.config.height / 2)
     this.background.tilePositionX += gameState.player.body.velocity.x * this.sys.game.loop.delta / 1000;
     this.background.tilePositionY += gameState.player.body.velocity.y * this.sys.game.loop.delta / 1000;
 
