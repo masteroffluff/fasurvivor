@@ -55,16 +55,6 @@ class Item {
     this.x = this.item.x;
     this.y = this.item.y;
     this.item.onPickup = () => "";
-    if (context) {
-      this.sceneTrigger = (r) => {
-        if (r) {
-          context.physics.pause();  // Pause the physics
-          context.scene.pause();  // Pause the current scene
-          context.scene.launch(r.scene, { level: 'GameScene' });  // Start the level up scene
-          context.paused = true;
-        }
-      }
-    }
   }
 }
 
@@ -86,13 +76,6 @@ class Gem extends Item {
       player.xp += value;
       this.item.destroy();
 
-      while (player.xp >= player.nextLevel) {
-        player.level++;
-        player.nextLevel = Math.ceil(player.nextLevel * 1.2);
-        player.xp = 0;
-        this.sceneTrigger({ scene: 'LevelUpScene' })
-
-      }
 
     };
   }
@@ -106,7 +89,7 @@ class WeaponPickup extends Item {
     this.item.onPickup = (player) => {
       if (!player.heldWeapons.includes(value)) {
         player.heldWeapons.push(value)
-        context.events.emit ('weaponLoop',value)
+        context.events.emit('weaponLoop', value)
       }
       this.item.destroy();
     };
@@ -250,17 +233,21 @@ class GameScene extends Phaser.Scene {
   //// ***** CREATE FUNCTION *******
   create() {
     function weaponLoop(weaponName, context) {
-      context = context||this
+      context = context || this
       const weapon2 = context.weaponsData[weaponName];
       return context.time.addEvent({
         callback: getWeaponCallback(weapon2.name),
         delay: weapon2.delay,
         callbackScope: context,
         loop: true,
-    
+
       })
     }
-    this.events.on('weaponLoop',(w)=>weaponLoop(w,this))
+    this.events.on('weaponLoop', (w) => weaponLoop(w, this))
+    // this.events.on('levelUp', (context) => {
+    //   console.log(gameState.player.xp)
+    //   context.sceneTrigger({ scene: 'LevelUpScene' })
+    // })
     //console.log(this)
 
     //* initial setup
@@ -410,13 +397,13 @@ class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
       //console.log(item)
-      const r = item.onPickup(player)
-      if (r) {
-        this.physics.pause();  // Pause the physics
-        this.scene.pause();  // Pause the current scene
-        this.scene.launch(r.scene, { level: 'GameScene' });  // Start the level up scene
-        this.paused = true;
-      }
+      const r = item.onPickup(player, this)
+      // if (r) {
+      //   this.physics.pause();  // Pause the physics
+      //   this.scene.pause();  // Pause the current scene
+      //   this.scene.launch(r.scene, { level: 'GameScene' });  // Start the level up scene
+      //   this.paused = true;
+      // }
 
     })
     // * controller function for game
@@ -481,9 +468,9 @@ class GameScene extends Phaser.Scene {
     // Initialize a flag to track paused state
     this.paused = false;
 
-    const keyObject = this.input.keyboard.addKey('P');  // Get key object
+    const pKey = this.input.keyboard.addKey('P');  // Get key object
 
-    keyObject.on('down', () => {
+    pKey.on('down', () => {
       if (!this.paused) {
         this.physics.pause();  // Pause the physics
         this.scene.pause();  // Pause the current scene
@@ -568,8 +555,19 @@ class GameScene extends Phaser.Scene {
         weapon.destroy()
       }
     })
-
-
+    const player = gameState.player
+    // handle level up
+    if (player.xp >= player.nextLevel) {
+      this.physics.pause();  // Pause the physics
+      this.scene.pause();  // Pause the current scene
+      this.scene.launch("LevelUpScene", { level: 'GameScene' });  // Start the level up scene
+      this.paused = true;
+      player.maxHitpoints *= 1.01
+      player.hitpoints *= 1.01
+      player.level++;
+      player.xp -= player.nextLevel;
+      player.nextLevel = Math.ceil(player.nextLevel * 1.2);
+    }
 
   }
 

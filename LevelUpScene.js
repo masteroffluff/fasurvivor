@@ -4,6 +4,7 @@ class LevelUpScene extends Phaser.Scene {
 	}
 	
 	create(data) {
+		let exitButtonText
 		this.bonusesData = this.cache.json.get('bonusesData');
     this.weaponsData = this.cache.json.get('weaponsData');
 
@@ -14,8 +15,8 @@ class LevelUpScene extends Phaser.Scene {
 		const textStyle = { 
 				fill: '#000', 
 				fontSize: '20px', 
-				wordWrap: { width: 280, useAdvancedWrap: true }, 
-				align: 'center' 
+				wordWrap: { width: 300, useAdvancedWrap: true }, 
+				align: 'left' 
 		};
 		const textStyle_small = { 
 			fill: '#000', 
@@ -23,6 +24,12 @@ class LevelUpScene extends Phaser.Scene {
 			wordWrap: { width: 240, useAdvancedWrap: true }, 
 			align: 'left' 
 	}
+	const textStyle_exitButton = { 
+		fill: '#000', 
+		fontSize: '15px', 
+		wordWrap: { width: 300, useAdvancedWrap: true }, 
+		align: 'left' 
+}
 
 		const messageText = this.add.text(
 				130, 
@@ -34,13 +41,13 @@ class LevelUpScene extends Phaser.Scene {
 		const offset = 200;
 		const margin = 50;
 		let avaibleBonuses
-		if(gameState.player.heldBonuses>=6){
+		if(gameState.player.heldBonuses.length>=6){
 			avaibleBonuses=this.bonusesData.filter((e)=> gameState.player.heldBonuses.includes(e.name))
 		} else {
 			avaibleBonuses=this.bonusesData
 		}
 		let avaibleWeapons	
-		if(gameState.player.heldWeapons>=6){
+		if(gameState.player.heldWeapons.length>=6){
 			avaibleWeapons = Object.values(Object.values(this.weaponsData)).filter((e)=>gameState.player.heldWeapons.includes(e.name))
 
 		} else {
@@ -57,6 +64,7 @@ class LevelUpScene extends Phaser.Scene {
 				button.isStroked = false
 			})
 			buttons[selected].setStrokeStyle(2,0xFFFFFF);
+			exitButtonText.setText(`Click to select ${selectableItems[selected].name}`)
 		}
 		for(let i = 0;i<=value;i++){
 			graphics.fillRect(120, offset+margin*i, 300, 50);
@@ -86,40 +94,62 @@ class LevelUpScene extends Phaser.Scene {
 			button.setInteractive();
 			button.on('pointerup', function(b) {
 				selected = (i);
-				updateSelected()
+				updateSelected.call(this)
 				//this.isFilled = true;
 				//this.fillColor = 0x00FF00;
 				//console.log(this.x, this.y)
 			});
-			graphics.fillRect(120, offset+margin*5, 300, 50);
-			const exitButton = this.add.rectangle(120, offset+margin*5, 300, 50).setOrigin(0,0);
-
-			exitButton.on('pointerup', function(b) {
-				resumeGame()
-			});
-
-
-
-			buttons.push(button)
-
+			buttons.push(button) // asdded to array to control bounding box
 		}
-		updateSelected();
+		this.cursors = this.input.keyboard.createCursorKeys();
+		this.cursors.up.on('up', () => {
+			selected--
+			if (selected<0){
+				selected= value
+			}
+			updateSelected.call(this);
+	});
+
+	this.cursors.down.on('down', () => {
+			selected++
+			if(selected>value){
+				selected= 0
+			}
+			updateSelected.call(this);
+	});
+
+		graphics.fillRect(120, offset+margin*5, 300, 50);
+
+		const exitButton = this.add.rectangle(120, offset+margin*5, 300, 50).setOrigin(0,0);
+		//exitButton.setFillStyle(0x00FF00)
+		exitButtonText = this.add.text(
+			130, 
+			5+offset+margin*5, 
+			`Click to select ${selectableItems[selected].name}`, 
+			textStyle_exitButton
+		).setDepth(101);
+		exitButton.setInteractive();
+		exitButton.on('pointerup', resumeGame, this);
+		updateSelected.call(this);
 		// Adding debug outline to see the bounding box of the text
 		messageText.setStroke('#ff0000', 2);
+		// todo: set cursor key functions
+
+
 
 		function resumeGame(){
-			const {name:value,type} = selectableItems[selected]
-			console.log()
+			const {name,type} = selectableItems[selected]
+			//console.log(this)
 			if(type==='weapon'){
-				console.log()
-				if (!gameState.player.heldWeapons.includes(value)) {
-					gameState.player.heldWeapons.push(value)
-					this.scene.get(data.level).events.emit('weaponLoop', value)
+				//console.log()
+				if (!gameState.player.heldWeapons.includes(name)) {
+					gameState.player.heldWeapons.push(name)
+					this.scene.get(data.level).events.emit('weaponLoop', name)
 				}
 			}
 			if(type==='bonus'){
-				if (!gameState.player.heldBonuses.includes(value)) {
-					gameState.player.heldBonuses.push(value)
+				if (!gameState.player.heldBonuses.includes(name)) {
+					gameState.player.heldBonuses.push(name)
 					
 				}
 			}
@@ -127,15 +157,13 @@ class LevelUpScene extends Phaser.Scene {
 			this.scene.stop();  // Stop the PauseScene
 		}
 		//this.input.on('pointerdown', resumeGame, this)
+
+
 		const spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 		const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 		spaceBar.on('down', resumeGame, this)
 		enter.on('down', resumeGame, this)
-		const kKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
-		kKey.on('down', ()=>{
-			console.log('holla...')
-			
-		})
+
 
 	}
 }

@@ -42,7 +42,7 @@ class HudScene extends Phaser.Scene {
 	}
 	update(){
 		this.scoreText.setText(`Killed:${gameState.score}`);
-		this.healthText.setText(`Health:${gameState.player.hitpoints}`);
+		this.healthText.setText(`Health:${Math.floor(gameState.player.hitpoints)}`);
 		this.xpText.setText(`XP:${gameState.player.xp}/${gameState.player.nextLevel}`);
 		this.levelText.setText(`Level:${gameState.player.level}`);
 		this.weaponsText.setText(`Weapons:${gameState.player.heldWeapons.join(", ")}`)
