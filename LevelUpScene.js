@@ -4,7 +4,7 @@ class LevelUpScene extends Phaser.Scene {
 	}
 	
 	create(data) {
-		let exitButtonText
+		//let exitButtonText
 		this.bonusesData = this.cache.json.get('bonusesData');
     this.weaponsData = this.cache.json.get('weaponsData');
 
@@ -59,13 +59,7 @@ class LevelUpScene extends Phaser.Scene {
 
 		let selected = 0
 		const buttons = [];
-		function updateSelected(){
-			buttons.forEach((button)=>{
-				button.isStroked = false
-			})
-			buttons[selected].setStrokeStyle(2,0xFFFFFF);
-			exitButtonText.setText(`Click to select ${selectableItems[selected].name}`)
-		}
+
 		for(let i = 0;i<=value;i++){
 			graphics.fillRect(120, offset+margin*i, 300, 50);
 			const button = this.add.rectangle(120, offset+margin*i, 300, 50).setOrigin(0,0);
@@ -101,6 +95,30 @@ class LevelUpScene extends Phaser.Scene {
 			});
 			buttons.push(button) // asdded to array to control bounding box
 		}
+
+
+		graphics.fillRect(120, offset+margin*5, 300, 50);
+
+		const exitButton = this.add.rectangle(120, offset+margin*5, 300, 50).setOrigin(0,0);
+		//exitButton.setFillStyle(0x00FF00)
+		//if (this.exitButtonText)  {delete(this.exitButtonText)}
+		this.exitButtonText = this.add.text(
+			130, 
+			5+offset+margin*5, 
+			`Click to select ${selectableItems[selected].name}`, 
+			textStyle_exitButton
+		).setDepth(101);
+
+		exitButton.setInteractive();
+		exitButton.on('pointerup', resumeGame, this);
+		const updateSelected=()=>{
+			buttons.forEach((button)=>{
+				button.isStroked = false
+			})
+			buttons[selected].setStrokeStyle(2,0xFFFFFF);
+			this.exitButtonText.setText(`Click to select ${selectableItems[selected].name}`)
+		}
+		updateSelected.call(this);
 		this.cursors = this.input.keyboard.createCursorKeys();
 		this.cursors.up.on('up', () => {
 			selected--
@@ -117,26 +135,8 @@ class LevelUpScene extends Phaser.Scene {
 			}
 			updateSelected.call(this);
 	});
-
-		graphics.fillRect(120, offset+margin*5, 300, 50);
-
-		const exitButton = this.add.rectangle(120, offset+margin*5, 300, 50).setOrigin(0,0);
-		//exitButton.setFillStyle(0x00FF00)
-		exitButtonText = this.add.text(
-			130, 
-			5+offset+margin*5, 
-			`Click to select ${selectableItems[selected].name}`, 
-			textStyle_exitButton
-		).setDepth(101);
-		exitButton.setInteractive();
-		exitButton.on('pointerup', resumeGame, this);
-		updateSelected.call(this);
 		// Adding debug outline to see the bounding box of the text
 		messageText.setStroke('#ff0000', 2);
-		// todo: set cursor key functions
-
-
-
 		function resumeGame(){
 			const {name,type} = selectableItems[selected]
 			//console.log(this)
