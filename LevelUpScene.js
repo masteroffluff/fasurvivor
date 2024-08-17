@@ -5,6 +5,8 @@ class LevelUpScene extends Phaser.Scene {
 	
 	create(data) {
 		//let exitButtonText
+		let ok = true
+		this.input.keyboard.resetKeys()
 		this.bonusesData = this.cache.json.get('bonusesData');
     this.weaponsData = this.cache.json.get('weaponsData');
 
@@ -41,10 +43,11 @@ class LevelUpScene extends Phaser.Scene {
 		const offset = 200;
 		const margin = 50;
 		let avaibleBonuses
-		if(gameState.player.heldBonuses.length>=6){
-			avaibleBonuses=this.bonusesData.filter((e)=> gameState.player.heldBonuses.includes(e.name))
+		if(gameState.player.heldBonuses.size>=6){
+			avaibleBonuses =[]
+			gameState.player.heldBonuses.forEach((e)=>avaibleBonuses.push(e))
 		} else {
-			avaibleBonuses=this.bonusesData
+			avaibleBonuses=Object.values(this.bonusesData)
 		}
 		let avaibleWeapons	
 		if(gameState.player.heldWeapons.length>=6){
@@ -138,23 +141,28 @@ class LevelUpScene extends Phaser.Scene {
 		// Adding debug outline to see the bounding box of the text
 		messageText.setStroke('#ff0000', 2);
 		function resumeGame(){
-			const {name,type} = selectableItems[selected]
-			//console.log(this)
-			if(type==='weapon'){
-				//console.log()
-				if (!gameState.player.heldWeapons.includes(name)) {
-					gameState.player.heldWeapons.push(name)
-					this.scene.get(data.level).events.emit('weaponLoop', name)
+			// this.scene.pause()
+			// this.input.keyboard.resetKeys()
+			if (ok) {
+				ok = false
+				const {name,type} = selectableItems[selected]
+				console.log(gameState.player.xp, name)
+				//console.log(this)
+				if(type==='weapon'){
+					//console.log()
+					//if (!gameState.player.heldWeapons.includes(name)) {
+						//gameState.player.heldWeapons.push(name)
+						//this.scene.get(data.level).events.emit('weaponLoop', name)
+						
+					//}
+					this.scene.get(data.level).events.emit('getWeapon', name)
 				}
-			}
-			if(type==='bonus'){
-				if (!gameState.player.heldBonuses.includes(name)) {
-					gameState.player.heldBonuses.push(name)
-					
+				if(type==='bonus'){
+					this.scene.get(data.level).events.emit('getBonus', name)
 				}
+				this.scene.resume(data.level);  // Resume the Level scene
+				this.scene.stop();  // Stop the PauseScene
 			}
-			this.scene.resume(data.level);  // Resume the Level scene
-			this.scene.stop();  // Stop the PauseScene
 		}
 		//this.input.on('pointerdown', resumeGame, this)
 

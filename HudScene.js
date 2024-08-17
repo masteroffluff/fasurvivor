@@ -29,11 +29,25 @@ class HudScene extends Phaser.Scene {
       fill: "#000",
 			opacity:0,
     });
-		this.weaponsText  = this.add.text( 150, 50, `Weapons:${gameState.player.heldWeapons.join(", ")}`, {
+		this.heldItemsText  = this.add.text( 150, 50, `Weapons:${gameState.player.heldWeapons.join(", ")}\nBonuses:`, {
       fontSize: "15px",
       fill: "#000",
 			opacity:0,
+			wordWrap: { width: 240, useAdvancedWrap: true }, 
     });
+		// this.statsText  = this.add.text( 300, 0, "", {
+    //   fontSize: "15px",
+    //   fill: "#000",
+		// 	opacity:0,
+		// 	wordWrap: { width: 240, useAdvancedWrap: true }, 
+    // });
+		
+		// this.bonusesText  = this.add.text( 150, 75, `Bonuses:${gameState.player.heldBonuses.join(", ")}`, {
+    //   fontSize: "15px",
+    //   fill: "#000",
+		// 	opacity:0,
+    // });
+		//gameState.player.stats
 		this.scoreText.setStroke('#ff0000', 2);
 		this.healthText.setStroke('#ff0000', 2);
 		this.hiScoreText.setStroke('#ff0000', 2);
@@ -45,6 +59,10 @@ class HudScene extends Phaser.Scene {
 		this.healthText.setText(`Health:${Math.floor(gameState.player.hitpoints)}`);
 		this.xpText.setText(`XP:${gameState.player.xp}/${gameState.player.nextLevel}`);
 		this.levelText.setText(`Level:${gameState.player.level}`);
-		this.weaponsText.setText(`Weapons:${gameState.player.heldWeapons.join(", ")}`)
+		const heldBonuses = Array.from(gameState.player.heldBonuses.entries()).map(([e,l])=>e.name+":" + l)
+		//console.log(gameState.player.heldBonuses.keys())
+		this.heldItemsText.setText(`Weapons:${gameState.player.heldWeapons.join(", ")}\nBonuses:${heldBonuses.join(", ")}`)
+		//const stats = Object.entries(gameState.player.stats).map(([k,v])=>k+":"+v).join("\n")
+		this.statsText.setText(stats)
 	}
 }

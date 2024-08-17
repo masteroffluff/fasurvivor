@@ -1,93 +1,93 @@
-[
-  {
+{
+  "explosives":{
       "name": "explosives",
       "type": "bonus",
       "stat": "bonusDamage",
       "icon": "icon_explosives",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Add ing punch to you weapons increases damage"
   },
-  {
+  "drilling":{
       "name": "drilling",
       "type": "bonus",
       "stat": "bonusPen",
       "icon": "icon_drills",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Drill through enemies, shot penetrates through to the next enemy."
   },
-  {
+  "air cooled":{
       "name": "air cooled",
       "type": "bonus",
       "stat": "bonusROF",
       "icon": "icon_aircooling",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Air cooling for your equipment, increases ROF"
   },
-  {
+  "running shoes":{
       "name": "running shoes",
       "type": "bonus",
       "stat": "playerSpeed",
       "icon": "icon_runningShoe",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "run fast, increases player movement speed"
   },
-  {
+  "vitamins":{
       "name": "vitamins",
       "type": "bonus",
       "stat": "maxHitpoints",
       "icon": "icon_vitamins",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Eat you vitamins! Increases max HP"
   },
-  {
+  "kevlar":{
       "name": "kevlar",
       "type": "bonus",
       "stat": "armour",
       "icon": "icon_armour",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Armour for today, reduces damage."
   },
-  {
+  "vacuum":{
       "name": "vacuum",
       "type": "bonus",
       "stat": "collectionRadius",
       "icon": "icon_hoover",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Vrooom increases collection distance."
   },
-  {
+ "grease":{
       "name": "grease",
       "type": "bonus",
       "stat": "projectileSpeed",
       "icon": "icon_grease",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Its greaed lightning. Increases projectile speed"
   },
-  {
+  "investments":{
       "name": "investments",
       "type": "bonus",
       "stat": "goldBonus",
       "icon": "icon_linegoup",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Invest wisely, give you more gold per coin picked up."
   },
-  {
+  "zoom":{
       "name": "zoom",
       "type": "bonus",
       "stat": "bonusArea",
       "icon": "icon_zoom",
-      "amt": "10.00%",
+      "amt": 0.1,
       "max": 5,
       "desc": "Zoomed In, increases the size of weapons."
   }
-]
+}
 

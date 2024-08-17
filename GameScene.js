@@ -5,7 +5,7 @@ let itemPickups
 let crates
 let enemy
 let playerSpeed = 100
-let playerMaxHitpoints = 100
+//let playerMaxHitpoints = 100
 //let cursors;
 let emitter;
 let particles;
@@ -31,24 +31,26 @@ const enemyData = {
 }
 
 const playerStats = {
-  playerSpeed: 100,
-  maxHitpoints: 100,
+  startingHitpoints:100,
+  playerSpeed: 0,
+  maxHitpoints: 0,
   armour: 0,
   collectionRadius: 0,
-  projectileSpeed: 1,
+  projectileSpeed: 0,
+  projectileCount: 0,
   damageBonus: 0,
   goldBonus: 0,
   bonusDamage: 0,
   bonusPen: 0,
   bonusROF: 0,
-  bonusProjectileSpeed: 0,
+  bonusArea: 0,
 }
 
 
 
 
 class Item {
-  constructor(type, x, y, context) {
+  constructor(type, x, y, context,) {
     this.item = itemPickups.create(x, y, type);
     this.item.setDepth(floorItemDepth)
     this.type = this.item.type;
@@ -75,9 +77,8 @@ class Gem extends Item {
       //console.log(player.xp, gameState.player.xp)
       player.xp += value;
       this.item.destroy();
-
-
     };
+
   }
 }
 
@@ -87,10 +88,12 @@ class WeaponPickup extends Item {
     this.item.setScale(0.5)
     this.type = value
     this.item.onPickup = (player) => {
-      if (!player.heldWeapons.includes(value)) {
-        player.heldWeapons.push(value)
-        context.events.emit('weaponLoop', value)
-      }
+      // if (!player.heldWeapons.includes(value)) {
+      //player.heldWeapons.push(value)
+      //context.events.emit('weaponLoop', value)
+
+      // }
+      context.events.emit('getWeapon', value)
       this.item.destroy();
     };
   }
@@ -125,7 +128,7 @@ function getWeaponCallback(weaponName) {
         fireball.damage = damage
         fireball.pen = pen
         const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
-        this.physics.moveToObject(fireball, targeted, 100);
+        this.physics.moveToObject(fireball, targeted,  100*(1+gameState.player.stats.projectileSpeed*0.10));
       }
 
     case 'sword':
@@ -135,14 +138,14 @@ function getWeaponCallback(weaponName) {
         sword.damage = damage
         sword.pen = pen === "Infinity" ? Infinity : pen
 
-        const bodyRadius = 15
+        const bodyRadius = 15 
         sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
         this.tweens.add({
           targets: sword,
           paused: false,
           angle: -360,
           yoyo: false,
-          duration: 750,
+          duration: 750*1-(gameState.player.stats.projectileSpeed*0.10),
           onComplete: () => {
             sword.destroy()
           },
@@ -181,7 +184,7 @@ function getWeaponCallback(weaponName) {
         const bomb = this.physics.add.sprite(gameState.player.x, gameState.player.y, 'bomb').setScale(0.2)
         bomb.damage = damage
         bomb.pen = pen
-        Phaser.Math.RandomXY(bomb.body.velocity, 100);
+        Phaser.Math.RandomXY(bomb.body.velocity, 100*1-(gameState.player.stats.projectileSpeed*0.10));
         this.tweens.add({
           targets: bomb,
           paused: false,
@@ -232,18 +235,19 @@ class GameScene extends Phaser.Scene {
   }
   //// ***** CREATE FUNCTION *******
   create() {
-    function weaponLoop(weaponName, context) {
-      context = context || this
-      const weapon2 = context.weaponsData[weaponName];
-      return context.time.addEvent({
+    function weaponLoop(weaponName) {
+      //context = context || this
+      const weapon2 = this.weaponsData[weaponName];
+      return this.time.addEvent({
         callback: getWeaponCallback(weapon2.name),
-        delay: weapon2.delay,
-        callbackScope: context,
+        delay: weapon2.delay*(gameState.player.stats.bonusROF),
+        callbackScope: this,
         loop: true,
 
       })
     }
-    this.events.on('weaponLoop', (w) => weaponLoop(w, this))
+    //this.events.on('weaponLoop', (w) => weaponLoop(w, this))
+
     // this.events.on('levelUp', (context) => {
     //   console.log(gameState.player.xp)
     //   context.sceneTrigger({ scene: 'LevelUpScene' })
@@ -298,13 +302,13 @@ class GameScene extends Phaser.Scene {
     gameState.player = this.physics.add.sprite(200, 450, 'player')
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
     gameState.player.stats = { ...playerStats }           // dump all the stats into the player
-    gameState.player.hitpoints = playerStats.maxHitpoints // initialise hitpoints as the current max
+    gameState.player.hitpoints = playerStats.startingHitpoints // initialise hitpoints as the current max
     gameState.player.immune = false                       // set state for layer immunity
     gameState.player.xp = 0                               // set up xp 
     gameState.player.nextLevel = 5                        // set next level xp
     gameState.player.level = 0                            // set level
     gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
-    gameState.player.heldBonuses = []
+    gameState.player.heldBonuses = new Map()
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
 
 
@@ -321,7 +325,7 @@ class GameScene extends Phaser.Scene {
         pl.setTint(0xff0000)
         gameState.player.immune = true
         //console.log(enemy)
-        pl.hitpoints -= enemy.data.damage
+        pl.hitpoints -= enemy.data.damage * (1-pl.stats.armour*0.01)
         if (pl.hitpoints <= 0) {
           // player dead
           //alert("lol u died")
@@ -459,7 +463,7 @@ class GameScene extends Phaser.Scene {
 
 
     gameState.player.heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
-      weaponLoop.call(this, w)
+      this.events.emit("getWeapon",w)
     })
 
 
@@ -486,20 +490,34 @@ class GameScene extends Phaser.Scene {
         this.paused = false;
       }
     }, this);  // Bind the context
+    this.events.on('getBonus', (b) => {
+      const { heldBonuses } = gameState.player
+      const bonusObject = this.bonusesData[b]
+      if (heldBonuses.has(bonusObject)) {
+        heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
+        heldBonuses.get(bonusObject)
+      } else (
+        heldBonuses.set(bonusObject, 1)
+      )
+      const level = heldBonuses.get(bonusObject)
+
+      gameState.player.stats[bonusObject.stat] = level;
+    }, this);
+
+    this.events.on('getWeapon', (w) => {
+      const {player} = gameState
+      console.log(player.heldWeapons)
+      if (!player.heldWeapons.includes(w)) {
+        player.heldWeapons.push(w)
+        weaponLoop.call(this,w)
+      }
+    })
   }
 
 
 
   //// ***** UPDATE FUNCTION *******
   update() {
-    // this.debugGraphics.clear()
-    // this.debugGraphics.lineStyle(2, 0xff0000);
-    // this.debugGraphics.strokeRectShape(this.gameState.playArea);
-    // this.debugGraphics.lineStyle(2, 0x0000ff);
-    // this.debugGraphics.strokeRectShape(this.gameState.cameraView);
-    // this.debugGraphics.lineStyle(2, 0xffff00);
-    // this.debugGraphics.strokeRectShape(this.cameras.main.worldView);
-
     // player controls
     // use dx and dy to control the player velocity initially zero as not moving
     let dX = 0, dY = 0
@@ -521,8 +539,8 @@ class GameScene extends Phaser.Scene {
     }
     // we then multiply dx and dy by the velocityx and velovity y times the speed
 
-    gameState.player.setVelocityX(dX * gameState.player.stats.playerSpeed);
-    gameState.player.setVelocityY(dY * gameState.player.stats.playerSpeed);
+    gameState.player.setVelocityX(dX * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1));
+    gameState.player.setVelocityY(dY * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1));
 
     this.background.x = gameState.player.x - (this.sys.game.config.width / 2)
     this.background.y = gameState.player.y - (this.sys.game.config.height / 2)
@@ -562,9 +580,10 @@ class GameScene extends Phaser.Scene {
       this.scene.pause();  // Pause the current scene
       this.scene.launch("LevelUpScene", { level: 'GameScene' });  // Start the level up scene
       this.paused = true;
-      player.maxHitpoints *= 1.01
-      player.hitpoints *= 1.01
       player.level++;
+      player.maxHitpoints = 100 + (player.maxHitpoints * 0.01)
+      player.hitpoints *= 1.01
+
       player.xp -= player.nextLevel;
       player.nextLevel = Math.ceil(player.nextLevel * 1.2);
     }
