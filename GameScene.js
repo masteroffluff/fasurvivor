@@ -11,8 +11,10 @@ let emitter;
 let particles;
 let enemyPool = ['enemy1']
 let maxEnemies = 15
+
 const playAreaOffset = 50;
 
+let timer = 0
 
 
 const backgroundDepth = -999;
@@ -31,19 +33,18 @@ const enemyData = {
 }
 
 const playerStats = {
-  startingHitpoints:100,
-  playerSpeed: 0,
-  maxHitpoints: 0,
-  armour: 0,
-  collectionRadius: 0,
-  projectileSpeed: 0,
-  projectileCount: 0,
-  damageBonus: 0,
-  goldBonus: 0,
-  bonusDamage: 0,
-  bonusPen: 0,
-  bonusROF: 0,
-  bonusArea: 0,
+  startingHitpoints: 100,
+  playerSpeed: 0, // done
+  maxHitpoints: 0, // done
+  armour: 0, // done
+  collectionRadius: 0, // TODO: Add vacuum zone
+  projectileSpeed: 0, // done
+  projectileCount: 0, // done
+  goldBonus: 0, // todo: add gold
+  bonusDamage: 0, // done
+  bonusPen: 0, // done
+  bonusROF: 0, // done
+  bonusArea: 0, // done
 }
 
 
@@ -98,6 +99,22 @@ class WeaponPickup extends Item {
     };
   }
 }
+class BonusPickup extends Item {
+  constructor(x, y, value, context) {
+    super(`icon_${value}`, x, y);
+    this.item.setScale(0.5)
+    this.type = value
+    this.item.onPickup = (player) => {
+      // if (!player.heldWeapons.includes(value)) {
+      //player.heldWeapons.push(value)
+      //context.events.emit('weaponLoop', value)
+
+      // }
+      context.events.emit('getBonus', value)
+      this.item.destroy();
+    };
+  }
+}
 // class Chest extends Item {
 //   constructor(x, y, value) {
 //     super(value, x, y);
@@ -117,92 +134,115 @@ class WeaponPickup extends Item {
 
 // }
 
+
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
+  console.log(weaponName)
+  switch ('get,', weaponName) {
 
-  switch (weaponName) {
     case 'fireball':
       return function shootFireball() {
+        if (gameState.player.weaponLoops[weaponName]) {
+          gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
+        }
+        //console.log('fireball')
         const { pen, damage } = this.weaponsData['fireball']
-        const fireball = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2)
-        fireball.damage = damage
-        fireball.pen = pen
-        const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
-        this.physics.moveToObject(fireball, targeted,  100*(1+gameState.player.stats.projectileSpeed*0.10));
+        for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
+          const sprite = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2+(gameState.player.stats.bonusArea*0.1))
+          sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
+          sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.10)
+          const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
+          this.physics.moveToObject(sprite, targeted, 100 * (1 + gameState.player.stats.projectileSpeed * 0.10));
+        }
       }
 
     case 'sword':
+
       return function swingSword() {
-        const sword = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5)
+        console.log('sword')
+        if (gameState.player.weaponLoops[weaponName]) {
+          gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
+        }
         const { pen, damage } = this.weaponsData['sword']
-        sword.damage = damage
-        sword.pen = pen === "Infinity" ? Infinity : pen
 
-        const bodyRadius = 15 
-        sword.body.setCircle(bodyRadius, sword.width - bodyRadius * 2, -(sword.height / 2 + bodyRadius) / 2)
-        this.tweens.add({
-          targets: sword,
-          paused: false,
-          angle: -360,
-          yoyo: false,
-          duration: 750*1-(gameState.player.stats.projectileSpeed*0.10),
-          onComplete: () => {
-            sword.destroy()
-          },
-          onUpdate: () => {
-            // Update sword position to match player position
-            sword.x = gameState.player.x;
-            sword.y = gameState.player.y;
+        const ang = 360 / (gameState.player.stats.projectileCount + 1)
 
-            // Radius of the path traced by the sword's tip
-            const pathRadius = sword.width; // Adjust as needed for your sword's path
+        for (let angle = 0; angle < 360; angle += ang) {
 
-            //const bodyRadius = 20; // set further up the code now
+          const sprite = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5).setScale(1+(gameState.player.stats.bonusArea*0.1))
+          console.log(angle)
+          sprite.angle = -angle
+          sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
+          sprite.pen = Infinity
 
-            // Calculate the sword's rotation
-            const rotation = sword.rotation;
-
-            // Calculate the tip position using the sword's rotation
-            const tipX = pathRadius * Math.cos(rotation);
-            const tipY = pathRadius * Math.sin(rotation);
-
-            // The body's center should be positioned so that its edge is aligned with the tip's path
-            // The offset is calculated by translating the body's center back from the tip's position
-            const offsetX = tipX - bodyRadius * Math.cos(rotation) - bodyRadius;
-            const offsetY = tipY - bodyRadius * Math.sin(rotation) + (sword.height / 2) - bodyRadius;
-
-            // Set the new offset for the sword's body
-            sword.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
-
+          const bodyRadius = 15
+          sprite.body.setCircle(bodyRadius, sprite.width - bodyRadius * 2, -(sprite.height / 2 + bodyRadius) / 2)
+          this.tweens.add({
+            targets: sprite,
+            paused: false,
+            angle: -405+sprite.angle,
+            yoyo: false,
+            duration: 750 * 1 - (gameState.player.stats.projectileSpeed * 0.10),
+            onComplete: () => {
+              sprite.destroy()
+            },
+            onUpdate: () => {
+              // Update sword position to match player position
+              sprite.x = gameState.player.x;
+              sprite.y = gameState.player.y;
+              // Radius of the path traced by the sword's tip
+              const pathRadius = sprite.width; // Adjust as needed for your sword's path
+              //const bodyRadius = 20; // set further up the code now
+              // Calculate the sword's rotation
+              const rotation = sprite.rotation;
+              // Calculate the tip position using the sword's rotation
+              const tipX = pathRadius * Math.cos(rotation);
+              const tipY = pathRadius * Math.sin(rotation);
+              // The body's center should be positioned so that its edge is aligned with the tip's path
+              // The offset is calculated by translating the body's center back from the tip's position
+              const offsetX = tipX - bodyRadius * Math.cos(rotation) - bodyRadius;
+              const offsetY = tipY - bodyRadius * Math.sin(rotation) + (sprite.height / 2) - bodyRadius;
+              // Set the new offset for the sword's body
+              sprite.body.setOffset(Math.floor(offsetX), Math.floor(offsetY));
+            }
           }
 
-        })
+          )
+        }
       }
     case 'bomb':
       return function throwbomb() {
+        console.log('bomb')
+        if (gameState.player.weaponLoops[weaponName]) {
+          gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
+        }
         const { pen, damage } = this.weaponsData['bomb']
-        const bomb = this.physics.add.sprite(gameState.player.x, gameState.player.y, 'bomb').setScale(0.2)
-        bomb.damage = damage
-        bomb.pen = pen
-        Phaser.Math.RandomXY(bomb.body.velocity, 100*1-(gameState.player.stats.projectileSpeed*0.10));
-        this.tweens.add({
-          targets: bomb,
-          paused: false,
-          angle: 360,
-          yoyo: false,
-          duration: 750,
-          onComplete: () => {
-            const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion')
-            bombExplosion.body.setCircle(bombExplosion.width / 2)
-            bombExplosion.on('animationcomplete', (e) => {
 
-              bombExplosion.destroy()
-            })
-            bombExplosion.play('bombExplodes')
-            bomb.destroy()
+        for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
+          const bomb = this.physics.add.sprite(gameState.player.x, gameState.player.y, 'bomb').setScale(0.2)
 
-          }
-        })
+          Phaser.Math.RandomXY(bomb.body.velocity, 100 * 1 - (gameState.player.stats.projectileSpeed * 0.10));
+          this.tweens.add({
+            targets: bomb,
+            paused: false,
+            angle: 360,
+            yoyo: false,
+            duration: 750,
+            onComplete: () => {
+              const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion').setScale(1+(gameState.player.stats.bonusArea*0.1))
+              bombExplosion.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
+              bombExplosion.body.setCircle(bombExplosion.width / 2)
+              bombExplosion.on('animationcomplete', (e) => {
+
+                bombExplosion.destroy()
+              })
+              bombExplosion.play('bombExplodes')
+              bomb.destroy()
+
+            }
+          })
+
+        }
       }
     default:
   }
@@ -235,24 +275,21 @@ class GameScene extends Phaser.Scene {
   }
   //// ***** CREATE FUNCTION *******
   create() {
+    this.calculateDelay = function calculateDelay(weaponName) {
+      const weapon2 = this.weaponsData[weaponName];
+      return weapon2.delay * (1 - gameState.player.stats.bonusROF*0.01)
+    }
     function weaponLoop(weaponName) {
       //context = context || this
-      const weapon2 = this.weaponsData[weaponName];
+      //const weapon2 = this.weaponsData[weaponName];
+      getWeaponCallback(weaponName).call(this)
       return this.time.addEvent({
-        callback: getWeaponCallback(weapon2.name),
-        delay: weapon2.delay*(gameState.player.stats.bonusROF),
+        callback: getWeaponCallback(weaponName),
+        delay: this.calculateDelay.call(this, weaponName),
         callbackScope: this,
         loop: true,
-
       })
     }
-    //this.events.on('weaponLoop', (w) => weaponLoop(w, this))
-
-    // this.events.on('levelUp', (context) => {
-    //   console.log(gameState.player.xp)
-    //   context.sceneTrigger({ scene: 'LevelUpScene' })
-    // })
-    //console.log(this)
 
     //* initial setup
     this.gameState = {}
@@ -270,7 +307,6 @@ class GameScene extends Phaser.Scene {
     this.background.setOrigin(0, 0);
     this.background.setDepth(-999)
 
-
     // * set up anims here 
     this.anims.create({
       key: 'bombExplodes',
@@ -278,6 +314,69 @@ class GameScene extends Phaser.Scene {
       frameRate: 10,
     });
 
+    // *set up events
+    // ***** pause mode ****
+    // Initialize a flag to track paused state
+    this.paused = false;
+
+    const pKey = this.input.keyboard.addKey('P');  // Get key object
+    pKey.on('down', () => {
+      if (!this.paused) {
+        this.physics.pause();  // Pause the physics
+        this.scene.pause();  // Pause the current scene
+        this.scene.launch('PauseScene', { level: 'GameScene' });  // Start the PauseScene
+        this.paused = true;
+      }
+    });
+    const oKey = this.input.keyboard.addKey('O');  // Get key object
+    oKey.on('down', () => {
+      if (!this.paused) {
+        gameState.player.stats.bonusArea += 1
+
+      }
+    });
+
+    this.events.on('resume', () => {
+      if (this.paused) {
+        this.input.keyboard.resetKeys()
+        this.physics.resume();  // Resume the physics
+        this.paused = false;
+      }
+    }, this);  // Bind the context
+
+    // *** pick up items/weapons
+
+    this.events.on('getBonus', (b) => {
+      const { heldBonuses } = gameState.player
+      const bonusObject = this.bonusesData[b]
+      if (heldBonuses.has(bonusObject)) {
+        heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
+        heldBonuses.get(bonusObject)
+      } else (
+        heldBonuses.set(bonusObject, 1)
+      )
+      const level = heldBonuses.get(bonusObject)
+
+      gameState.player.stats[bonusObject.stat] = level;
+      // Object.entries(gameState.player.weaponLoops).map(([w,loop])=>{
+      //   loop.destroy()
+      //   gameState.player.weaponLoops[w]=weaponLoop.call(this,w)
+      // })
+    }, this);
+
+    this.events.on('getWeapon', (w) => {
+      const { player } = gameState
+      console.log('getWeapon', player.heldWeapons)
+      if (!player.heldWeapons.has(w)) {
+        //player.heldWeapons.push(w)
+        player.heldWeapons.set(w, 1)
+        gameState.player.weaponLoops[w] = weaponLoop.call(this, w)// creates a weaponloop for the weapon and adds it to the weaponloops hashmap
+      } else {
+        player.heldWeapons.set(w, player.heldWeapons.get(w))
+        //gameState.player.weaponLoops[w]
+
+      }
+    })
 
     //this.debugGraphics = this.add.graphics();
 
@@ -307,8 +406,11 @@ class GameScene extends Phaser.Scene {
     gameState.player.xp = 0                               // set up xp 
     gameState.player.nextLevel = 5                        // set next level xp
     gameState.player.level = 0                            // set level
-    gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
+    //gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
+    gameState.player.heldWeapons = new Map();
+    gameState.player.weaponLoops = {}
     gameState.player.heldBonuses = new Map()
+
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
 
 
@@ -325,7 +427,7 @@ class GameScene extends Phaser.Scene {
         pl.setTint(0xff0000)
         gameState.player.immune = true
         //console.log(enemy)
-        pl.hitpoints -= enemy.data.damage * (1-pl.stats.armour*0.01)
+        pl.hitpoints -= enemy.data.damage * (1 - pl.stats.armour * 0.01)
         if (pl.hitpoints <= 0) {
           // player dead
           //alert("lol u died")
@@ -374,7 +476,7 @@ class GameScene extends Phaser.Scene {
     this.physics.add.overlap(weapons, enemies, (w, e) => {
       //if(!e.dead){
       w.pen--
-      e.data.life--
+      e.data.life -= w.damage
       if (w.pen <= 0) {
         w.destroy();
       }
@@ -462,56 +564,16 @@ class GameScene extends Phaser.Scene {
     });
 
 
-    gameState.player.heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
-      this.events.emit("getWeapon",w)
+    heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
+      console.log("setup", w)
+      this.events.emit("getWeapon", w)
     })
 
 
 
-    // ***** pause mode ****
-    // Initialize a flag to track paused state
-    this.paused = false;
 
-    const pKey = this.input.keyboard.addKey('P');  // Get key object
 
-    pKey.on('down', () => {
-      if (!this.paused) {
-        this.physics.pause();  // Pause the physics
-        this.scene.pause();  // Pause the current scene
-        this.scene.launch('PauseScene', { level: 'GameScene' });  // Start the PauseScene
-        this.paused = true;
-      }
-    });
 
-    this.events.on('resume', () => {
-      if (this.paused) {
-        this.input.keyboard.resetKeys()
-        this.physics.resume();  // Resume the physics
-        this.paused = false;
-      }
-    }, this);  // Bind the context
-    this.events.on('getBonus', (b) => {
-      const { heldBonuses } = gameState.player
-      const bonusObject = this.bonusesData[b]
-      if (heldBonuses.has(bonusObject)) {
-        heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
-        heldBonuses.get(bonusObject)
-      } else (
-        heldBonuses.set(bonusObject, 1)
-      )
-      const level = heldBonuses.get(bonusObject)
-
-      gameState.player.stats[bonusObject.stat] = level;
-    }, this);
-
-    this.events.on('getWeapon', (w) => {
-      const {player} = gameState
-      console.log(player.heldWeapons)
-      if (!player.heldWeapons.includes(w)) {
-        player.heldWeapons.push(w)
-        weaponLoop.call(this,w)
-      }
-    })
   }
 
 
@@ -586,6 +648,7 @@ class GameScene extends Phaser.Scene {
 
       player.xp -= player.nextLevel;
       player.nextLevel = Math.ceil(player.nextLevel * 1.2);
+
     }
 
   }
