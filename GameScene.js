@@ -11,6 +11,7 @@ let emitter;
 let particles;
 let enemyPool = ['enemy1']
 let maxEnemies = 15
+//let this.idempotenceFlag = true;
 
 const playAreaOffset = 50;
 
@@ -51,19 +52,33 @@ const playerStats = {
 
 
 class Item {
-  constructor(type, x, y, context,) {
+  constructor(type, x, y, context) {
+    // note contecxt shouls always be the this from the scene clas.
     this.item = itemPickups.create(x, y, type);
     this.item.setDepth(floorItemDepth)
     this.type = this.item.type;
     this.x = this.item.x;
     this.y = this.item.y;
     this.item.onPickup = () => "";
+    this.item.vacuumTween =  context.tweens.add({
+      targets: this.item,
+      paused: true,
+      yoyo: false,
+      repeat:-1,
+      onUpdate: () => {
+        context.physics.moveToObject(this.item, gameState.player, 50);
+      }
+    });
+    this.item.onVacuum = () => {
+      this.item.vacuumTween.reStart()
+    };
+
   }
 }
 
 class Heart extends Item {
-  constructor(x, y, value) {
-    super('heart', x, y);
+  constructor(x, y, value, context) {
+    super('heart', x, y, context);
     this.item.onPickup = () => {
       gameState.player.hitpoints += value;
       this.item.destroy();
@@ -85,7 +100,7 @@ class Gem extends Item {
 
 class WeaponPickup extends Item {
   constructor(x, y, value, context) {
-    super(`icon_${value}`, x, y);
+    super(`icon_${value}`, x, y, context);
     this.item.setScale(0.5)
     this.type = value
     this.item.onPickup = (player) => {
@@ -94,7 +109,11 @@ class WeaponPickup extends Item {
       //context.events.emit('weaponLoop', value)
 
       // }
-      context.events.emit('getWeapon', value)
+      context.paused=true
+      context.physics.pause();  // Pause the physics
+      context.scene.pause();  // Pause the current scene
+      context.scene.launch('PickUpItemScene', { level: 'GameScene', type:'weapon', value})
+      //context.events.emit('getWeapon', value)
       this.item.destroy();
     };
   }
@@ -110,7 +129,11 @@ class BonusPickup extends Item {
       //context.events.emit('weaponLoop', value)
 
       // }
-      context.events.emit('getBonus', value)
+      context.paused=true
+      context.physics.pause();  // Pause the physics
+      context.scene.pause();  // Pause the current scene
+      context.scene.launch('PickUpItemScene', { level: 'GameScene', type:'bonus', value})
+      //context.events.emit('getBonus', value)
       this.item.destroy();
     };
   }
@@ -293,6 +316,7 @@ class GameScene extends Phaser.Scene {
 
     //* initial setup
     this.gameState = {}
+    this.idempotenceFlag = true;
     this.bonusesData = this.cache.json.get('bonusesData');
     this.weaponsData = this.cache.json.get('weaponsData');
     // var background = this.add.tileSprite(0, 0, 2000, 2000, "background");
@@ -337,7 +361,9 @@ class GameScene extends Phaser.Scene {
     });
 
     this.events.on('resume', () => {
+
       if (this.paused) {
+        this.idempotenceFlag = true
         this.input.keyboard.resetKeys()
         this.physics.resume();  // Resume the physics
         this.paused = false;
@@ -347,14 +373,19 @@ class GameScene extends Phaser.Scene {
     // *** pick up items/weapons
 
     this.events.on('getBonus', (b) => {
+      if(this.idempotenceFlag){
+      this.idempotenceFlag = false
       const { heldBonuses } = gameState.player
+
       const bonusObject = this.bonusesData[b]
+      console.log('getBonus', [...gameState.player.heldBonuses.entries()])
       if (heldBonuses.has(bonusObject)) {
+        console.log(heldBonuses.get(bonusObject))
         heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
         heldBonuses.get(bonusObject)
-      } else (
+      } else {
         heldBonuses.set(bonusObject, 1)
-      )
+      }
       const level = heldBonuses.get(bonusObject)
 
       gameState.player.stats[bonusObject.stat] = level;
@@ -362,21 +393,26 @@ class GameScene extends Phaser.Scene {
       //   loop.destroy()
       //   gameState.player.weaponLoops[w]=weaponLoop.call(this,w)
       // })
-    }, this);
+    }}, this);
 
     this.events.on('getWeapon', (w) => {
-      const { player } = gameState
-      console.log('getWeapon', player.heldWeapons)
-      if (!player.heldWeapons.has(w)) {
-        //player.heldWeapons.push(w)
-        player.heldWeapons.set(w, 1)
-        gameState.player.weaponLoops[w] = weaponLoop.call(this, w)// creates a weaponloop for the weapon and adds it to the weaponloops hashmap
-      } else {
-        player.heldWeapons.set(w, player.heldWeapons.get(w))
-        //gameState.player.weaponLoops[w]
-
+      console.log("getWeapon",this.idempotenceFlag)
+      if (this.idempotenceFlag) {
+        this.idempotenceFlag = false
+        const { player } = gameState
+        console.log('getWeapon', [...player.heldWeapons.entries()])
+        if (!player.heldWeapons.has(w)) {
+          //player.heldWeapons.push(w)
+          player.heldWeapons.set(w, 1)
+          gameState.player.weaponLoops[w] = weaponLoop.call(this, w)// creates a weaponloop for the weapon and adds it to the weaponloops hashmap
+        } else {
+          player.heldWeapons.set(w, player.heldWeapons.get(w))
+          //gameState.player.weaponLoops[w]
+  
+        }
       }
-    })
+    }
+  , this)
 
     //this.debugGraphics = this.add.graphics();
 
@@ -395,9 +431,22 @@ class GameScene extends Phaser.Scene {
 
     // *player
     if (gameState.player) {
-      delete (gameState.player.stats)
-      gameState.player.destroy
+      console.log("deleting old player")
+      gameState.player.heldWeapons.clear(); // Clear the Map
+      gameState.player.heldBonuses.clear(); // Clear the Map
+      gameState.player.weaponLoops = null;
+      gameState.player.stats = null;
+      console.log(gameState.player.heldWeapons)
+      delete (gameState.player.heldWeapons); // Clear the Map
+      delete (gameState.player.heldBonuses); // Clear the Map
+      delete (gameState.player.weaponLoops);
+      delete (gameState.player.stats);
+      // Destroy the player sprite and clear the reference
+      //gameState.player.destroy();
+      gameState.player = null;
+      console.log("gamestate",gameState)
     }
+    console.log("what is going on")
     gameState.player = this.physics.add.sprite(200, 450, 'player')
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
     gameState.player.stats = { ...playerStats }           // dump all the stats into the player
@@ -552,7 +601,7 @@ class GameScene extends Phaser.Scene {
     // **** game starting conditions *****
     // level specific setup
     new WeaponPickup(500, 500, 'sword', this)
-    new Gem(250, 250, 50, this)
+    new Gem(250, 250, 200, this)
     // start hud
     this.scene.launch('HudScene')
     // initalise the enemy genrator
@@ -567,10 +616,14 @@ class GameScene extends Phaser.Scene {
     heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
       console.log("setup", w)
       this.events.emit("getWeapon", w)
+      this.idempotenceFlag= true
     })
 
 
-
+    this.events.on('shutdown', () => {
+      gameState.player = null;  // Reset player on scene shutdown
+      console.log('deadState',JSON.stringify(gameState))
+    });
 
 
 

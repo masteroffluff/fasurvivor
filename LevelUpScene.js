@@ -43,12 +43,18 @@ class LevelUpScene extends Phaser.Scene {
 		const offset = 200;
 		const margin = 50;
 		let avaibleBonuses
+		console.log(gameState.player.heldBonuses.size)
 		if(gameState.player.heldBonuses.size>=6){
-			avaibleBonuses =[]
-			gameState.player.heldBonuses.forEach((e)=>avaibleBonuses.push(e))
+					avaibleBonuses =[]
+			console.log('bonuses filled')
+			gameState.player.heldBonuses.forEach((v,e)=>{
+				console.log('bonus:',e)
+				avaibleBonuses.push(e)
+			})
 		} else {
 			avaibleBonuses=Object.values(this.bonusesData)
 		}
+
 		let avaibleWeapons	
 		if(gameState.player.heldWeapons.length>=6){
 			avaibleWeapons = Object.values(Object.values(this.weaponsData)).filter((e)=>gameState.player.heldWeapons.includes(e.name))

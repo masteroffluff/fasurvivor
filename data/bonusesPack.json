@@ -51,6 +51,11 @@
         "key": "icon_zoom",
         "type": "image",
         "url": "icon_zoom.png"
+      },
+      {
+        "key": "icon_duplicator",
+        "type": "image",
+        "url": "icon_duplicator.png"
       }
     ]
   },
