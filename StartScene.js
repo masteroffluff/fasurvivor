@@ -49,7 +49,8 @@ class StartScene extends Phaser.Scene {
 				//survivorImage2.destroy()
 			}
 		})
-		this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
+		const text = this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
+		text.setLineSpacing(5)
 		function startGame(){
 			this.scene.stop('StartScene');
 			this.scene.start('GameScene');

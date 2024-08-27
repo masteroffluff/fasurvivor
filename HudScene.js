@@ -4,36 +4,21 @@ class HudScene extends Phaser.Scene {
 	}
 
 	create() {
-		this.scoreText = this.add.text( 10, 0, `Killed:0`, {
+		const textStyle = {
       fontSize: "15px",
       fill: "#000000",
+			stroke:"#f00",
+			strokeThickness:1,
 			opacity:0,
-    });
-		this.healthText = this.add.text( 10, 25, `Health:${gameState.player.hitpoints}`, {
-      fontSize: "15px",
-      fill: "#000",
-			opacity:0,
-    });
-		this.hiScoreText = this.add.text( 10, 50, `Hi Score:${gameState.highScore}`, {
-      fontSize: "15px",
-      fill: "#000",
-			opacity:0,
-    });
-		this.xpText = this.add.text( 150, 0, `XP:${gameState.player.xp}/${gameState.player.nextLevel}`, {
-      fontSize: "15px",
-      fill: "#000",
-			opacity:0,
-    });
-		this.levelText = this.add.text( 150, 25, `Level:${gameState.player.level}`, {
-      fontSize: "15px",
-      fill: "#000",
-			opacity:0,
-    });
+    }
+		this.scoreText = this.add.text( 10, 0, `Killed:0`, textStyle);
+		this.healthText = this.add.text( 10, 25, `Health:${gameState.player.hitpoints}`, textStyle);
+		this.hiScoreText = this.add.text( 10, 50, `Hi Score:${gameState.highScore}`, textStyle);
+		this.xpText = this.add.text( 150, 0, `XP:${gameState.player.xp}/${gameState.player.nextLevel}`, textStyle);
+		this.levelText = this.add.text( 150, 25, `Level:${gameState.player.level}`, textStyle);
 		const weapons =Array.from( gameState.player.heldWeapons.keys())
 		this.heldItemsText  = this.add.text( 150, 50, `Weapons:${weapons.join(", ")}\nBonuses:`, {
-      fontSize: "15px",
-      fill: "#000",
-			opacity:0,
+			...textStyle,
 			wordWrap: { width: 240, useAdvancedWrap: true }, 
     });
 		// this.statsText  = this.add.text( 300, 0, "", {
@@ -48,13 +33,13 @@ class HudScene extends Phaser.Scene {
     //   fill: "#000",
 		// 	opacity:0,
     // });
-		//gameState.player.stats
-		this.scoreText.setStroke('#ff0000', 2);
-		this.scoreText.setLineSpacing(20)
-		this.healthText.setStroke('#ff0000', 2);
-		this.hiScoreText.setStroke('#ff0000', 2);
-		this.xpText.setStroke('#ff0000', 2);
-		this.levelText.setStroke('#ff0000', 2);
+		// //gameState.player.stats
+		// this.scoreText.setStroke('#ff0000', 2);
+		// this.scoreText.setLineSpacing(20)
+		// this.healthText.setStroke('#ff0000', 2);
+		// this.hiScoreText.setStroke('#ff0000', 2);
+		// this.xpText.setStroke('#ff0000', 2);
+		// this.levelText.setStroke('#ff0000', 2);
 	}
 	update(){
 		this.scoreText.setText(`Killed:${gameState.score}`);
