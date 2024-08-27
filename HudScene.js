@@ -50,6 +50,7 @@ class HudScene extends Phaser.Scene {
     // });
 		//gameState.player.stats
 		this.scoreText.setStroke('#ff0000', 2);
+		this.scoreText.setLineSpacing(20)
 		this.healthText.setStroke('#ff0000', 2);
 		this.hiScoreText.setStroke('#ff0000', 2);
 		this.xpText.setStroke('#ff0000', 2);
