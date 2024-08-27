@@ -36,12 +36,12 @@ class HudScene extends Phaser.Scene {
 			opacity:0,
 			wordWrap: { width: 240, useAdvancedWrap: true }, 
     });
-		this.statsText  = this.add.text( 300, 0, "", {
-      fontSize: "15px",
-      fill: "#fff",
-			opacity:0,
-			wordWrap: { width: 240, useAdvancedWrap: true }, 
-    });
+		// this.statsText  = this.add.text( 300, 0, "", {
+    //   fontSize: "15px",
+    //   fill: "#fff",
+		// 	opacity:0,
+		// 	wordWrap: { width: 240, useAdvancedWrap: true }, 
+    // });
 
 		// this.bonusesText  = this.add.text( 150, 75, `Bonuses:${gameState.player.heldBonuses.join(", ")}`, {
     //   fontSize: "15px",
@@ -64,7 +64,7 @@ class HudScene extends Phaser.Scene {
 		//console.log(gameState.player.heldBonuses.keys())
 		const weapons =Array.from( gameState.player.heldWeapons.keys())
 		this.heldItemsText.setText(`Weapons:${weapons.join(", ")}\nBonuses:${heldBonuses.join(", ")}`)
-		const stats = Object.entries(gameState.player.stats).map(([k,v])=>k+":"+v).join("\n")
-		this.statsText.setText(stats)
+		//const stats = Object.entries(gameState.player.stats).map(([k,v])=>k+":"+v).join("\n")
+		//this.statsText.setText(stats)
 	}
 }

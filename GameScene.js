@@ -38,7 +38,7 @@ const playerStats = {
   playerSpeed: 0, // done
   maxHitpoints: 0, // done
   armour: 0, // done
-  collectionRadius: 0, // TODO: Add vacuum zone
+  collectionRadius: 0, // TODO: Add vacuum zone done
   projectileSpeed: 0, // done
   projectileCount: 0, // done
   goldBonus: 0, // todo: add gold
@@ -60,17 +60,21 @@ class Item {
     this.x = this.item.x;
     this.y = this.item.y;
     this.item.onPickup = () => "";
-    this.item.vacuumTween =  context.tweens.add({
+    this.item.vaccumable = true
+    this.item.vacuumTween = context.tweens.add({
       targets: this.item,
       paused: true,
       yoyo: false,
-      repeat:-1,
+      angle: 360,
+      repeat: -1,
       onUpdate: () => {
-        context.physics.moveToObject(this.item, gameState.player, 50);
+        context.physics.moveToObject(this.item, gameState.player, 75);
+        console.log('hello')
       }
     });
     this.item.onVacuum = () => {
-      this.item.vacuumTween.reStart()
+      console.log(this.item)
+      this.item.vacuumTween.restart()
     };
 
   }
@@ -81,6 +85,7 @@ class Heart extends Item {
     super('heart', x, y, context);
     this.item.onPickup = () => {
       gameState.player.hitpoints += value;
+      this.item.vacuumTween.stop();
       this.item.destroy();
     };
   }
@@ -92,6 +97,7 @@ class Gem extends Item {
     this.item.onPickup = (player) => {
       //console.log(player.xp, gameState.player.xp)
       player.xp += value;
+      this.item.vacuumTween.stop();
       this.item.destroy();
     };
 
@@ -103,16 +109,17 @@ class WeaponPickup extends Item {
     super(`icon_${value}`, x, y, context);
     this.item.setScale(0.5)
     this.type = value
+    this.item.vaccumable = false
     this.item.onPickup = (player) => {
       // if (!player.heldWeapons.includes(value)) {
       //player.heldWeapons.push(value)
       //context.events.emit('weaponLoop', value)
 
       // }
-      context.paused=true
+      context.paused = true
       context.physics.pause();  // Pause the physics
       context.scene.pause();  // Pause the current scene
-      context.scene.launch('PickUpItemScene', { level: 'GameScene', type:'weapon', value})
+      context.scene.launch('PickUpItemScene', { level: 'GameScene', type: 'weapon', value })
       //context.events.emit('getWeapon', value)
       this.item.destroy();
     };
@@ -129,11 +136,10 @@ class BonusPickup extends Item {
       //context.events.emit('weaponLoop', value)
 
       // }
-      context.paused=true
+      context.paused = true
       context.physics.pause();  // Pause the physics
       context.scene.pause();  // Pause the current scene
-      context.scene.launch('PickUpItemScene', { level: 'GameScene', type:'bonus', value})
-      //context.events.emit('getBonus', value)
+      context.scene.launch('PickUpItemScene', { level: 'GameScene', type: 'bonus', value })
       this.item.destroy();
     };
   }
@@ -171,7 +177,7 @@ function getWeaponCallback(weaponName) {
         //console.log('fireball')
         const { pen, damage } = this.weaponsData['fireball']
         for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
-          const sprite = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2+(gameState.player.stats.bonusArea*0.1))
+          const sprite = weapons.create(gameState.player.x, gameState.player.y, 'fireball').setScale(0.2 + (gameState.player.stats.bonusArea * 0.1))
           sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
           sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.10)
           const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
@@ -192,7 +198,7 @@ function getWeaponCallback(weaponName) {
 
         for (let angle = 0; angle < 360; angle += ang) {
 
-          const sprite = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5).setScale(1+(gameState.player.stats.bonusArea*0.1))
+          const sprite = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5).setScale(1 + (gameState.player.stats.bonusArea * 0.1))
           console.log(angle)
           sprite.angle = -angle
           sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
@@ -203,7 +209,7 @@ function getWeaponCallback(weaponName) {
           this.tweens.add({
             targets: sprite,
             paused: false,
-            angle: -405+sprite.angle,
+            angle: -405 + sprite.angle,
             yoyo: false,
             duration: 750 * 1 - (gameState.player.stats.projectileSpeed * 0.10),
             onComplete: () => {
@@ -252,7 +258,7 @@ function getWeaponCallback(weaponName) {
             yoyo: false,
             duration: 750,
             onComplete: () => {
-              const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion').setScale(1+(gameState.player.stats.bonusArea*0.1))
+              const bombExplosion = weapons.create(bomb.x, bomb.y, 'bombExplosion').setScale(1 + (gameState.player.stats.bonusArea * 0.1))
               bombExplosion.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
               bombExplosion.body.setCircle(bombExplosion.width / 2)
               bombExplosion.on('animationcomplete', (e) => {
@@ -300,7 +306,7 @@ class GameScene extends Phaser.Scene {
   create() {
     this.calculateDelay = function calculateDelay(weaponName) {
       const weapon2 = this.weaponsData[weaponName];
-      return weapon2.delay * (1 - gameState.player.stats.bonusROF*0.01)
+      return weapon2.delay * (1 - gameState.player.stats.bonusROF * 0.01)
     }
     function weaponLoop(weaponName) {
       //context = context || this
@@ -373,30 +379,38 @@ class GameScene extends Phaser.Scene {
     // *** pick up items/weapons
 
     this.events.on('getBonus', (b) => {
-      if(this.idempotenceFlag){
-      this.idempotenceFlag = false
-      const { heldBonuses } = gameState.player
+      if (this.idempotenceFlag) {
+        this.idempotenceFlag = false
+        const { heldBonuses } = gameState.player
 
-      const bonusObject = this.bonusesData[b]
-      console.log('getBonus', [...gameState.player.heldBonuses.entries()])
-      if (heldBonuses.has(bonusObject)) {
-        console.log(heldBonuses.get(bonusObject))
-        heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
-        heldBonuses.get(bonusObject)
-      } else {
-        heldBonuses.set(bonusObject, 1)
+        const bonusObject = this.bonusesData[b]
+        console.log('getBonus', [...gameState.player.heldBonuses.entries()])
+        if (heldBonuses.has(bonusObject)) {
+          console.log(heldBonuses.get(bonusObject))
+          heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
+          heldBonuses.get(bonusObject)
+        } else {
+          heldBonuses.set(bonusObject, 1)
+        }
+        const level = heldBonuses.get(bonusObject)
+
+        gameState.player.stats[bonusObject.stat] = level;
+        if (bonusObject.stat === "collectionRadius") {
+          gameState.vacuum.body.setCircle(75 + (gameState.player.stats.collectionRadius * 20))
+          gameState.vacuum.body.setOffset(
+            gameState.vacuum.width / 2 - gameState.vacuum.body.radius,
+            gameState.vacuum.height / 2 - gameState.vacuum.body.radius
+          )
+        }
+        // Object.entries(gameState.player.weaponLoops).map(([w,loop])=>{
+        //   loop.destroy()
+        //   gameState.player.weaponLoops[w]=weaponLoop.call(this,w)
+        // })
       }
-      const level = heldBonuses.get(bonusObject)
-
-      gameState.player.stats[bonusObject.stat] = level;
-      // Object.entries(gameState.player.weaponLoops).map(([w,loop])=>{
-      //   loop.destroy()
-      //   gameState.player.weaponLoops[w]=weaponLoop.call(this,w)
-      // })
-    }}, this);
+    }, this);
 
     this.events.on('getWeapon', (w) => {
-      console.log("getWeapon",this.idempotenceFlag)
+      console.log("getWeapon", this.idempotenceFlag)
       if (this.idempotenceFlag) {
         this.idempotenceFlag = false
         const { player } = gameState
@@ -408,11 +422,11 @@ class GameScene extends Phaser.Scene {
         } else {
           player.heldWeapons.set(w, player.heldWeapons.get(w))
           //gameState.player.weaponLoops[w]
-  
+
         }
       }
     }
-  , this)
+      , this)
 
     //this.debugGraphics = this.add.graphics();
 
@@ -444,10 +458,11 @@ class GameScene extends Phaser.Scene {
       // Destroy the player sprite and clear the reference
       //gameState.player.destroy();
       gameState.player = null;
-      console.log("gamestate",gameState)
+      console.log("gamestate", gameState)
     }
     console.log("what is going on")
     gameState.player = this.physics.add.sprite(200, 450, 'player')
+
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
     gameState.player.stats = { ...playerStats }           // dump all the stats into the player
     gameState.player.hitpoints = playerStats.startingHitpoints // initialise hitpoints as the current max
@@ -459,6 +474,17 @@ class GameScene extends Phaser.Scene {
     gameState.player.heldWeapons = new Map();
     gameState.player.weaponLoops = {}
     gameState.player.heldBonuses = new Map()
+    // set up the vacuum
+    gameState.vacuum = this.physics.add.sprite(200, 450, 'player')
+    gameState.vacuum.setTint(0x000)
+    gameState.vacuum.visible = false;
+    gameState.vacuum.body.setCircle(75 + (gameState.player.stats.collectionRadius * 20))
+    gameState.vacuum.body.setOffset(
+      gameState.vacuum.width / 2 - gameState.vacuum.body.radius,
+      gameState.vacuum.height / 2 - gameState.vacuum.body.radius
+    );
+
+    //gameState.vacuum.body.setOrigin(0.5,0.5)
 
     this.cameras.main.startFollow(gameState.player);      // make the camera follow the character
 
@@ -553,13 +579,13 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
       //console.log(item)
       const r = item.onPickup(player, this)
-      // if (r) {
-      //   this.physics.pause();  // Pause the physics
-      //   this.scene.pause();  // Pause the current scene
-      //   this.scene.launch(r.scene, { level: 'GameScene' });  // Start the level up scene
-      //   this.paused = true;
-      // }
-
+    })
+    this.physics.add.overlap(itemPickups, gameState.vacuum, (player, item) => {
+      //console.log(item)
+      if (item.vaccumable) {
+        item.vaccumable = false
+        const r = item.onVacuum()
+      }
     })
     // * controller function for game
 
@@ -616,13 +642,13 @@ class GameScene extends Phaser.Scene {
     heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
       console.log("setup", w)
       this.events.emit("getWeapon", w)
-      this.idempotenceFlag= true
+      this.idempotenceFlag = true
     })
 
 
     this.events.on('shutdown', () => {
       gameState.player = null;  // Reset player on scene shutdown
-      console.log('deadState',JSON.stringify(gameState))
+      console.log('deadState', JSON.stringify(gameState))
     });
 
 
@@ -656,6 +682,9 @@ class GameScene extends Phaser.Scene {
 
     gameState.player.setVelocityX(dX * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1));
     gameState.player.setVelocityY(dY * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1));
+
+    gameState.vacuum.x = gameState.player.x
+    gameState.vacuum.y = gameState.player.y
 
     this.background.x = gameState.player.x - (this.sys.game.config.width / 2)
     this.background.y = gameState.player.y - (this.sys.game.config.height / 2)
