@@ -137,7 +137,7 @@ class LevelUpScene extends Phaser.Scene {
 			updateSelected.call(this);
 	});
 
-	this.cursors.down.on('down', () => {
+	this.cursors.down.on('up', () => {
 			selected++
 			if(selected>value){
 				selected= 0

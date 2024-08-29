@@ -118,9 +118,45 @@ class PickUpItemScene extends Phaser.Scene {
 
 		noButton.setInteractive();
 		noButton.on('pointerup', resumeGame, this);
+		const buttons = [yesButton, noButton]
+		let selected = 1
+		const updateSelected = () => {
+			buttons.forEach((button) => {
+				button.isStroked = false
+			})
+			buttons[selected].setStrokeStyle(2, 0xFFFFFF);
 
+		}
+		updateSelected.call(this);
+		const keyCodes = [
+			Phaser.Input.Keyboard.KeyCodes.UP,
+			Phaser.Input.Keyboard.KeyCodes.DOWN
+		]
+		const exitCodes = [
+			Phaser.Input.Keyboard.KeyCodes.SPACE,
+			Phaser.Input.Keyboard.KeyCodes.ENTER
+		]
+		this.input.keyboard.on('keyup', (event) => {
+			if (keyCodes.includes(event.keyCode)) {
+				console.log(selected)
+				selected++
+				selected = selected % 2
+				updateSelected.call(this);
+			}
+			if (exitCodes.includes(event.keyCode)){
+				if (selected ===0){
+					// yes
+					emitMessage.call(this)
+				} else {
+					//no
+					resumeGame.call(this)
+				}
+			}
+		});
 
-		messageText.setStroke('#ff0000', 2);
+		
+
+			messageText.setStroke('#ff0000', 2);
 
 
 		//this.input.on('pointerdown', resumeGame, this)
