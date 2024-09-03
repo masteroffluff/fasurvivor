@@ -94,7 +94,7 @@ class PickUpItemScene extends Phaser.Scene {
 		const yesButton = this.add.rectangle(120, offset + margin * 4, 300, 50).setOrigin(0, 0);
 		//exitButton.setFillStyle(0x00FF00)
 		//if (this.exitButtonText)  {delete(this.exitButtonText)}
-		this.exitButtonText = this.add.text(
+		this.yesButtonText = this.add.text(
 			130,
 			5 + offset + margin * 4,
 			`Yes`,
@@ -157,16 +157,6 @@ class PickUpItemScene extends Phaser.Scene {
 		
 
 			messageText.setStroke('#ff0000', 2);
-
-
-		//this.input.on('pointerdown', resumeGame, this)
-
-
-		// const spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-		// const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-		// spaceBar.on('down', resumeGame, this)
-		// enter.on('down', resumeGame, this)
-
 
 	}
 }

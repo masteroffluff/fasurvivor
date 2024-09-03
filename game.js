@@ -17,7 +17,7 @@ const config = {
 		default: 'arcade',
 		arcade: {
 			enableBody: true,
-			//debug: true,
+			debug: true,
 		}
 	},
 	scale: {

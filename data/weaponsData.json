@@ -31,5 +31,16 @@
     "velocity": 2,
     "delay": 3000,
     "pen": 1
+  },
+  "foot": {
+    "name": "foot",
+    "type": "weapon",
+    "desc": "And now for something completely diferent.",
+    "spriteName": "foot",
+    "icon": "icon_foot",
+    "damage": 1,
+    "velocity": 2,
+    "delay": 15000,
+    "pen": 1
   }
 }

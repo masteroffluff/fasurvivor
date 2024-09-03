@@ -267,18 +267,44 @@ function getWeaponCallback(weaponName) {
               })
               bombExplosion.play('bombExplodes')
               bomb.destroy()
-
+              
             }
           })
 
         }
+      }
+    case 'foot':
+      return function putFootDown(){
+        console.log('foot')
+        if (gameState.player.weaponLoops[weaponName]) {
+          gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
+        }
+        const foot = this.physics.add.sprite(gameState.player.x, gameState.player.y-300, 'foot').setOrigin(0.5,1)
+        this.tweens.add({
+          targets:foot,
+          paused:false,
+          y:gameState.player.y+100,
+          yoyo:true,
+          duration: 400,
+          onComplete: () => {
+            foot.destroy()
+          },
+          onYoyo: ()=>{
+            console.log('yoyo')
+            goodProc =Math.random()>0.5           
+            enemies.children.each((enemy) => {
+              
+              enemy.deadTween.restart()
+            })
+          }
+        })
       }
     default:
   }
 
 }
 
-const heldWeapons = ['bomb'];
+const heldWeapons = ['bomb','foot'];
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -329,8 +355,7 @@ class GameScene extends Phaser.Scene {
     // background.setOrigin(0, 0);
 
     // Get the width and height of the game
-    const width = this.sys.game.config.width;
-    const height = this.sys.game.config.height;
+    const {width,height} = this.sys.game.config;
 
     // Create a tile sprite that covers the entire game area
     this.background = this.add.tileSprite(0, 0, width, height, 'background');
@@ -444,23 +469,23 @@ class GameScene extends Phaser.Scene {
 
 
     // *player
-    if (gameState.player) {
-      console.log("deleting old player")
-      gameState.player.heldWeapons.clear(); // Clear the Map
-      gameState.player.heldBonuses.clear(); // Clear the Map
-      gameState.player.weaponLoops = null;
-      gameState.player.stats = null;
-      console.log(gameState.player.heldWeapons)
-      delete (gameState.player.heldWeapons); // Clear the Map
-      delete (gameState.player.heldBonuses); // Clear the Map
-      delete (gameState.player.weaponLoops);
-      delete (gameState.player.stats);
-      // Destroy the player sprite and clear the reference
-      //gameState.player.destroy();
-      gameState.player = null;
-      console.log("gamestate", gameState)
-    }
-    console.log("what is going on")
+    // if (gameState.player) {
+    //   console.log("deleting old player")
+    //   gameState.player.heldWeapons.clear(); // Clear the Map
+    //   gameState.player.heldBonuses.clear(); // Clear the Map
+    //   gameState.player.weaponLoops = null;
+    //   gameState.player.stats = null;
+    //   console.log(gameState.player.heldWeapons)
+    //   delete (gameState.player.heldWeapons); // Clear the Map
+    //   delete (gameState.player.heldBonuses); // Clear the Map
+    //   delete (gameState.player.weaponLoops);
+    //   delete (gameState.player.stats);
+    //   // Destroy the player sprite and clear the reference
+    //   //gameState.player.destroy();
+    //   gameState.player = null;
+    //   console.log("gamestate", gameState)
+    // }
+    //console.log("what is going on")
     gameState.player = this.physics.add.sprite(200, 450, 'player')
 
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
@@ -590,11 +615,12 @@ class GameScene extends Phaser.Scene {
     // * controller function for game
 
     function director() {
-      // * crates
+      // * crates and objects
+      
 
       // * enemies
       if (enemies.countActive() <= maxEnemies) {
-
+        
         //this.gameState.cameraView.setPosition(this.cameras.main.worldView.x, this.cameras.main.worldView.y)
         const spawnPoint = Phaser.Geom.Rectangle.RandomOutside(this.gameState.playArea, this.gameState.cameraView)
         // crates 
