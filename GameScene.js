@@ -10,6 +10,7 @@ let playerSpeed = 100
 let emitter;
 let particles;
 let enemyPool = ['enemy1']
+const heldWeapons = ['banana','foot'];
 let maxEnemies = 15
 //let this.idempotenceFlag = true;
 
@@ -38,9 +39,9 @@ const playerStats = {
   playerSpeed: 0, // done
   maxHitpoints: 0, // done
   armour: 0, // done
-  collectionRadius: 0, // TODO: Add vacuum zone done
+  collectionRadius: 0, // done
   projectileSpeed: 0, // done
-  projectileCount: 0, // done
+  projectileCount: 1, // done
   goldBonus: 0, // todo: add gold
   bonusDamage: 0, // done
   bonusPen: 0, // done
@@ -68,12 +69,13 @@ class Item {
       angle: 360,
       repeat: -1,
       onUpdate: () => {
-        context.physics.moveToObject(this.item, gameState.player, 75);
-        console.log('hello')
+        
+        context.physics.moveToObject(this.item, gameState.player, 200);
+        
       }
     });
     this.item.onVacuum = () => {
-      console.log(this.item)
+      //console.log(this.item)
       this.item.vacuumTween.restart()
     };
 
@@ -166,7 +168,7 @@ class BonusPickup extends Item {
 
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
-  console.log(weaponName)
+  //console.log(weaponName)
   switch ('get,', weaponName) {
 
     case 'fireball':
@@ -188,7 +190,7 @@ function getWeaponCallback(weaponName) {
     case 'sword':
 
       return function swingSword() {
-        console.log('sword')
+        //console.log('sword')
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
@@ -199,7 +201,7 @@ function getWeaponCallback(weaponName) {
         for (let angle = 0; angle < 360; angle += ang) {
 
           const sprite = weapons.create(gameState.player.x, gameState.player.y, 'sword').setOrigin(0, 0.5).setScale(1 + (gameState.player.stats.bonusArea * 0.1))
-          console.log(angle)
+          //console.log(angle)
           sprite.angle = -angle
           sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
           sprite.pen = Infinity
@@ -241,7 +243,7 @@ function getWeaponCallback(weaponName) {
       }
     case 'bomb':
       return function throwbomb() {
-        console.log('bomb')
+        //console.log('bomb')
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
@@ -273,9 +275,10 @@ function getWeaponCallback(weaponName) {
 
         }
       }
+    
     case 'foot':
       return function putFootDown(){
-        console.log('foot')
+        //console.log('foot')
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
@@ -290,21 +293,104 @@ function getWeaponCallback(weaponName) {
             foot.destroy()
           },
           onYoyo: ()=>{
-            console.log('yoyo')
-            goodProc =Math.random()>0.5           
-            enemies.children.each((enemy) => {
-              
-              enemy.deadTween.restart()
+            
+            const goodProc =Math.random()>0.5           
+            enemies.children.each((e) => {
+              e.body.destroy()
+              e.dead=true
+              e.deadTween.restart()
+              if(goodProc){
+              if (Math.random() > 0.75) {
+                new Gem(e.x, e.y, e.data.xpGiven, this);
+              }
+              gameState.score++
+            }
             })
           }
         })
       }
+      case 'banana':
+        return function flingBanana(rept = null) {
+          if (gameState.player.weaponLoops[weaponName]) {
+            //console.log(this)
+            gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
+          }
+          //console.log('fireball')
+          
+          const { pen, damage } = this.weaponsData['banana']
+          for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
+            const sprite = weapons.create(gameState.player.x, gameState.player.y, 'banana').setScale(1.2 + (gameState.player.stats.bonusArea * 0.1))
+            sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
+            sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.10)
+            //let bananaX = gameState.player.x;
+            sprite.bananaFlip = false
+            sprite.offset = 1
+            sprite.orientationX=(gameState.player.flipX?-1:1)
+            const bananarang = this.tweens.add({
+              name:'bananarang',
+              targets:sprite,
+              paused:false,
+              angle:360,
+              yoyo:false,
+              repeat:-1,
+              duration: 150,
+              onUpdate: ()=>{
+                //console.log(gameState.player)
+                if(sprite.body){sprite.setVelocityY(gameState.player.body.velocity.y*0.75)}
+                //sprite.y=gameState.player.y;
+                if(!sprite.bananaFlip){
+                  sprite.offset++
+
+                } else{
+                  sprite.offset--
+                }
+                sprite.x = (sprite.offset*sprite.orientationX*3)+gameState.player.x
+                if(Math.abs(sprite.x-gameState.player.x)>200){
+                  //sprite.setTint(0x000)
+                  sprite.bananaFlip= true
+                }
+                if(sprite.offset<=0){
+                  bananarang.stop()
+                  sprite.destroy()
+                }
+              }
+            })
+
+          }
+          if(rept===null){
+            rept = gameState.player.stats.projectileCount
+          }
+          console.log('rept',rept);
+          
+          if(rept>0){
+            this.time.addEvent({
+              callback: ()=>{ flingBanana.call(this,rept-1)},
+              delay: 100,
+              callbackScope: this,
+              loop: false,
+            })
+          }
+
+        }
     default:
+      return function genericAction() {
+        if (gameState.player.weaponLoops[weaponName]) {
+          gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
+        }
+        //console.log('fireball')
+        const { pen, damage } = this.weaponsData[weaponName]
+        for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
+          const sprite = weapons.create(gameState.player.x, gameState.player.y, weaponName).setScale(0.2 + (gameState.player.stats.bonusArea * 0.1))
+          sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
+          sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.10)
+          
+        }
+      }
   }
 
 }
 
-const heldWeapons = ['bomb','foot'];
+
 
 class GameScene extends Phaser.Scene {
   constructor() {
@@ -326,14 +412,14 @@ class GameScene extends Phaser.Scene {
     this.load.image("background", "./imgs/grassTile.png");
     this.load.pack('bonusesPack', './data/bonusesPack.json')
     this.load.pack('weaponsPack', './data/weaponsPack.json')
-
-  }
-  //// ***** CREATE FUNCTION *******
-  create() {
     this.calculateDelay = function calculateDelay(weaponName) {
       const weapon2 = this.weaponsData[weaponName];
       return weapon2.delay * (1 - gameState.player.stats.bonusROF * 0.01)
     }
+  }
+  //// ***** CREATE FUNCTION *******
+  create() {
+
     function weaponLoop(weaponName) {
       //context = context || this
       //const weapon2 = this.weaponsData[weaponName];
@@ -348,7 +434,7 @@ class GameScene extends Phaser.Scene {
 
     //* initial setup
     this.gameState = {}
-    this.idempotenceFlag = true;
+    this.idempotenceFlag = true; // make sure only one bonus or weapon event happens at a time
     this.bonusesData = this.cache.json.get('bonusesData');
     this.weaponsData = this.cache.json.get('weaponsData');
     // var background = this.add.tileSprite(0, 0, 2000, 2000, "background");
@@ -409,9 +495,9 @@ class GameScene extends Phaser.Scene {
         const { heldBonuses } = gameState.player
 
         const bonusObject = this.bonusesData[b]
-        console.log('getBonus', [...gameState.player.heldBonuses.entries()])
+        //console.log('getBonus', [...gameState.player.heldBonuses.entries()])
         if (heldBonuses.has(bonusObject)) {
-          console.log(heldBonuses.get(bonusObject))
+          //console.log(heldBonuses.get(bonusObject))
           heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
           heldBonuses.get(bonusObject)
         } else {
@@ -435,11 +521,11 @@ class GameScene extends Phaser.Scene {
     }, this);
 
     this.events.on('getWeapon', (w) => {
-      console.log("getWeapon", this.idempotenceFlag)
+      //console.log("getWeapon", this.idempotenceFlag)
       if (this.idempotenceFlag) {
         this.idempotenceFlag = false
         const { player } = gameState
-        console.log('getWeapon', [...player.heldWeapons.entries()])
+        //console.log('getWeapon', [...player.heldWeapons.entries()])
         if (!player.heldWeapons.has(w)) {
           //player.heldWeapons.push(w)
           player.heldWeapons.set(w, 1)
@@ -452,6 +538,11 @@ class GameScene extends Phaser.Scene {
       }
     }
       , this)
+      this.events.on('generateGem', (w) => {
+
+        
+      }
+        , this)
 
     //this.debugGraphics = this.add.graphics();
 
@@ -666,7 +757,7 @@ class GameScene extends Phaser.Scene {
 
 
     heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
-      console.log("setup", w)
+      //console.log("setup", w)
       this.events.emit("getWeapon", w)
       this.idempotenceFlag = true
     })
@@ -674,7 +765,7 @@ class GameScene extends Phaser.Scene {
 
     this.events.on('shutdown', () => {
       gameState.player = null;  // Reset player on scene shutdown
-      console.log('deadState', JSON.stringify(gameState))
+     // console.log('deadState', JSON.stringify(gameState))
     });
 
 

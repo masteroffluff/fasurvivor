@@ -8,7 +8,29 @@
     "damage": 1,
     "velocity": 100,
     "delay": 750,
-    "pen": 1
+    "pen": 1,
+    "levels":{
+      "1":{
+        "desc":"Add one more fireball",
+        "bonus":{"amount":1}
+      },
+      "2":{
+        "desc":"Increase Rate of Fire",
+        "bonus":{"rof":1}
+      },
+      "3":{
+        "desc":"Add another fireball",
+        "bonus":{"amount":2}
+      },
+      "4":{
+        "desc":"Further increase ROF",
+        "bonus":{"rof":2}
+      },
+      "5":{
+        "desc":"Add yet another fireball",
+        "bonus":{"amount":3}
+      }
+    }
   },
   "sword": {
     "name": "sword",
@@ -19,7 +41,29 @@
     "damage": 1,
     "velocity": 2,
     "delay": 3000,
-    "pen": "Infinity"
+    "pen": "Infinity",
+    "levels":{
+      "1":{
+        "desc":"Add another blade",
+        "bonus":{"amount":1}
+      },
+      "2":{
+        "desc":"Increase damage",
+        "bonus":{"damage":1}
+      },
+      "3":{
+        "desc":"Increase the rate",
+        "bonus":{"rof":1}
+      },
+      "4":{
+        "desc":"Further increase ROF",
+        "bonus":{"rof":2}
+      },
+      "5":{
+        "desc":"increase the blade speed",
+        "bonus":{"proj_speed":3}
+      }
+    }
   },
   "bomb": {
     "name": "bomb",
@@ -30,17 +74,94 @@
     "damage": 1,
     "velocity": 2,
     "delay": 3000,
-    "pen": 1
+    "pen": 1,
+    "levels":{
+      "1":{
+        "desc":"Increase the rate of fire",
+        "bonus":{"rof":1}
+      },
+      "2":{
+        "desc":"Increase damage",
+        "bonus":{"damage":1}
+      },
+      "3":{
+        "desc":"Increase the area of the explosion",
+        "bonus":{"area":1}
+      },
+      "4":{
+        "desc":"Increase the amount of bombs",
+        "bonus":{"amount":1}
+      },
+      "5":{
+        "desc":"Increase the area of the explosion further",
+        "bonus":{"area":2}
+      }
+    }
+  },
+  "banana": {
+    "name": "banana",
+    "type": "weapon",
+    "desc": "Bananarangs out and back",
+    "spriteName": "banana",
+    "icon": "icon_banana",
+    "damage": 1,
+    "velocity": 2,
+    "delay": 3000,
+    "pen": 1,
+    "levels":{
+      "1":{
+        "desc":"More bananas.",
+        "bonus":{"amount":1}
+      },
+      "2":{
+        "desc":"More bananas!",
+        "bonus":{"amount":2}
+      },
+      "3":{
+        "desc":"More bananas!!",
+        "bonus":{"amount":3}
+      },
+      "4":{
+        "desc":"More bananas!!!",
+        "bonus":{"amount":4}
+      },
+      "5":{
+        "desc":"More bananas!!!!",
+        "bonus":{"amount":5}
+      }
+    }
   },
   "foot": {
     "name": "foot",
     "type": "weapon",
-    "desc": "And now for something completely diferent.",
+    "desc": "And now for something completely diferent. Squishes all enemies on screen.",
     "spriteName": "foot",
     "icon": "icon_foot",
     "damage": 1,
     "velocity": 2,
     "delay": 15000,
-    "pen": 1
+    "pen": 1,
+    "levels":{
+      "1":{
+        "desc":"Increase the rate of fire.",
+        "bonus":{"rof":1}
+      },
+      "2":{
+        "desc":"Increase change of getting a good proc.",
+        "bonus":{"luck":1}
+      },
+      "3":{
+        "desc":"Increase the rate of fire",
+        "bonus":{"rof":2}
+      },
+      "4":{
+        "desc":"Increase change of getting a good proc.",
+        "bonus":{"luck":2}
+      },
+      "5":{
+        "desc":"Increase change of getting a good proc.",
+        "bonus":{"luck":3}
+      }
+    }
   }
 }

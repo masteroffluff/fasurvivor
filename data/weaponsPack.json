@@ -16,6 +16,11 @@
         "key": "sword",
         "type": "image",
         "url": "sword3.png"
+      },      
+      {
+        "key": "banana",
+        "type": "image",
+        "url": "banana.png"
       },
       {
         "key": "foot",
@@ -41,6 +46,11 @@
         "key": "icon_sword",
         "type": "image",
         "url": "icon_sword.png"
+      },
+      {
+        "key": "icon_banana",
+        "type": "image",
+        "url": "icon_banana.png"
       },
       {
         "key": "icon_foot",
