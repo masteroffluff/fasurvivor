@@ -4,7 +4,7 @@ class LevelUpScene extends Phaser.Scene {
 	}
 	
 	create(data) {
-		//let exitButtonText
+
 		let ok = true
 		this.input.keyboard.resetKeys()
 		this.bonusesData = this.cache.json.get('bonusesData');
@@ -73,9 +73,6 @@ class LevelUpScene extends Phaser.Scene {
 			graphics.fillRect(120, offset+margin*i, 300, 50);
 			const button = this.add.rectangle(120, offset+margin*i, 300, 50).setOrigin(0,0);
 			button.setDepth(100)
-			//button.isFilled = true;
-			//button.fillColor = 0xFFF;
-			//button.setStrokeStyle(2,'#fff');
 			button.isStroked = false
 			this.add.sprite(120+5, offset+margin*i+margin/2, selectableItems[i].icon).setScale(0.5).setOrigin(0,0.5);
 			
@@ -98,9 +95,7 @@ class LevelUpScene extends Phaser.Scene {
 			button.on('pointerup', function(b) {
 				selected = (i);
 				updateSelected.call(this)
-				//this.isFilled = true;
-				//this.fillColor = 0x00FF00;
-				//console.log(this.x, this.y)
+
 			});
 			buttons.push(button) // asdded to array to control bounding box
 		}
@@ -109,8 +104,6 @@ class LevelUpScene extends Phaser.Scene {
 		graphics.fillRect(120, offset+margin*5, 300, 50);
 
 		const exitButton = this.add.rectangle(120, offset+margin*5, 300, 50).setOrigin(0,0);
-		//exitButton.setFillStyle(0x00FF00)
-		//if (this.exitButtonText)  {delete(this.exitButtonText)}
 		this.exitButtonText = this.add.text(
 			130, 
 			5+offset+margin*5, 
@@ -147,20 +140,12 @@ class LevelUpScene extends Phaser.Scene {
 		// Adding debug outline to see the bounding box of the text
 		messageText.setStroke('#ff0000', 2);
 		function resumeGame(){
-			// this.scene.pause()
-			// this.input.keyboard.resetKeys()
 			if (ok) {
 				ok = false
 				const {name,type} = selectableItems[selected]
 				console.log(gameState.player.xp, name)
 				//console.log(this)
 				if(type==='weapon'){
-					//console.log()
-					//if (!gameState.player.heldWeapons.includes(name)) {
-						//gameState.player.heldWeapons.push(name)
-						//this.scene.get(data.level).events.emit('weaponLoop', name)
-						
-					//}
 					this.scene.get(data.level).events.emit('getWeapon', name)
 				}
 				if(type==='bonus'){
@@ -170,9 +155,6 @@ class LevelUpScene extends Phaser.Scene {
 				this.scene.stop();  // Stop the PauseScene
 			}
 		}
-		//this.input.on('pointerdown', resumeGame, this)
-
-
 		const spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 		const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 		spaceBar.on('down', resumeGame, this)
