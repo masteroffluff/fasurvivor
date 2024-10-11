@@ -455,13 +455,6 @@ class GameScene extends Phaser.Scene {
         this.paused = true;
       }
     });
-    const oKey = this.input.keyboard.addKey('O');  // Get key object
-    oKey.on('down', () => {
-      if (!this.paused) {
-        gameState.player.stats.bonusArea += 1
-
-      }
-    });
 
     this.events.on('resume', () => {
 

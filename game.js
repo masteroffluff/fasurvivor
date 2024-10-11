@@ -3,8 +3,9 @@ const gameState = {
 	score: 0,
 	money: 0,
 	width: 2000,
-  height: 2000,
+  	height: 2000,
 	highScore:100,
+	debug:false
 };
 let weaponsData, bonusesData
 
@@ -17,7 +18,7 @@ const config = {
 		default: 'arcade',
 		arcade: {
 			enableBody: true,
-			//debug: true,
+			debug: gameState.debug,
 		}
 	},
 	scale: {

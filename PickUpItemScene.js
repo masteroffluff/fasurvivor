@@ -92,8 +92,7 @@ class PickUpItemScene extends Phaser.Scene {
 
 
 		const yesButton = this.add.rectangle(120, offset + margin * 4, 300, 50).setOrigin(0, 0);
-		//exitButton.setFillStyle(0x00FF00)
-		//if (this.exitButtonText)  {delete(this.exitButtonText)}
+
 		this.yesButtonText = this.add.text(
 			130,
 			5 + offset + margin * 4,
@@ -107,8 +106,7 @@ class PickUpItemScene extends Phaser.Scene {
 		graphics.fillRect(120, offset + margin * 5, 300, 50);
 
 		const noButton = this.add.rectangle(120, offset + margin * 5, 300, 50).setOrigin(0, 0);
-		//exitButton.setFillStyle(0x00FF00)
-		//if (this.exitButtonText)  {delete(this.exitButtonText)}
+
 		this.noButtonText = this.add.text(
 			130,
 			5 + offset + margin * 5,
