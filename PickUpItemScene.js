@@ -70,10 +70,10 @@ class PickUpItemScene extends Phaser.Scene {
 			if (ok) {
 				ok = false
 
-				console.log('firing event', type, value, data.level)
+
 
 				if (type === 'weapon') {
-					console.log("weapon event")
+
 					this.scene.get(data.level).events.emit('getWeapon', value)
 				}
 				if (type === 'bonus') {
@@ -86,6 +86,7 @@ class PickUpItemScene extends Phaser.Scene {
 
 
 		const resumeGame = () => {
+			this.scene.get("HudScene").events.emit('UpdateHudItemTB') // sent the event to tell the hud to update
 			this.scene.resume(data.level);  // Resume the Level scene
 			this.scene.stop();  // Stop the PauseScene
 		}
@@ -136,7 +137,7 @@ class PickUpItemScene extends Phaser.Scene {
 		]
 		this.input.keyboard.on('keyup', (event) => {
 			if (keyCodes.includes(event.keyCode)) {
-				console.log(selected)
+
 				selected++
 				selected = selected % 2
 				updateSelected.call(this);

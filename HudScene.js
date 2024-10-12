@@ -1,26 +1,83 @@
 class IconThingy {
-  static symbol = '■';
+  static symbol = "■";
   static textStyle = {
     fontSize: "8px",
     fill: "#ff0",
     stroke: "#000",
     strokeThickness: 1,
-    opacity: 0,
+    opacity: 1,
   };
   constructor(scene, thing, x, y) {
-    scene.add.image(x, y, thing.icon).setScale(0.5).setOrigin(0, 0.5);
+    console.log("creating")
+    this.sprite = scene.add
+      .sprite(x, y, thing.icon)
+      .setScale(0.5)
+      .setOrigin(0, 0.5);
     this.thing = thing;
     this.x = x;
     this.y = y;
 
     this._level = 1;
-    this.text = scene.add.text(x, y + 16, IconThingy.symbol, IconThingy.textStyle);
+    this.text = scene.add.text(
+      x,
+      y + 16,
+      IconThingy.symbol,
+      IconThingy.textStyle
+    );
 
   }
 
-  update() {
-    this.level = gameState.player.heldWeapons.get(thing);
+  update(x,y) {
+    console.log("updating")
+    this.x = x
+    this.y = y
+    this.sprite.setPosition(x, y)
+    this.text.setPosition(x,y+16)
+    this.level = gameState.player.heldWeapons.get(this.thing)||1;
     this.text.setText(IconThingy.symbol.repeat(this.level));
+  }
+}
+class IconThingyBar {
+  constructor(scene, xOffset, yOffset) {
+    this.map = new Map();
+    this.scene = scene
+    this.xOffset = xOffset
+    this.yOffset = yOffset
+
+  }
+  update() {
+
+
+    const xmult = 32;
+    const ymult = 40;
+    let x = 0;
+    let y = 0;
+    const  setUpRows = (itemMap) => {
+      let rows = 1;
+      for (const [item,_] of itemMap) {
+        if (x >= 7) {
+          x = 0;
+          y++;
+          rows++;
+        }
+        if (this.map.has(item)){
+          this.map.get(item).update(x * xmult + this.xOffset, y * ymult + this.yOffset)
+        } else {
+        this.map.set(
+          item,
+          new IconThingy(this.scene, item, x * xmult + this.xOffset, y * ymult + this.yOffset)
+        );
+        }
+        x++
+      }
+
+      return rows;
+    }
+    const wRows = setUpRows(gameState.player.heldWeapons)
+    x = 0;
+    y++;
+    const bRows = setUpRows(gameState.player.heldBonuses)
+    console.log(this.map)
   }
 }
 
@@ -28,20 +85,20 @@ class HudScene extends Phaser.Scene {
   constructor() {
     super({ key: "HudScene" });
   }
-  update() {
+  preload() {
     this.load.pack("bonusesPack", "./data/bonusesPack.json");
     this.load.pack("weaponsPack", "./data/weaponsPack.json");
   }
 
-  iconThingyBuilder(){
-    
-  }
   create() {
     this.weaponOffSetX = 16;
     this.weaponOffSetY = 32;
 
-    
-
+    this.iconThingyBar = new IconThingyBar(this, this.weaponOffSetX, this.weaponOffSetY);
+    this.events.on('UpdateHudItemTB', (w) => {
+      this.iconThingyBar.update()
+    }, this)
+    this.iconThingyBar.update();
     if (gameState.debug) {
       const textStyle = {
         fontSize: "15px",
@@ -86,8 +143,10 @@ class HudScene extends Phaser.Scene {
         }
       );
     }
+
   }
   update() {
+
     if (gameState.debug) {
       this.scoreText.setText(`Killed:${gameState.score}`);
       this.healthText.setText(

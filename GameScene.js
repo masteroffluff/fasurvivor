@@ -73,7 +73,7 @@ class Item {
       }
     });
     this.item.onVacuum = () => {
-      //console.log(this.item)
+
       this.item.vacuumTween.restart()
     };
 
@@ -155,7 +155,7 @@ class BonusPickup extends Item {
 
 // TODO: turn this into a proper class 
 function getWeaponCallback(weaponName) {
-  //console.log(weaponName)
+
   switch ('get,', weaponName) {
 
     case 'fireball':
@@ -163,7 +163,7 @@ function getWeaponCallback(weaponName) {
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
-        //console.log('fireball')
+
         const { pen, damage } = this.weaponsData[weaponName]
         for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
           const sprite = weapons.create(gameState.player.x, gameState.player.y, weaponName).setScale(0.2 + (gameState.player.stats.bonusArea * 0.1))
@@ -177,7 +177,7 @@ function getWeaponCallback(weaponName) {
     case 'sword':
 
       return function swingSword() {
-        //console.log('sword')
+
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
@@ -188,7 +188,7 @@ function getWeaponCallback(weaponName) {
         for (let angle = 0; angle < 360; angle += ang) {
 
           const sprite = weapons.create(gameState.player.x, gameState.player.y, weaponName).setOrigin(0, 0.5).setScale(1 + (gameState.player.stats.bonusArea * 0.1))
-          //console.log(angle)
+
           sprite.angle = -angle
           sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
           sprite.pen = Infinity
@@ -229,7 +229,7 @@ function getWeaponCallback(weaponName) {
       }
     case 'bomb':
       return function throwbomb() {
-        //console.log('bomb')
+
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
@@ -264,7 +264,7 @@ function getWeaponCallback(weaponName) {
 
     case 'foot':
       return function putFootDown() {
-        //console.log('foot')
+
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
@@ -298,10 +298,9 @@ function getWeaponCallback(weaponName) {
     case 'banana':
       return function flingBanana(rept = null) {
         if (gameState.player.weaponLoops[weaponName]) {
-          //console.log(this)
+
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
-        //console.log('fireball')
 
         const { pen, damage } = this.weaponsData[weaponName]
         for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
@@ -321,7 +320,7 @@ function getWeaponCallback(weaponName) {
             repeat: -1,
             duration: 150,
             onUpdate: () => {
-              //console.log(gameState.player)
+
               if (sprite.body) { sprite.setVelocityY(gameState.player.body.velocity.y * 0.75) }
               //sprite.y=gameState.player.y;
               if (!sprite.bananaFlip) {
@@ -364,7 +363,7 @@ function getWeaponCallback(weaponName) {
         if (gameState.player.weaponLoops[weaponName]) {
           gameState.player.weaponLoops[weaponName].delay = (this.calculateDelay(weaponName))
         }
-        console.log(weaponName)
+
         const { pen, damage } = this.weaponsData[weaponName]
         for (let index = 0; index <= gameState.player.stats.projectileCount; index++) {
           const sprite = weapons.create(gameState.player.x, gameState.player.y, weaponName).setScale(0.2 + (gameState.player.stats.bonusArea * 0.1))
@@ -474,9 +473,9 @@ class GameScene extends Phaser.Scene {
         const { heldBonuses } = gameState.player
 
         const bonusObject = this.bonusesData[b]
-        //console.log('getBonus', [...gameState.player.heldBonuses.entries()])
+
         if (heldBonuses.has(bonusObject)) {
-          //console.log(heldBonuses.get(bonusObject))
+
           heldBonuses.set(bonusObject, heldBonuses.get(bonusObject) + 1)
           heldBonuses.get(bonusObject)
         } else {
@@ -500,7 +499,7 @@ class GameScene extends Phaser.Scene {
       if (this.idempotenceFlag) {
         this.idempotenceFlag = false
         const { player } = gameState
-        console.log({weaponname:w,weapondata:this.weaponsData})
+
         const weaponObject = this.weaponsData[w.trim()]
         if (!player.heldWeapons.has(weaponObject)) {
 
@@ -558,11 +557,10 @@ class GameScene extends Phaser.Scene {
       if (!gameState.player.immune) {
         pl.setTint(0xff0000)
         gameState.player.immune = true
-        //console.log(enemy)
+
         pl.hitpoints -= enemy.data.damage * (1 - pl.stats.armour * 0.01)
         if (pl.hitpoints <= 0) {
           // player dead
-          //alert("lol u died")
           this.scene.launch('YouDiedScene')
           this.scene.pause()
         }
@@ -615,7 +613,7 @@ class GameScene extends Phaser.Scene {
 
       }
 
-      //console.log(e.data) //}
+     
     })
 
     //* Pickups
@@ -623,11 +621,10 @@ class GameScene extends Phaser.Scene {
 
 
     this.physics.add.collider(itemPickups, gameState.player, (player, item) => {
-      //console.log(item)
       const r = item.onPickup(player, this)
     })
     this.physics.add.overlap(itemPickups, gameState.vacuum, (player, item) => {
-      //console.log(item)
+
       if (item.vaccumable) {
         item.vaccumable = false
         const r = item.onVacuum()
@@ -677,6 +674,7 @@ class GameScene extends Phaser.Scene {
     new Gem(250, 250, 200, this)
     // start hud
     this.scene.launch('HudScene')
+    this.scene.get("HudScene").events.emit('UpdateHudItemTB') // sent the event to tell the hud to update
     // initalise the enemy genrator
     const directorLoop = this.time.addEvent({
       callback: director,
@@ -687,7 +685,6 @@ class GameScene extends Phaser.Scene {
 
 
     heldWeapons.forEach((w) => { // start weapon loops for weapons held at the start
-      //console.log("setup", w)
       this.events.emit("getWeapon", w)
       this.idempotenceFlag = true
     })
@@ -695,7 +692,6 @@ class GameScene extends Phaser.Scene {
 
     this.events.on('shutdown', () => {
       gameState.player = null;  // Reset player on scene shutdown
-      // console.log('deadState', JSON.stringify(gameState))
     });
 
 

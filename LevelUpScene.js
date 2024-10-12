@@ -43,12 +43,12 @@ class LevelUpScene extends Phaser.Scene {
 		const offset = 200;
 		const margin = 50;
 		let avaibleBonuses
-		console.log(gameState.player.heldBonuses.size)
+
 		if(gameState.player.heldBonuses.size>=6){
 					avaibleBonuses =[]
-			console.log('bonuses filled')
+
 			gameState.player.heldBonuses.forEach((v,e)=>{
-				console.log('bonus:',e)
+
 				avaibleBonuses.push(e)
 			})
 		} else {
@@ -143,14 +143,15 @@ class LevelUpScene extends Phaser.Scene {
 			if (ok) {
 				ok = false
 				const {name,type} = selectableItems[selected]
-				console.log(gameState.player.xp, name)
-				//console.log(this)
+
+
 				if(type==='weapon'){
 					this.scene.get(data.level).events.emit('getWeapon', name)
 				}
 				if(type==='bonus'){
 					this.scene.get(data.level).events.emit('getBonus', name)
 				}
+				this.scene.get("HudScene").events.emit('UpdateHudItemTB')
 				this.scene.resume(data.level);  // Resume the Level scene
 				this.scene.stop();  // Stop the PauseScene
 			}
