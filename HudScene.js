@@ -6,6 +6,7 @@ class IconThingy {
     stroke: "#000",
     strokeThickness: 1,
     opacity: 1,
+    wordWrap: { width: 40, useAdvancedWrap: true },
   };
   constructor(scene, thing, x, y) {
     console.log("creating")
@@ -77,9 +78,38 @@ class IconThingyBar {
     x = 0;
     y++;
     const bRows = setUpRows(gameState.player.heldBonuses)
-    console.log(this.map)
+    //console.log(this.map)
   }
 }
+
+class StatusBar {
+  constructor(scene, x, y, title, fillColour, current, max){
+    this.x = x
+    this.y = y
+    this.title = scene.add.text(this.x, this.y, title, scene.defaultTextStyle);
+    this.gameWidth = scene.game.config.width;
+    this.bottomGraphics = scene.add.graphics();
+    this.colour = Phaser.Display.Color.IntegerToColor(fillColour);
+    this.bottomGraphics.lineStyle(2, this.colour.color, 1.0);
+    this.bottomBar = this.bottomGraphics.strokeRect(this.x+this.title.width, this.y, this.gameWidth-this.title.width, 16);
+    this.topGraphics = scene.add.graphics();
+		this.topGraphics.fillGradientStyle(this.colour.clone().lighten(50).color, this.colour.color, this.colour.color, this.colour.clone().darken(50).color, 1);
+    
+    this.topBar = this.topGraphics.fillRect(this.x+this.title.width, this.y, (this.gameWidth-this.title.width)*(current/max), 16);
+    //this.topBar.setAlpha(1)
+  }
+  update(current, max){
+    
+    if(current>max){
+      current = max
+    }
+    this.topGraphics.clear()
+    this.topGraphics.fillGradientStyle(this.colour.clone().lighten(50).color, this.colour.color, this.colour.color, this.colour.clone().darken(50).color, 1);
+    
+    this.topBar = this.topGraphics.fillRect(this.x+this.title.width, this.y, (this.gameWidth-this.title.width)*(current/max), 16);
+  }
+}
+
 
 class HudScene extends Phaser.Scene {
   constructor() {
@@ -88,49 +118,53 @@ class HudScene extends Phaser.Scene {
   preload() {
     this.load.pack("bonusesPack", "./data/bonusesPack.json");
     this.load.pack("weaponsPack", "./data/weaponsPack.json");
+    this.defaultTextStyle = {
+      fontSize: "15px",
+      fill: "#000000",
+      stroke: "#f00",
+      strokeThickness: 1,
+      opacity: 0,
+      
+    };
   }
 
   create() {
     this.weaponOffSetX = 16;
     this.weaponOffSetY = 32;
+    this.healthBar = new StatusBar(this, 0, this.game.config.height-40, "HP:", 0xff0000, 100, 100)
+    this.xpBar = new StatusBar(this, 0, this.game.config.height-20, "XP:", 0x707ef9, 0, 100)
 
     this.iconThingyBar = new IconThingyBar(this, this.weaponOffSetX, this.weaponOffSetY);
     this.events.on('UpdateHudItemTB', (w) => {
       this.iconThingyBar.update()
     }, this)
     this.iconThingyBar.update();
+
     if (gameState.debug) {
-      const textStyle = {
-        fontSize: "15px",
-        fill: "#000000",
-        stroke: "#f00",
-        strokeThickness: 1,
-        opacity: 0,
-      };
+      const textStyle = this.defaultTextStyle
       this.scoreText = this.add.text(10, 0, `Killed:0`, textStyle);
       this.healthText = this.add.text(
         10,
         25,
         `Health:${gameState.player.hitpoints}`,
-        textStyle
+        this.defaultTextStyle
       );
       this.hiScoreText = this.add.text(
         10,
         50,
         `Hi Score:${gameState.highScore}`,
-        textStyle
+        this.defaultTextStyle
       );
       this.xpText = this.add.text(
-        150,
-        0,
+        150,player.maxHitpoints
         `XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
-        textStyle
+        this.defaultTextStyle
       );
       this.levelText = this.add.text(
         150,
         25,
         `Level:${gameState.player.level}`,
-        textStyle
+        this.defaultTextStyle
       );
       const weapons = Array.from(gameState.player.heldWeapons.keys());
       this.heldItemsText = this.add.text(
@@ -138,15 +172,17 @@ class HudScene extends Phaser.Scene {
         50,
         `Weapons:${weapons.join(", ")}\nBonuses:`,
         {
-          ...textStyle,
+          ...this.defaultTextStyle,
           wordWrap: { width: 240, useAdvancedWrap: true },
         }
       );
     }
-
+    
   }
   update() {
-
+    console.log(gameState.player)
+    this.healthBar.update(gameState.player.hitpoints,gameState.player.maxHitpoints)
+    this.xpBar.update(gameState.player.xp,gameState.player.nextLevel)
     if (gameState.debug) {
       this.scoreText.setText(`Killed:${gameState.score}`);
       this.healthText.setText(

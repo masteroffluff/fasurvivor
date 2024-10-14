@@ -35,7 +35,7 @@ const enemyData = {
 const playerStats = {
   startingHitpoints: 100,
   playerSpeed: 0, // done
-  maxHitpoints: 0, // done
+  maxHitpoints: 0, // done note this is the level for may hp NOT the max hp itself
   armour: 0, // done
   collectionRadius: 0, // done
   projectileSpeed: 0, // done
@@ -523,6 +523,7 @@ class GameScene extends Phaser.Scene {
     gameState.player.body.setSize(32, 32, true)           // make the hitbox a touch smaller to make it a bit fairer
     gameState.player.stats = { ...playerStats }           // dump all the stats into the player
     gameState.player.hitpoints = playerStats.startingHitpoints // initialise hitpoints as the current max
+    gameState.player.maxHitpoints = playerStats.startingHitpoints // initialise max hitpoints as the current max
     gameState.player.immune = false                       // set state for layer immunity
     gameState.player.xp = 0                               // set up xp 
     gameState.player.nextLevel = 5                        // set next level xp
