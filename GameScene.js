@@ -708,29 +708,44 @@ class GameScene extends Phaser.Scene {
   //// ***** UPDATE FUNCTION *******
   update() {
     // player controls
-    // use dx and dy to control the player velocity initially zero as not moving
-    let dX = 0, dY = 0
+    gameState.player.setVelocity(0) // remove old velocity
+    // pointer/ mobile controls
+    const { isDown, worldX, worldY } = this.input.activePointer;
+    
+    if(isDown){
+      const angle = Phaser.Math.Angle.Between(gameState.player.x, gameState.player.y, worldX, worldY)
+      this.physics.velocityFromRotation(
+        angle,
+        playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
+        gameState.player.body.velocity
+    );
+    }
+    // * keyboard contols
+    // use dx and dy to control the player velocity initially zero as not movin
+    let dX = 0, dY = 0, keyPressed = false
     if (this.cursors.left.isDown) {
       dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
       gameState.player.flipX = true
+      keyPressed = true
     }
     if (this.cursors.right.isDown) {
       dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
       gameState.player.flipX = false
+      keyPressed = true
     }
     if (this.cursors.up.isDown) {
       dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
-
+      keyPressed = true
     }
     if (this.cursors.down.isDown) {
       dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
-
+      keyPressed = true
     }
     // we then multiply dx and dy by the velocityx and velovity y times the speed
-
+    if(keyPressed){
     gameState.player.setVelocityX(dX * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1));
     gameState.player.setVelocityY(dY * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1));
-
+}
     gameState.vacuum.x = gameState.player.x
     gameState.vacuum.y = gameState.player.y
 
