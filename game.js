@@ -9,6 +9,16 @@ const gameState = {
 };
 let weaponsData, bonusesData
 
+// prevent addressbar on mobile
+window.addEventListener("load",function() {
+	// Set a timeout...
+	setTimeout(function(){
+		// Hide the address bar!
+		window.scrollTo(0, 1);
+	}, 0);
+});
+
+
 const config = {
 	type: Phaser.AUTO,
 	width: 500,

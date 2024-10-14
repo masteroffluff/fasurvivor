@@ -710,9 +710,9 @@ class GameScene extends Phaser.Scene {
     // player controls
     gameState.player.setVelocity(0) // remove old velocity
     // pointer/ mobile controls
-    const { isDown, worldX, worldY } = this.input.activePointer;
+    const {  worldX, worldY } = this.input.activePointer;
     
-    if(isDown){
+    if(this.input.activePointer.isDown){
       const angle = Phaser.Math.Angle.Between(gameState.player.x, gameState.player.y, worldX, worldY)
       this.physics.velocityFromRotation(
         angle,
