@@ -170,7 +170,11 @@ function getWeaponCallback(weaponName) {
           sprite.damage = damage * (1 + gameState.player.stats.bonusDamage * 0.10)
           sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.10)
           const targeted = enemies.children.getArray()[Math.floor(Math.random() * enemies.children.size)]
+          if(targeted){
           this.physics.moveToObject(sprite, targeted, 100 * (1 + gameState.player.stats.projectileSpeed * 0.10));
+        } else {
+          Phaser.Math.RandomXY(sprite.body.velocity, 100 * (1 + gameState.player.stats.projectileSpeed * 0.10))
+        }
         }
       }
 
@@ -672,7 +676,7 @@ class GameScene extends Phaser.Scene {
     // **** game starting conditions *****
     // level specific setup
     new WeaponPickup(500, 500, 'sword', this)
-    new Gem(250, 250, 200, this)
+    //new Gem(250, 250, 200, this)
     // start hud
     this.scene.launch('HudScene')
     this.scene.get("HudScene").events.emit('UpdateHudItemTB') // sent the event to tell the hud to update
