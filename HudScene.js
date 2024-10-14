@@ -139,22 +139,26 @@ class HudScene extends Phaser.Scene {
       this.iconThingyBar.update()
     }, this)
     this.iconThingyBar.update();
+    this.hiScoreText = this.add.text(
+      this.game.config.width-200,
+      10,
+      `Hi Score:${gameState.highScore}`,
+      this.defaultTextStyle
+    );
+    this.scoreText = this.add.text(this.game.config.width-200, 30, `Killed:0`, this.defaultTextStyle);
+
+
 
     if (gameState.debug) {
       const textStyle = this.defaultTextStyle
-      this.scoreText = this.add.text(10, 0, `Killed:0`, textStyle);
+      this.scoreTextDemo = this.add.text(10, 0, `Killed:0`, textStyle);
       this.healthText = this.add.text(
         10,
         25,
         `Health:${gameState.player.hitpoints}`,
         this.defaultTextStyle
       );
-      this.hiScoreText = this.add.text(
-        10,
-        50,
-        `Hi Score:${gameState.highScore}`,
-        this.defaultTextStyle
-      );
+
       this.xpText = this.add.text(
         150,player.maxHitpoints
         `XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
@@ -183,8 +187,9 @@ class HudScene extends Phaser.Scene {
     console.log(gameState.player)
     this.healthBar.update(gameState.player.hitpoints,gameState.player.maxHitpoints)
     this.xpBar.update(gameState.player.xp,gameState.player.nextLevel)
+    this.scoreText.setText(`Killed:${gameState.score}`);
     if (gameState.debug) {
-      this.scoreText.setText(`Killed:${gameState.score}`);
+      this.scoreTextDemo.setText(`Killed:${gameState.score}`);
       this.healthText.setText(
         `Health:${Math.floor(gameState.player.hitpoints)}`
       );

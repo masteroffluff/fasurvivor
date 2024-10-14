@@ -35,7 +35,7 @@ const enemyData = {
 const playerStats = {
   startingHitpoints: 100,
   playerSpeed: 0, // done
-  maxHitpoints: 0, // done note this is the level for may hp NOT the max hp itself
+  maxHitpointsBonus: 0, // done note this is the level for may hp NOT the max hp itself
   armour: 0, // done
   collectionRadius: 0, // done
   projectileSpeed: 0, // done
@@ -769,8 +769,9 @@ class GameScene extends Phaser.Scene {
       this.scene.launch("LevelUpScene", { level: 'GameScene' });  // Start the level up scene
       this.paused = true;
       player.level++;
-      player.maxHitpoints = 100 + (player.maxHitpoints * 0.01)
-      player.hitpoints *= 1.01
+      const hpRate = player.hitpoints/player.maxHitpoints
+      player.maxHitpoints = 100 + (player.stats.maxHitpointsBonus * 0.01)
+      player.hitpoints = hpRate*player.maxHitpoints
 
       player.xp -= player.nextLevel;
       player.nextLevel = Math.ceil(player.nextLevel * 1.2);
