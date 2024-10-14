@@ -78,7 +78,7 @@ class IconThingyBar {
     x = 0;
     y++;
     const bRows = setUpRows(gameState.player.heldBonuses)
-    //console.log(this.map)
+
   }
 }
 
@@ -96,7 +96,7 @@ class StatusBar {
 		this.topGraphics.fillGradientStyle(this.colour.clone().lighten(50).color, this.colour.color, this.colour.color, this.colour.clone().darken(50).color, 1);
     
     this.topBar = this.topGraphics.fillRect(this.x+this.title.width, this.y, (this.gameWidth-this.title.width)*(current/max), 16);
-    //this.topBar.setAlpha(1)
+
   }
   update(current, max){
     
@@ -184,7 +184,6 @@ class HudScene extends Phaser.Scene {
     
   }
   update() {
-    console.log(gameState.player)
     this.healthBar.update(gameState.player.hitpoints,gameState.player.maxHitpoints)
     this.xpBar.update(gameState.player.xp,gameState.player.nextLevel)
     this.scoreText.setText(`Killed:${gameState.score}`);

@@ -9,7 +9,7 @@ let playerSpeed = 100
 let emitter;
 let particles;
 let enemyPool = ['enemy1']
-const heldWeapons = ['banana', 'foot'];
+const heldWeapons = ['fireball'];
 let maxEnemies = 15
 
 const playAreaOffset = 50;
@@ -39,7 +39,7 @@ const playerStats = {
   armour: 0, // done
   collectionRadius: 0, // done
   projectileSpeed: 0, // done
-  projectileCount: 1, // done
+  projectileCount: 0, // done
   goldBonus: 0, // todo: add gold
   bonusDamage: 0, // done
   bonusPen: 0, // done
