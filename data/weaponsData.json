@@ -35,7 +35,7 @@
   "sword": {
     "name": "sword",
     "type": "weapon",
-    "desc": "Sweeps around the player hitting all enemeys",
+    "desc": "Sweeps around the player hitting all enemies",
     "spriteName": "sword",
     "icon": "icon_sword",
     "damage": 1,
@@ -134,7 +134,7 @@
   "foot": {
     "name": "foot",
     "type": "weapon",
-    "desc": "And now for something completely diferent. Squishes all enemies on screen.",
+    "desc": "And now for something completely different. Squishes all enemies on screen.",
     "spriteName": "foot",
     "icon": "icon_foot",
     "damage": 1,
