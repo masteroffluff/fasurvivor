@@ -1,9 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, session
 from flask import request
 import mysql.connector
 from mysql.connector import Error
 
 app = Flask(__name__)
+
+app.secret_key = b'shhhSuperSecret'
+
+
 # testing
 @app.route("/highscore", methods = ['POST', 'GET'])
 def highscore():
@@ -17,15 +21,19 @@ def highscore():
 
         if connection.is_connected():
             print("Connected to MySQL database")
+            cursor = connection.cursor()
             if request.method == 'POST':
-                cursor = connection.cursor()
-                sql_query = "INSERT INTO highscore (id, score) VALUES (%s, %s)"
-                cursor.execute(sql_query, (new_score["id"], new_score["score"]))
+
+                id = request.form['id']
+                score =  request.form['score']
+                
+                sql_query = "INSERT INTO highscore (user, score) VALUES (%s, %s)"
+                cursor.execute(sql_query, (id, score))
                 connection.commit()  # Commit the transaction
                 return jsonify({"message": "Score added successfully!"}), 201
             else:
                 cursor = connection.cursor()
-                cursor.execute("SELECT `users`.`name`, `highscore`.`score` FROM `highscore` JOIN `users` on `highscore`.`user` = `users`.`user_id`; ")
+                cursor.execute("SELECT `users`.`name`, `highscore`.`score` FROM `highscore` JOIN `users` on `highscore`.`user` = `users`.`user_id` ORDER BY `highscore`.`score` DESC;")
                 records = cursor.fetchall()
                 results = []
                 for row in records:
@@ -42,3 +50,14 @@ def highscore():
             connection.close()
             print("MySQL connection is closed")
     return "<p>no data</p>"
+
+
+@app.route('/login/<username>')
+def login(username):
+    session['username'] = username
+    return 'Logged in as ' + username
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return 'Logged out'
