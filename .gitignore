@@ -1,2 +1,3 @@
 backend/*
 !backend/highscore.py
+!backend/model.py
