@@ -30,6 +30,8 @@ class User (Base, UserMixin):
     email = Column(String(120))
     password_hash = Column(String(128))
     high_scores = relationship('HighScore', back_populates='user_rel')
+    def get_id(self):
+        return str(self.id)
 
 class HighScore (Base):
     __tablename__ = 'highscore'
