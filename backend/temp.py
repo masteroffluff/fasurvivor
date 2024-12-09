@@ -1,7 +1,7 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives import serialization
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify, session as flask_session
 import base64, uuid
 import json
 from datetime import datetime, timedelta, timezone
@@ -32,8 +32,8 @@ def get_public_key():
     pem_lines = pem_data.decode('utf-8').splitlines()
     key_base64 = ''.join(pem_lines[1:-1])  # Remove first and last lines
     
-    session_id = str(uuid.uuid4())  # Generate a unique session ID
-    session['exam_session_id'] = session_id
+    session_id = str(uuid.uuid4())  # Generate a unique flask_session ID
+    flask_session['session_id'] = session_id
 
 
     return jsonify({"public_key": key_base64, "session_id":session_id})
@@ -80,7 +80,7 @@ def submit_score():
         return jsonify({"error": str(e)}), 500
 
 def verify_submission(session_id, timestamp, nonce):
-    # Verify session ID (implement your session management logic here)
+    # Verify flask_session ID (implement your flask_session management logic here)
     if not is_valid_session(session_id):
         return False
     
@@ -96,14 +96,10 @@ def verify_submission(session_id, timestamp, nonce):
     return True
 
 def is_valid_session(session_id):
-    # Implement your session validation logic here
-    # For example, check against a database of active sessions
-    return True  # Placeholder
+    return flask_session['session_id'] == session_id
 
 def save_score(session_id, score):
-    # Implement your score saving logic here
-    # For example, save to a database
-    print(f"Saving score {score} for session {session_id}")
+    print(f"Saving score {score} for flask_session {session_id}")
 
 if __name__ == '__main__':
     app.run()  # Use 'adhoc' for development HTTPS

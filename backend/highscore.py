@@ -1,14 +1,28 @@
-from flask import Flask, jsonify, request
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives import serialization
+from flask import Flask, jsonify, request, session as flask_session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, LoginManager, login_required, current_user
+import base64, uuid
 import jwt
 import datetime
 import json
+from datetime import datetime, timedelta, timezone
 
 from cryptography.hazmat.primitives import serialization
+try:
+    from model import session, User, HighScore
+except Exception as e:
+    print("Error while connecting to MySQL", e)
+    print("is the database switched on")
 
-from model import session, User, HighScore
+SECRET_KEY = b'b6M4CyDFtvXYFbQyHs7BT85ryH@NEQ9W'
 
+app = Flask(__name__)
+app.secret_key  = SECRET_KEY
+
+used_nonces = set()
 
 with open("private_key.pem", "rb") as key_file:
     private_key = serialization.load_pem_private_key(
@@ -21,14 +35,21 @@ with open("public_key.pem", "rb") as key_file:
         key_file.read()
     )
 
+@app.route('/public-key', methods=['GET'])
+@login_required
+def get_public_key():
+    with open("public_key.pem", "rb") as key_file:
+        pem_data = key_file.read()
+    
+    # Remove PEM headers and newlines
+    pem_lines = pem_data.decode('utf-8').splitlines()
+    key_base64 = ''.join(pem_lines[1:-1])  # Remove first and last lines
+    if(flask_session['session_id']==None):
+        session_id = str(uuid.uuid4())  # Generate a unique session ID
+        flask_session['session_id'] = session_id
 
 
-
-SECRET_KEY = b'b6M4CyDFtvXYFbQyHs7BT85ryH@NEQ9W'
-
-app = Flask(__name__)
-app.secret_key  = SECRET_KEY
-
+    return jsonify({"public_key": key_base64, "session_id":flask_session['session_id']})
 #SqlAlchemy Database Configuration With Mysqlpip list
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/highscore'
@@ -65,14 +86,10 @@ def highscore():
         return jsonify({"error": "Failed to connect to the database."}), 500
 
 
-    # finally:
-    #     pass
-    # return "<p>no data</p>"
-
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.form
+    data = request.json
     user_name = data['user']
     user_password = data['password']
     user = session.query(User).filter_by(name=user_name).first()
@@ -81,53 +98,8 @@ def login():
     if(not check_password_hash(password=user_password, pwhash = user.password_hash)):
         return jsonify({"error": "Login Failed"}), 400
     login_user(user, remember = True)
-    return jsonify({"sucess": f"Logged in {user_name}"}), 500
+    return jsonify({"sucess": f"Logged in {user_name}"}), 200
     
-# def decrypt_jwe(encrypted_jwt):
-#     try:
-#         # Parse the received token
-#         token = jwt.JWT(key=SECRET_KEY, jwt=encrypted_jwt)
-#         # Decrypt and verify claims
-#         payload = token.claims
-#         return jsonify({"status": "success", "data": payload}), 200
-#     except Exception as e:
-#         return jsonify({"status": "error", "message": str(e)}), 400
-
-
-def decrypt_and_decode(token, secret_key, algorithm='HS256'):
-    try:
-        # Decode and verify the JWT
-        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return "Token has expired"
-    except jwt.InvalidTokenError:
-        return "Invalid token"
-
-
-
-# @app.route('/submit_score', methods=['POST'])
-# @login_required
-# def submit_score():
-#     # try:
-#         # Extract the encrypted JWT from the request
-#     data = request.form
-#     encrypted_jwt = data['token']
-
-#     if not encrypted_jwt:
-#         return jsonify({"error": "Missing token"}), 400
-
-#     # Decrypt and validate the JWT
-    
-#     return decrypt_and_decode(encrypted_jwt, SECRET_KEY)
-
-#     # except Exception as e:
-#     #     return jsonify({"error": str(e)}), 500
-
-
-#     highscore = HighScore(user = user_id,score = score)
-#     session.add(highscore)
-#     session.commit()
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -158,15 +130,67 @@ def logout():
     logout_user()
     return 'Logged out'
 
-@app.route('/reset')
-def reset():
-    users = session.query(User).all()
-    for user in users:
-        user.password_hash = generate_password_hash(user.name + "1")
-    session.commit()
-    return "ok"
+@app.route('/submit_score', methods=['POST'])
+def submit_score():
+    try:
+        # Get the encrypted data from the request
+        encrypted_data = request.json['data']
+        
+        # Decode the base64 encrypted data
+        encrypted_bytes = base64.b64decode(encrypted_data)
+        
+        # Decrypt the data using the private key
+        decrypted_bytes = private_key.decrypt(
+            encrypted_bytes,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        
+        # Parse the decrypted JSON data
+        submission = json.loads(decrypted_bytes.decode('utf-8'))
+        
+        # Extract submission details
+        session_id = submission['sessionId']
+        score = submission['score']
+        timestamp = datetime.fromisoformat(submission['timestamp'])
+        nonce = submission['nonce']
+        
+        # Verify the submission
+        if not verify_submission(session_id, timestamp, nonce):
+            return jsonify({"error": "Invalid submission"}), 400
+        
+        # Process the score (e.g., save to database)
+        save_score(session_id, score)
+        
+        return jsonify({"message": "Score submitted successfully"}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-import set_score 
+def verify_submission(session_id, timestamp, nonce):
+    # Verify flask_session ID (implement your flask_session management logic here)
+    if not is_valid_session(session_id):
+        return False
+    
+    # Verify timestamp is within acceptable range (e.g., last 5 minutes)
+    if datetime.now(timezone.utc) - timestamp > timedelta(minutes=5):
+        return False
+    
+    # Verify nonce hasn't been used before
+    if nonce in used_nonces:
+        return False
+    used_nonces.add(nonce)
+    
+    return True
+
+def is_valid_session(session_id):
+    return flask_session['session_id'] == session_id
+
+def save_score(session_id, score):
+    print(f"Saving score {score} for {str(current_user.id)}")
 
 for rule in app.url_map.iter_rules():
     print (rule)
