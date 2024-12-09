@@ -46,7 +46,8 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    scene: GameScene,
+    backgroundColor: "aaaaaa",
+    scene: LoginScene,
     physics: {
         default: 'arcade',
         arcade: {
