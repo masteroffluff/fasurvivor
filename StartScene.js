@@ -7,7 +7,32 @@ class StartScene extends Phaser.Scene {
 			this.load.svg('logo', 'https://upload.wikimedia.org/wikipedia/commons/6/6c/Codecademy.svg');
 			this.load.svg('survivors', './imgs/survivors.svg');
 	}
-	
+	button (x,y,w,h,text,onClick, ts=textStyle){
+		const graphics = this.add.graphics();
+		graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+		const button1 = this.add.rectangle(x,y,w,h).setOrigin(0.5,0.5);
+		const sb = button1.getBounds()
+		graphics.fillRect(sb.x, sb.y, sb.width, sb.height)
+		button1.setStrokeStyle(1,0x000000)
+		
+		this.startButtonText = this.add.text(
+			button1.x,
+			button1.y,
+			text,
+			ts
+		).setDepth(101);
+		this.startButtonText.setOrigin(0.5,0.5)
+		button1.setInteractive()
+		button1.on('pointerup', onClick, this)
+		button1.on('pointerover',()=>{
+			button1.setFillStyle(0xffffff, 0.4)
+		})
+		button1.on('pointerout',()=>{
+			button1.setFillStyle()
+		})
+	}
+
+
 	create() {
 		gameState.score = 0
 		//this.cameras.main.setBounds(0, 0, gameState.width, gameState.height);
@@ -21,7 +46,7 @@ class StartScene extends Phaser.Scene {
 		this.add.image(200, 100, 'logo').setScale(1.2);
 		//const survivorImage2 = this.add.image(350, 250, 'survivors').setScale(0.3).setTint(0x111).setAlpha(0);
 		
-		const survivorImage = this.add.image(350, 250, 'survivors');
+		const survivorImage = this.add.image(350, 250, 'survivors').setVisible(false);
 		
 		this.tweens.add({
 			targets: survivorImage,
@@ -47,10 +72,13 @@ class StartScene extends Phaser.Scene {
 			},
 			onComplete: function() {
 				//survivorImage2.destroy()
+			},
+			onStart: ()=>{
+				survivorImage.setVisible(true);
 			}
 		})
-		const text = this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
-		text.setLineSpacing(5)
+		//const text = this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
+		//text.setLineSpacing(5)
 		function startGame(){
 			this.scene.stop('StartScene');
 			this.scene.start('GameScene');
@@ -61,32 +89,25 @@ class StartScene extends Phaser.Scene {
 		spaceBar.on('down', startGame, this)
 		enter.on('down', startGame, this)
 
+		this.button(config.width/2, 300, 300, 50,"Start Game",startGame)
+
 		if(login_name==""){
-			const loginButton = this.add.rectangle(config.width/2, 400, 300, 50);
-
-			loginButton.setStrokeStyle(1,0x000000)
-			.setFillStyle(0xaaaaaa);
-
-			this.loginButtonText = this.add.text(
-				loginButton.x,
-				loginButton.y,
-				`Login`,
-				textStyle
-			).setDepth(101);
-			this.loginButtonText.setOrigin(0.5,0.5)
-			loginButton.setInteractive()
-			loginButton.on('pointerup', ()=>{
+			this.button(40, config.height-20, 50, 25,"Login",()=>{
 				console.log('button login')
-				this.scene.stop('StartScene');
-				this.scene.start('LoginScene');	
-			})
+				this.scene.pause();
+				this.scene.launch('LoginScene', { level: this.scene.key });	
+			},
+			{...textStyle,fontSize: '16px'}
+		)
+
 		} else {
 			this.add.text(
-				config.width/2,
-				400,
+				10,
+				config.height-20,
 				`Logged in as ${login_name}`,
-				textStyle
-			).setDepth(101).setOrigin(0.5,0.5);
+				{...textStyle,fontSize: '16px'}
+			).setDepth(101).setOrigin(0,0);
 		}
+
 	}
 }

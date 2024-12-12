@@ -75,7 +75,6 @@ async function importPublicKey(publicKeyB64) {
 }
 
 
-
 // Helper function to encrypt data with the public key
 async function encryptWithPublicKey(data, publicKey) {
     const encoded = new TextEncoder().encode(data);
@@ -111,6 +110,43 @@ async function score_login(user, password){
         await get_Public_key()
         login_name = user
         return true
+    } else {
+        return false
+        login_name = ""
+    }
+}
+
+async function score_logout(user, password){
+    const content = {
+        method: 'POST',
+        body: JSON.stringify({ user, password }),
+        headers: { 'Content-Type': 'application/json', credentials: 'include'},
+        credentials: 'include'
+    }
+    const response = await fetch(URL + '/login', content);
+    if(response.ok){
+        console.log("log out")
+
+    }
+    login_name = ""
+    public_key = "" 
+    sessionId = "" 
+}
+
+
+async function score_register(user, password){
+    const content = {
+        method: 'POST',
+        body: JSON.stringify({ user, password }),
+        headers: { 'Content-Type': 'application/json', credentials: 'include'},
+        credentials: 'include'
+    }
+    const response = await fetch(URL + '/login', content);
+    if(response.ok){
+        console.log("register successful")
+        await get_Public_key()
+        login_name = user
+        return 'true'
     } else {
         return false
         login_name = ""

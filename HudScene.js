@@ -9,7 +9,7 @@ class IconThingy {
     wordWrap: { width: 40, useAdvancedWrap: true },
   };
   constructor(scene, thing, x, y) {
-    console.log("creating")
+    console.log("creating");
     this.sprite = scene.add
       .sprite(x, y, thing.icon)
       .setScale(0.5)
@@ -25,95 +25,144 @@ class IconThingy {
       IconThingy.symbol,
       IconThingy.textStyle
     );
-
   }
 
-  update(x,y) {
-    console.log("updating")
-    this.x = x
-    this.y = y
-    this.sprite.setPosition(x, y)
-    this.text.setPosition(x,y+16)
-    this.level = gameState.player.heldWeapons.get(this.thing)||1;
+  update(x, y) {
+    console.log("updating");
+    this.x = x;
+    this.y = y;
+    this.sprite.setPosition(x, y);
+    this.text.setPosition(x, y + 16);
+    this.level = gameState.player.heldWeapons.get(this.thing) || 1;
     this.text.setText(IconThingy.symbol.repeat(this.level));
   }
 }
 class IconThingyBar {
   constructor(scene, xOffset, yOffset) {
     this.map = new Map();
-    this.scene = scene
-    this.xOffset = xOffset
-    this.yOffset = yOffset
-
+    this.scene = scene;
+    this.xOffset = xOffset;
+    this.yOffset = yOffset;
   }
   update() {
-
-
     const xmult = 32;
     const ymult = 40;
     let x = 0;
     let y = 0;
-    const  setUpRows = (itemMap) => {
+    const setUpRows = (itemMap) => {
       let rows = 1;
-      for (const [item,_] of itemMap) {
+      for (const [item, _] of itemMap) {
         if (x >= 7) {
           x = 0;
           y++;
           rows++;
         }
-        if (this.map.has(item)){
-          this.map.get(item).update(x * xmult + this.xOffset, y * ymult + this.yOffset)
+        if (this.map.has(item)) {
+          this.map
+            .get(item)
+            .update(x * xmult + this.xOffset, y * ymult + this.yOffset);
         } else {
-        this.map.set(
-          item,
-          new IconThingy(this.scene, item, x * xmult + this.xOffset, y * ymult + this.yOffset)
-        );
+          this.map.set(
+            item,
+            new IconThingy(
+              this.scene,
+              item,
+              x * xmult + this.xOffset,
+              y * ymult + this.yOffset
+            )
+          );
         }
-        x++
+        x++;
       }
 
       return rows;
-    }
-    const wRows = setUpRows(gameState.player.heldWeapons)
+    };
+    const wRows = setUpRows(gameState.player.heldWeapons);
     x = 0;
     y++;
-    const bRows = setUpRows(gameState.player.heldBonuses)
-
+    const bRows = setUpRows(gameState.player.heldBonuses);
   }
 }
 
 class StatusBar {
-  constructor(scene, x, y, title, fillColour, current, max){
-    this.x = x
-    this.y = y
+  constructor(scene, x, y, title, fillColour, current, max) {
+    this.x = x;
+    this.y = y;
     this.title = scene.add.text(this.x, this.y, title, scene.defaultTextStyle);
     this.gameWidth = scene.game.config.width;
     this.bottomGraphics = scene.add.graphics();
     this.colour = Phaser.Display.Color.IntegerToColor(fillColour);
     this.bottomGraphics.lineStyle(2, this.colour.color, 1.0);
-    this.bottomBar = this.bottomGraphics.strokeRect(this.x+this.title.width, this.y, this.gameWidth-this.title.width, 16);
+    this.bottomBar = this.bottomGraphics.strokeRect(
+      this.x + this.title.width,
+      this.y,
+      this.gameWidth - this.title.width,
+      16
+    );
     this.topGraphics = scene.add.graphics();
-		this.topGraphics.fillGradientStyle(this.colour.clone().lighten(50).color, this.colour.color, this.colour.color, this.colour.clone().darken(50).color, 1);
-    
-    this.topBar = this.topGraphics.fillRect(this.x+this.title.width, this.y, (this.gameWidth-this.title.width)*(current/max), 16);
+    this.topGraphics.fillGradientStyle(
+      this.colour.clone().lighten(50).color,
+      this.colour.color,
+      this.colour.color,
+      this.colour.clone().darken(50).color,
+      1
+    );
 
+    this.topBar = this.topGraphics.fillRect(
+      this.x + this.title.width,
+      this.y,
+      (this.gameWidth - this.title.width) * (current / max),
+      16
+    );
   }
-  update(current, max){
-    
-    if(current>max){
-      current = max
+  update(current, max) {
+    if (current > max) {
+      current = max;
     }
-    this.topGraphics.clear()
-    this.topGraphics.fillGradientStyle(this.colour.clone().lighten(50).color, this.colour.color, this.colour.color, this.colour.clone().darken(50).color, 1);
-    
-    this.topBar = this.topGraphics.fillRect(this.x+this.title.width, this.y, (this.gameWidth-this.title.width)*(current/max), 16);
+    this.topGraphics.clear();
+    this.topGraphics.fillGradientStyle(
+      this.colour.clone().lighten(50).color,
+      this.colour.color,
+      this.colour.color,
+      this.colour.clone().darken(50).color,
+      1
+    );
+
+    this.topBar = this.topGraphics.fillRect(
+      this.x + this.title.width,
+      this.y,
+      (this.gameWidth - this.title.width) * (current / max),
+      16
+    );
   }
 }
-
 
 class HudScene extends Phaser.Scene {
   constructor() {
     super({ key: "HudScene" });
+  }
+  button(x, y, w, h, text, onClick, ts = textStyle) {
+    const button1 = this.add.rectangle(x, y, w, h).setOrigin(0.5, 0.5);
+    button1.graphics = this.add.graphics();
+    button1.graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+    
+    const sb = button1.getBounds();
+    button1.graphics.fillRect(sb.x, sb.y, sb.width, sb.height);
+    button1.setStrokeStyle(1, 0x000000);
+
+    button1.text = this.add
+      .text(button1.x, button1.y, text, ts)
+      .setDepth(101);
+    button1.text.setOrigin(0.5, 0.5);
+    button1.setInteractive();
+    button1.on("pointerup", onClick, this);
+    button1.on("pointerover", () => {
+      button1.setFillStyle(0xffffff, 0.4);
+    });
+    button1.on("pointerout", () => {
+      button1.setFillStyle();
+    });
+    return button1;
   }
   preload() {
     this.load.pack("bonusesPack", "./data/bonusesPack.json");
@@ -124,33 +173,67 @@ class HudScene extends Phaser.Scene {
       stroke: "#f00",
       strokeThickness: 1,
       opacity: 0,
-      
     };
   }
 
   create() {
     this.weaponOffSetX = 16;
     this.weaponOffSetY = 32;
-    this.healthBar = new StatusBar(this, 0, this.game.config.height-40, "HP:", 0xff0000, 100, 100)
-    this.xpBar = new StatusBar(this, 0, this.game.config.height-20, "XP:", 0x707ef9, 0, 100)
+    const graphics = this.add.graphics();
+    graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+    graphics.fillRect(
+      0,
+      this.game.config.height - 85,
+      this.game.config.height,
+      85
+    );
+    this.healthBar = new StatusBar(
+      this,
+      0,
+      this.game.config.height - 80,
+      "HP:",
+      0xff0000,
+      100,
+      100
+    );
+    this.xpBar = new StatusBar(
+      this,
+      0,
+      this.game.config.height - 60,
+      "XP:",
+      0x707ef9,
+      0,
+      100
+    );
 
-    this.iconThingyBar = new IconThingyBar(this, this.weaponOffSetX, this.weaponOffSetY);
-    this.events.on('UpdateHudItemTB', (w) => {
-      this.iconThingyBar.update()
-    }, this)
+    this.iconThingyBar = new IconThingyBar(
+      this,
+      this.weaponOffSetX,
+      this.weaponOffSetY
+    );
+    this.events.on(
+      "UpdateHudItemTB",
+      (w) => {
+        this.iconThingyBar.update();
+      },
+      this
+    );
     this.iconThingyBar.update();
     this.hiScoreText = this.add.text(
-      this.game.config.width-200,
+      this.game.config.width - 200,
       10,
       `Hi Score:${gameState.highScore}`,
       this.defaultTextStyle
     );
-    this.scoreText = this.add.text(this.game.config.width-200, 30, `Killed:0`, this.defaultTextStyle);
-
-
+    this.scoreText = this.add.text(
+      this.game.config.width - 200,
+      30,
+      `Killed:0`,
+      this.defaultTextStyle
+    );
 
     if (gameState.debug) {
-      const textStyle = this.defaultTextStyle
+      const textStyle = this.defaultTextStyle;
       this.scoreTextDemo = this.add.text(10, 0, `Killed:0`, textStyle);
       this.healthText = this.add.text(
         10,
@@ -160,8 +243,8 @@ class HudScene extends Phaser.Scene {
       );
 
       this.xpText = this.add.text(
-        150,player.maxHitpoints
-        `XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
+        150,
+        player.maxHitpoints`XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
         this.defaultTextStyle
       );
       this.levelText = this.add.text(
@@ -181,11 +264,49 @@ class HudScene extends Phaser.Scene {
         }
       );
     }
-    
+    const doLoginButton = () => {
+      console.log("doing login")
+      if (this.loginButton) {
+        this.loginButton.text.destroy()
+        this.loginButton.graphics.destroy()
+        this.loginButton.destroy();
+      }
+      if (login_name == "") {
+        this.loginButton = this.button(
+          40,
+          config.height - 20,
+          50,
+          25,
+          "Login",
+          () => {
+            console.log("button login");
+            this.scene.pause("GameScene");
+            this.scene.launch("LoginScene", { level: "GameScene" });
+          },
+          { ...textStyle, fontSize: "16px" }
+        );
+      } else {
+        this.loginButton = this.add
+          .text(10, config.height - 20, `Logged in as ${login_name}`, {
+            ...textStyle,
+            fontSize: "16px",
+          })
+          .setDepth(101)
+          .setOrigin(0, 0);
+      }
+    }
+    doLoginButton();
+    this.events.on("loginChange",doLoginButton)
   }
+
+
+
   update() {
-    this.healthBar.update(gameState.player.hitpoints,gameState.player.maxHitpoints)
-    this.xpBar.update(gameState.player.xp,gameState.player.nextLevel)
+    this.healthBar.update(
+      gameState.player.hitpoints,
+      gameState.player.maxHitpoints
+    );
+    this.xpBar.update(gameState.player.xp, gameState.player.nextLevel);
     this.scoreText.setText(`Killed:${gameState.score}`);
     if (gameState.debug) {
       this.scoreTextDemo.setText(`Killed:${gameState.score}`);

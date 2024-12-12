@@ -1,157 +1,137 @@
-// class LoginScene extends Phaser.Scene {
-// 	constructor() {
-// 			super({ key: 'LoginScene' });
-// 	}
-
-// 	create(data) {
-// 		const rightOffset = config.width/2
-// 		const topOffset = 120
-// 		const graphics = this.add.graphics();
-// 		graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-// 		graphics.fillRect(0, 0, 800, 600);
-		
-// 		let activeBox = 0
-		
-
-// 		const loginDetails = ["",""] // 0 username, 1= password
-
-
-
-// 		this.add.text(rightOffset, 50, 'Login', {...textStyle,fontSize: '40px'}).setOrigin(0.5,0.5)
-
-// 		const labels = [null,null]
-// 		const textEntrys = [null, null]
-// 		const textBackGrounds = [null,null]
-
-//         labels[0] =     this.add.text(rightOffset, topOffset+10, 'Enter your name:', textStyle).setOrigin(0.5,0.5)
-//         textEntrys[0] = this.add.text(rightOffset, topOffset+50, '', textStyle).setOrigin(0.5,0.5)
-
-		
-//         labels[1] =     this.add.text(rightOffset, topOffset+80, 'Enter your password:', textStyle).setOrigin(0.5,0.5)
-//         textEntrys[1] = this.add.text(rightOffset, topOffset+120, '', textStyle).setOrigin(0.5,0.5)
-		
-
-// 		for (let t in textEntrys){
-// 			const tFunction = ()=>{
-// 				console.log(t);
-// 				textBackGrounds.forEach(tb => tb.setFillStyle(0xaaaaaa));
-// 				textBackGrounds[t].setFillStyle(0xcccccc);
-// 				activeBox=t;
-// 			}
-
-
-// 			textBackGrounds[t] = this.add.rectangle(textEntrys[t].x, textEntrys[t].y, 200, 30);
-// 			textBackGrounds[t].setFillStyle(0xaaaaaa);
-// 			textBackGrounds[t].setStrokeStyle(1,0x000000);
-// 			textBackGrounds[t].setDepth(1);
-// 			textEntrys[t].setDepth(2);
-// 			const lb = labels[t].getBounds()
-// 			const rect = this.add.rectangle(rightOffset, lb.y, 250, 70).setOrigin(0.5,0);
-// 			rect.setDepth(999);
-// 			rect.setInteractive();
-// 			rect.on("pointerup",tFunction);
-			
-// 		}
-
-
-		
-//         this.input.keyboard.on('keydown', event =>
-//         {
-// 			console.log(event.key, activeBox, loginDetails[activeBox])
-//             if (event.keyCode === 8 && textEntrys[activeBox].text.length > 0)
-//             {
-//                 loginDetails[activeBox] = textEntrys[activeBox].text.substr(0, textEntrys[activeBox].text.length - 1);
-
-//             }
-//             else if (event.keyCode === 32 || (event.keyCode >= 48 && event.keyCode <= 90))
-//             {
-
-//                 loginDetails[activeBox] += event.key;
-//             }
-// 			if(activeBox==0){
-// 				textEntrys[0].text = loginDetails[0]
-// 			} else {
-// 				textEntrys[1].text = "*".repeat(loginDetails[activeBox].length)
-// 			}
-			 
-//         });
-
-// 		const loginButton = this.add.rectangle(rightOffset, topOffset+180, 300, 50);
-
-// 		loginButton.setStrokeStyle(1,0x000000)
-// 		.setFillStyle(0xaaaaaa);
-
-// 		this.loginButtonText = this.add.text(
-// 			loginButton.x,
-// 			loginButton.y,
-// 			`Login`,
-// 			textStyle
-// 		).setDepth(101);
-// 		this.loginButtonText.setOrigin(0.5,0.5)
-// 		loginButton.setInteractive()
-
-// 		loginButton.on('pointerup', async ()=>{
-// 			if(loginDetails[0].text.length > 0|| loginDetails[1].text.length > 0){
-// 				const loggedIn = score_login(loginDetails[0],loginDetails[1])
-// 				console.log(login_name)
-// 				return
-// 			}
-// 		})
-// 	}
-// }
-
 class LoginScene extends Phaser.Scene {
     constructor() {
         super({ key: 'LoginScene' });
     }
 
-    create() {
-        
-        // Display text
-        this.add.text(100, 50, 'Login Required', { fontSize: '32px', ...textStyle });
+    create(data) {
+        const x_offset = 20
+        const y_offset = data.y_offset||160
 
+        const graphics = this.add.graphics();
+		graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+        graphics.fillRect(20 + x_offset, 60 + y_offset, 420, 340);
+        graphics.lineStyle(1, 0x000000, 1.0);
+        graphics.strokeRect(20 + x_offset, 60 + y_offset, 420, 340);
+        graphics.beginPath();
+        graphics.moveTo(230+ x_offset, 60 + y_offset);
+        graphics.lineTo(230+ x_offset, 400 + y_offset);
+        graphics.closePath();
+        graphics.strokePath();
+        
+        
+        // Add exit button
+        const exitButton = this.add.dom(410+ x_offset, 70 + y_offset, 'button', {
+            style: 'width: 40px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
+        }, 'X').setOrigin(0,0);
+
+        // Handle button click
+        exitButton.addListener('click');
+        exitButton.on('click', async () => {
+            
+            //this.scene.resume('StartScene');
+            this.scene.resume(data.level);
+            this.scene.stop();
+        });
+       /////////////// Login ///////////////
+       
+        // Display text
+        this.add.text(40+ x_offset, 80 + y_offset, 'Login', { fontSize: '32px', ...textStyle }).setOrigin(0,0);
         // Add username input
-        const usernameInput = this.add.dom(200, 150, 'input', {
+        this.add.text(40+ x_offset, 130 + y_offset, 'User Name', { ...textStyle, fontSize: '16px' }).setOrigin(0,0);
+        const usernameInput_login = this.add.dom(40+ x_offset, 160 + y_offset, 'input', {
             type: 'text',
             placeholder: 'Username',
             style: 'width: 200px; height: 30px; font-size: 16px;',
         });
-
+        usernameInput_login.setOrigin(0,0)
         // Add password input
-        const passwordInput = this.add.dom(200, 200, 'input', {
+        this.add.text(40+ x_offset, 190 + y_offset, 'Password', { ...textStyle, fontSize: '16px' });
+        const passwordInput_login = this.add.dom(40+ x_offset, 220 + y_offset, 'input', {
             //type: 'password',
             placeholder: 'Password',
             style: 'width: 200px; height: 30px; font-size: 16px;',
         });
-        passwordInput.node.setAttribute('type', 'password');
+        passwordInput_login.setOrigin(0,0)
+        passwordInput_login.node.setAttribute('type', 'password');
 
         // Add login button
-        const loginButton = this.add.dom(200, 250, 'button', {
+        const loginButton = this.add.dom(40+ x_offset, 260 + y_offset, 'button', {
             style: 'width: 100px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
-        }, 'Login');
+        }, 'Login').setOrigin(0,0);
 
         // Handle button click
         loginButton.addListener('click');
         loginButton.on('click', async () => {
-            const username = usernameInput.node.value;
-            const password = passwordInput.node.value;
+            const username = usernameInput_login.node.value;
+            const password = passwordInput_login.node.value;
 			
             const success = await score_login(username, password);
             if (success) {
+                this.scene.resume(data.level);
                 this.scene.stop();
-                this.scene.start('StartScene');
             } else {
                 alert('Login failed!');
             }
+            this.scene.get('HudScene').events.emit('loginChange', success)
         });
-    }
+        //////////////////// Register ///////////////
+        // Display text
+        this.add.text(240+ x_offset, 80 + y_offset, 'Register', { fontSize: '32px', ...textStyle }).setOrigin(0,0);
 
-    // async handleLogin(username, password) {
-    //     const response = await fetch('https://your-backend-api.com/login', {
-    //         method: 'POST',
-    //         headers: { 'Content-Type': 'application/json' },
-    //         body: JSON.stringify({ username, password }),
-    //     });
-    //     return response.ok;
-    // }
+        // Add username input
+        this.add.text(240+ x_offset, 130 + y_offset, 'User Name', { ...textStyle, fontSize: '16px' }).setOrigin(0,0);
+        const usernameInput_register = this.add.dom(240+ x_offset, 160 + y_offset, 'input', {
+            type: 'text',
+            placeholder: 'Username',
+            style: 'width: 200px; height: 30px; font-size: 16px;',
+        });
+        usernameInput_register.setOrigin(0,0)
+        // Add password input
+        // this.add.text(240, 190, 'email', { ...textStyle, fontSize: '16px' });
+        // const emailInput_register = this.add.dom(240, 220, 'input', {
+        //     //type: 'password',
+        //     placeholder: 'Password',
+        //     style: 'width: 200px; height: 30px; font-size: 16px;',
+        // });
+        this.add.text(240+ x_offset, 190 + y_offset, 'Password', { ...textStyle, fontSize: '16px' });
+        const passwordInput_register = this.add.dom(240+ x_offset, 220 + y_offset, 'input', {
+            //type: 'password',
+            placeholder: 'Password',
+            style: 'width: 200px; height: 30px; font-size: 16px;',
+        });
+        this.add.text(240+ x_offset, 250 + y_offset, 'Repeat Pasword', { ...textStyle, fontSize: '16px' });
+        const password2Input_register = this.add.dom(240+ x_offset, 280 + y_offset, 'input', {
+            //type: 'password',
+            placeholder: 'Password',
+            style: 'width: 200px; height: 30px; font-size: 16px;',
+        });
+        // emailInput_register.setOrigin(0,0)
+        passwordInput_register.setOrigin(0,0)
+        password2Input_register.setOrigin(0,0)
+        passwordInput_register.node.setAttribute('type', 'password');
+        password2Input_register.node.setAttribute('type', 'password');
+        // Add login button
+        const registerButton = this.add.dom(240+ x_offset, 320 + y_offset, 'button', {
+            style: 'width: 100px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
+        }, 'Register').setOrigin(0,0);
+
+        // Handle button click
+        registerButton.addListener('click');
+        registerButton.on('click', async () => {
+            const username = usernameInput_register.node.value;
+            const password = passwordInput_register.node.value;
+            // const email = emailInput_register.node.value;
+            const password2 = passwordInput2_register.node.value;
+            const success = await score_register(username, password);
+            if (success) {
+                this.scene.stop();
+                this.scene.resume(data.level);
+            } else {
+                alert('Register failed!');
+            }
+            this.scene.get(data.level).events.emit('loginChange', success)
+        });
+
+    }
+    
 }
