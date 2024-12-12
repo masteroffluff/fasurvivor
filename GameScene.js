@@ -47,9 +47,6 @@ const playerStats = {
   bonusArea: 0, // done
 }
 
-
-
-
 class Item {
   constructor(type, x, y, context) {
     // note contecxt should always be the this from the scene clas.

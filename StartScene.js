@@ -55,11 +55,38 @@ class StartScene extends Phaser.Scene {
 			this.scene.stop('StartScene');
 			this.scene.start('GameScene');
 		}
-		this.input.on('pointerdown', startGame, this)
+		//this.input.on('pointerdown', startGame, this)
 		const spaceBar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 		const enter = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 		spaceBar.on('down', startGame, this)
 		enter.on('down', startGame, this)
 
+		if(login_name==""){
+			const loginButton = this.add.rectangle(config.width/2, 400, 300, 50);
+
+			loginButton.setStrokeStyle(1,0x000000)
+			.setFillStyle(0xaaaaaa);
+
+			this.loginButtonText = this.add.text(
+				loginButton.x,
+				loginButton.y,
+				`Login`,
+				textStyle
+			).setDepth(101);
+			this.loginButtonText.setOrigin(0.5,0.5)
+			loginButton.setInteractive()
+			loginButton.on('pointerup', ()=>{
+				console.log('button login')
+				this.scene.stop('StartScene');
+				this.scene.start('LoginScene');	
+			})
+		} else {
+			this.add.text(
+				config.width/2,
+				400,
+				`Logged in as ${login_name}`,
+				textStyle
+			).setDepth(101).setOrigin(0.5,0.5);
+		}
 	}
 }

@@ -1,7 +1,7 @@
 
 const URL = "http://127.0.0.1:5000"
 
-var public_key, sessionId
+
 
 function generateNonce() {
     return crypto.getRandomValues(new Uint8Array(16)).join('');
@@ -38,7 +38,8 @@ async function score_submit(score) {
         const response = await fetch(URL + '/submit_score', {
             method: 'POST',
             body: JSON.stringify({ data: encryptedData }),
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json'},
+            credentials: 'include'
         });
         
         if (!response.ok) {
@@ -89,7 +90,8 @@ async function encryptWithPublicKey(data, publicKey) {
 }
 
 async function get_Public_key(){
-    const response = await fetch(URL + '/public-key');
+    const response = await fetch(URL + '/public-key', {
+        credentials: 'include'});
     const key_data = await response.json();
    public_key = key_data.public_key
    sessionId = key_data.session_id
@@ -97,17 +99,21 @@ async function get_Public_key(){
 }
 
 async function score_login(user, password){
-    constent = {
+    const content = {
         method: 'POST',
         body: JSON.stringify({ user, password }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json', credentials: 'include'},
+        credentials: 'include'
     }
-    const response = await fetch(URL + '/login');
+    const response = await fetch(URL + '/login', content);
     if(response.ok){
         console.log("login successful")
         await get_Public_key()
+        login_name = user
         return true
     } else {
         return false
+        login_name = ""
     }
 }
+

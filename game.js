@@ -7,6 +7,14 @@ const gameState = {
 	highScore:100,
 	debug:false
 };
+
+const textStyle = { 
+	fill: '#000', 
+	fontSize: '20px', 
+	wordWrap: { width: 280, useAdvancedWrap: true }, 
+	align: 'center' 
+};
+
 let weaponsData, bonusesData
 
 // prevent addressbar on mobile
@@ -18,6 +26,7 @@ window.addEventListener("load",function() {
 	}, 0);
 });
 
+var public_key, sessionId, login_name = ""
 
 const config = {
 	type: Phaser.AUTO,
@@ -37,8 +46,15 @@ const config = {
 		// Center vertically and horizontally
 		autoCenter: Phaser.Scale.CENTER_BOTH
 	},
-	scene: [StartScene, GameScene, PauseScene, HudScene, YouDiedScene, LevelUpScene, PickUpItemScene, LoginScene]
+	scene: [StartScene, GameScene, PauseScene, HudScene, YouDiedScene, LevelUpScene, PickUpItemScene, LoginScene],
+	parent: 'phaser-container',
+	dom: {
+        createContainer: true, // Enable DOM elements
+    }
 };
+
+
+console.log(Phaser.VERSION)
 
 game = new Phaser.Game(config);
 

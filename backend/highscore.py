@@ -4,11 +4,10 @@ from cryptography.hazmat.primitives import serialization
 from flask import Flask, jsonify, request, session as flask_session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, LoginManager, login_required, current_user
-import base64, uuid
-import jwt
-import datetime
-import json
+from flask_cors import CORS, cross_origin
+import base64, uuid, jwt, datetime, json
 from datetime import datetime, timedelta, timezone
+
 
 from cryptography.hazmat.primitives import serialization
 try:
@@ -21,6 +20,7 @@ SECRET_KEY = b'b6M4CyDFtvXYFbQyHs7BT85ryH@NEQ9W'
 
 app = Flask(__name__)
 app.secret_key  = SECRET_KEY
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 used_nonces = set()
 
@@ -37,6 +37,7 @@ with open("public_key.pem", "rb") as key_file:
 
 @app.route('/public-key', methods=['GET'])
 @login_required
+@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
 def get_public_key():
     with open("public_key.pem", "rb") as key_file:
         pem_data = key_file.read()
@@ -44,12 +45,12 @@ def get_public_key():
     # Remove PEM headers and newlines
     pem_lines = pem_data.decode('utf-8').splitlines()
     key_base64 = ''.join(pem_lines[1:-1])  # Remove first and last lines
-    if(flask_session['session_id']==None):
+    if(not 'session_id' in flask_session):
         session_id = str(uuid.uuid4())  # Generate a unique session ID
         flask_session['session_id'] = session_id
 
-
-    return jsonify({"public_key": key_base64, "session_id":flask_session['session_id']})
+    
+    return jsonify({"public_key": key_base64, "session_id":(flask_session['session_id'])})
 #SqlAlchemy Database Configuration With Mysqlpip list
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/highscore'
@@ -72,6 +73,7 @@ def holla():
 
 # testing
 @app.route("/highscore", methods=['GET'])
+@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
 def highscore():
     try:
         high_scores=session.query(HighScore).order_by(HighScore.score.desc()).all()
@@ -88,6 +90,7 @@ def highscore():
 
 
 @app.route('/login', methods=['POST'])
+@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
 def login():
     data = request.json
     user_name = data['user']
@@ -102,6 +105,7 @@ def login():
     
 
 @app.route('/register', methods=['POST'])
+@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
 def register():
     # body is username, email and password
     data = request.form
@@ -125,12 +129,14 @@ def register():
 
 
 @app.route('/logout')
+@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
 @login_required
 def logout():
     logout_user()
     return 'Logged out'
 
 @app.route('/submit_score', methods=['POST'])
+@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
 def submit_score():
     try:
         # Get the encrypted data from the request
