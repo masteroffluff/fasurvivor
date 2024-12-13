@@ -155,13 +155,16 @@ class HudScene extends Phaser.Scene {
       .setDepth(101);
     button1.text.setOrigin(0.5, 0.5);
     button1.setInteractive();
-    button1.on("pointerup", onClick, this);
-    button1.on("pointerover", () => {
-      button1.setFillStyle(0xffffff, 0.4);
-    });
-    button1.on("pointerout", () => {
-      button1.setFillStyle();
-    });
+		button1.on('pointerup', onClick, this)
+		button1.on('pointerover',()=>{
+			button1.setFillStyle(0xffffff, 0.4)
+		})
+		button1.on('pointerdown',()=>{
+			button1.setFillStyle(0x000000, 0.4)
+		})		
+		button1.on('pointerout',()=>{
+			button1.setFillStyle()
+		})
     return button1;
   }
   preload() {
