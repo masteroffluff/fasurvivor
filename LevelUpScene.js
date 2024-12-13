@@ -163,8 +163,8 @@ class LevelUpScene extends Phaser.Scene {
           this.scene.get(data.level).events.emit("getBonus", name);
         }
         this.scene.get("HudScene").events.emit("UpdateHudItemTB");
-        this.scene.resume(data.level); // Resume the Level scene
-        this.scene.stop(); // Stop the PauseScene
+        this.scene.resume(data.level); 
+        this.scene.stop(); 
       }
     }
     const spaceBar = this.input.keyboard.addKey(
