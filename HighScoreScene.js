@@ -2,30 +2,30 @@ class HighScoreScene extends Phaser.Scene {
   constructor() {
     super({ key: "HighScoreScene" });
   }
-  button(x, y, w, h, text, onClick, ts = textStyle) {
-    const graphics = this.add.graphics();
-    graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-    const button1 = this.add.rectangle(x, y, w, h).setOrigin(0.5, 0.5);
-    const sb = button1.getBounds();
-    graphics.fillRect(sb.x, sb.y, sb.width, sb.height);
-    button1.setStrokeStyle(1, 0x000000);
+  // button(x, y, w, h, text, onClick, ts = textStyle) {
+  //   const graphics = this.add.graphics();
+  //   graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+  //   const button1 = this.add.rectangle(x, y, w, h).setOrigin(0.5, 0.5);
+  //   const sb = button1.getBounds();
+  //   graphics.fillRect(sb.x, sb.y, sb.width, sb.height);
+  //   button1.setStrokeStyle(1, 0x000000);
 
-    this.startButtonText = this.add
-      .text(button1.x, button1.y, text, ts)
-      .setDepth(101);
-    this.startButtonText.setOrigin(0.5, 0.5);
-    button1.setInteractive();
-    button1.on("pointerup", onClick, this);
-    button1.on("pointerover", () => {
-      button1.setFillStyle(0xffffff, 0.4);
-    });
-    button1.on("pointerdown", () => {
-      button1.setFillStyle(0x000000, 0.4);
-    });
-    button1.on("pointerout", () => {
-      button1.setFillStyle();
-    });
-  }
+  //   this.startButtonText = this.add
+  //     .text(button1.x, button1.y, text, ts)
+  //     .setDepth(101);
+  //   this.startButtonText.setOrigin(0.5, 0.5);
+  //   button1.setInteractive();
+  //   button1.on("pointerup", onClick, this);
+  //   button1.on("pointerover", () => {
+  //     button1.setFillStyle(0xffffff, 0.4);
+  //   });
+  //   button1.on("pointerdown", () => {
+  //     button1.setFillStyle(0x000000, 0.4);
+  //   });
+  //   button1.on("pointerout", () => {
+  //     button1.setFillStyle();
+  //   });
+  // }
 
   create(data) {
     const graphics = this.add.graphics();
