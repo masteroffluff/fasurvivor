@@ -1,10 +1,12 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives import serialization
+
 from flask import Flask, jsonify, request, session as flask_session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, LoginManager, login_required, current_user
 from flask_cors import CORS, cross_origin
+
 import base64, uuid, jwt, datetime, json
 from datetime import datetime, timedelta, timezone
 
@@ -17,6 +19,8 @@ except Exception as e:
     print("is the database switched on")
 
 SECRET_KEY = b'b6M4CyDFtvXYFbQyHs7BT85ryH@NEQ9W'
+ORIGIN = "http://localhost:3000"
+
 
 app = Flask(__name__)
 app.secret_key  = SECRET_KEY
@@ -37,7 +41,7 @@ with open("public_key.pem", "rb") as key_file:
 
 @app.route('/public-key', methods=['GET'])
 @login_required
-@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
+@cross_origin(origins=ORIGIN, supports_credentials=True)
 def get_public_key():
     with open("public_key.pem", "rb") as key_file:
         pem_data = key_file.read()
@@ -58,7 +62,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 login_manager = LoginManager()
-
 login_manager.init_app(app)
 
 
@@ -67,21 +70,27 @@ def load_user(user_id):
     return session.query(User).get(user_id)
 
 @app.route('/holla')
-@login_required
 def holla():
-    return str(current_user.id)
+    return "Holla!"
 
-# testing
 @app.route("/highscore", methods=['GET'])
-@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
+@cross_origin(origins=ORIGIN, supports_credentials=True)
 def highscore():
     try:
-        high_scores=session.query(HighScore).order_by(HighScore.score.desc()).all()
-        output = []
-        for high_score in high_scores:
-            user = session.query(User).get(high_score.user)
-            output.append({"Name":user.name, "Score":high_score.score, "Date":high_score.date})
-
+        # high_scores=session.query(HighScore).order_by(HighScore.score.desc()).all()
+        # output = []
+        # for high_score in high_scores:
+        #     user = session.query(User).get(high_score.user)
+        #     output.append({"Name":user.name, "Score":high_score.score, "Date":high_score.date})
+        high_scores = (
+            session.query(HighScore, User)
+            .join(User, HighScore.user == User.id)
+            .order_by(HighScore.score.desc()).all()
+            )
+        output = [
+        {"Name": user.name, "Score": high_score.score, "Date": high_score.date} 
+        for high_score, user in high_scores
+        ]
         return output
     except Exception as e:
         print("Error while connecting to MySQL", e)
@@ -90,7 +99,7 @@ def highscore():
 
 
 @app.route('/login', methods=['POST'])
-@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
+@cross_origin(origins=ORIGIN, supports_credentials=True)
 def login():
     data = request.json
     user_name = data['user']
@@ -105,7 +114,7 @@ def login():
     
 
 @app.route('/register', methods=['POST'])
-@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
+@cross_origin(origins=ORIGIN, supports_credentials=True)
 def register():
     # body is username, email and password
     data = request.form
@@ -129,14 +138,14 @@ def register():
 
 
 @app.route('/logout')
-@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
+@cross_origin(origins=ORIGIN, supports_credentials=True)
 @login_required
 def logout():
     logout_user()
     return 'Logged out'
 
 @app.route('/submit_score', methods=['POST'])
-@cross_origin(origins="http://192.168.0.30:3000", supports_credentials=True)
+@cross_origin(origins=ORIGIN, supports_credentials=True)
 def submit_score():
     try:
         # Get the encrypted data from the request
@@ -169,11 +178,13 @@ def submit_score():
             return jsonify({"error": "Invalid submission"}), 400
         
         # Process the score (e.g., save to database)
-        save_score(session_id, score)
+        high_score_table = save_score(session_id, score, timestamp)
+        return highscore()
         
-        return jsonify({"message": "Score submitted successfully"}), 200
+        #return jsonify(high_score_table), 200
     
     except Exception as e:
+        print({"error": str(e)})
         return jsonify({"error": str(e)}), 500
 
 def verify_submission(session_id, timestamp, nonce):
@@ -195,9 +206,32 @@ def verify_submission(session_id, timestamp, nonce):
 def is_valid_session(session_id):
     return flask_session['session_id'] == session_id
 
-def save_score(session_id, score):
-    print(f"Saving score {score} for {str(current_user.id)}")
+def save_score(session_id, score, time_stamp):
+    # get username
+    try:
+        user_id = current_user.id
+        # find old record
+        current_record = session.query(HighScore).filter_by(user=user_id).first()
+        # delete onld recors
+        if(current_record  != None):
+            session.delete(current_record)
+        # create new record
+        new_record = HighScore(
+            user = user_id,
+            date = time_stamp,
+            score = score
+        )
+        # append new record
+        session.add(new_record)
+        # commit
+        session.commit()
 
+    except Exception as e:
+        print({'error':e})
+        session.rollback()
+
+
+print("Active routes:")
 for rule in app.url_map.iter_rules():
     print (rule)
 

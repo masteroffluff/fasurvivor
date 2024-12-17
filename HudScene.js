@@ -270,8 +270,6 @@ class HudScene extends Phaser.Scene {
     const doLoginButton = () => {
       console.log("doing login")
       if (this.loginButton) {
-        this.loginButton.text.destroy()
-        this.loginButton.graphics.destroy()
         this.loginButton.destroy();
       }
       if (login_name == "") {

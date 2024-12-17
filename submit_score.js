@@ -1,18 +1,15 @@
 const URL = "http://127.0.0.1:5000";
 
 function generateNonce() {
-  return crypto.getRandomValues(new Uint8Array(16)).join("");
+  return globalThis.crypto.getRandomValues(new Uint8Array(16)).join("");
 }
 
-// When the exam black box produces a score
-async function score_submit(score) {
-  const response = await fetch(URL + "/public-key");
-  const keyData = await response.json();
-  const publicKeyB64 = keyData.public_key;
-  const sessionId = keyData.session_id; // remove
-  console.log({ publicKeyB64, sessionId });
 
-  const serverPublicKey = await importPublicKey(publicKeyB64);
+async function score_submit(score) {
+
+  console.log({ publicKey, sessionId });
+
+  const serverPublicKey = await importPublicKey(publicKey);
   //const sessionId = receivedSessionId;
   const nonce = generateNonce();
 
@@ -40,11 +37,12 @@ async function score_submit(score) {
     });
 
     if (!response.ok) {
-      throw new Error("Submission failed");
+      throw new Error(response.error);
     }
 
     const result = await response.json();
     console.log("Submission successful:", result);
+    return result
   } catch (error) {
     console.error("Error submitting score:", error);
     console.error(response);
@@ -58,7 +56,7 @@ async function importPublicKey(publicKeyB64) {
   ).buffer;
 
   // Import the key
-  const publicKey = await crypto.subtle.importKey(
+  const publicKey = await globalThis.crypto.subtle.importKey(
     "spki",
     binaryDer,
     {
@@ -86,10 +84,11 @@ async function encryptWithPublicKey(data, publicKey) {
 
 async function get_Public_key() {
   const response = await fetch(URL + "/public-key", {
+    headers: { "Content-Type": "application/json", credentials: "include" },
     credentials: "include",
   });
   const key_data = await response.json();
-  public_key = key_data.public_key;
+  publicKey = key_data.public_key;
   sessionId = key_data.session_id;
 }
 
@@ -124,7 +123,7 @@ async function score_logout(user, password) {
     console.log("log out");
   }
   login_name = "";
-  public_key = "";
+  publicKey = "";
   sessionId = "";
 }
 

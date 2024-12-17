@@ -41,6 +41,16 @@
 //     }
 // }
 
+const gameState = {
+	score: 2,
+	money: 0,
+	width: 2000,
+  	height: 2000,
+	highScore:1,
+	debug:false
+};
+
+
 const textStyle = { 
 	fill: '#000', 
 	fontSize: '20px', 
@@ -48,7 +58,7 @@ const textStyle = {
 	align: 'center' 
 };
 
-const login_name = "fluffy"
+var publicKey, sessionId, login_name = "fluffy"
 
 // Configuration for the Phaser game
 const config = {
@@ -56,7 +66,7 @@ const config = {
     width: 800,
     height: 600,
     backgroundColor: "aaaaaa",
-    scene: [HighScoreScene],
+    scene: [YouDiedScene],
     physics: {
         default: 'arcade',
         arcade: {
@@ -65,5 +75,9 @@ const config = {
         }
     }
 };
+const game = null;
+score_login(login_name,"fluffy1").then(()=>{
 
-const game = new Phaser.Game(config);
+console.log(sessionId)
+    game = new Phaser.Game(config);
+})

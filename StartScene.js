@@ -84,11 +84,7 @@ class StartScene extends Phaser.Scene {
         survivorImage.setVisible(true);
       },
     });
-	this.events.on('resume',()=>{
-		if(this.loginbutton){
-			this.loginbutton.show()
-		}
-	})
+	
     //const text = this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
     //text.setLineSpacing(5)
 
@@ -102,30 +98,48 @@ class StartScene extends Phaser.Scene {
     spaceBar.on("down", this.startGame, this);
     enter.on("down", this.startGame, this);
 
-
-
-    if (login_name == "") {
-      this.loginbutton = this.button(
-        40,
-        config.height - 20,
-        50,
-        25,
-        "Login",
-        () => {
-          this.scene.pause();
-          this.scene.launch("LoginScene", { level: this.scene.key });
-        },
-        { ...textStyle, fontSize: "16px" }
-      );
-    } else {
-      this.add
-        .text(10, config.height - 20, `Logged in as ${login_name}`, {
-          ...textStyle,
-          fontSize: "16px",
-        })
-        .setDepth(101)
-        .setOrigin(0, 0);
+    const setupLogin = () => {
+      if (login_name == "") {
+        if(this.loggedInAsText ){
+          this.loggedInAsText.destroy()
+        }
+        
+        if(this.loginbutton){
+          this.loginbutton.show()
+        } else {
+        this.loginbutton = this.button(
+            40,
+            config.height - 20,
+            50,
+            25,
+            "Login",
+            () => {
+              this.scene.pause();
+              this.scene.launch("LoginScene", { level: this.scene.key });
+            },
+            { ...textStyle, fontSize: "16px" }
+          );
+        }
+      } else {
+        if(this.loginbutton){
+          this.loginbutton.hide()
+        }
+        if(this.loggedInAsText ){
+          this.loggedInAsText.setText(`Logged in as ${login_name}`)
+        }
+        this.loggedInAsText = this.add
+          .text(10, config.height - 20, `Logged in as ${login_name}`, {
+            ...textStyle,
+            fontSize: "16px",
+          })
+          .setDepth(101)
+          .setOrigin(0, 0);
+      }
     }
+
+    setupLogin();
+
+    this.events.on('resume',setupLogin)
 
 
 

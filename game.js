@@ -26,7 +26,7 @@ window.addEventListener("load",function() {
 	}, 0);
 });
 
-var public_key, sessionId, login_name = ""
+var publicKey, sessionId, login_name = ""
 
 const config = {
 	type: Phaser.AUTO,
