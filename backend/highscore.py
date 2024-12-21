@@ -9,11 +9,16 @@ from flask_cors import CORS, cross_origin
 
 import base64, uuid, jwt, datetime, json
 from datetime import datetime, timedelta, timezone
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 from cryptography.hazmat.primitives import serialization
 try:
     from model import session, User, HighScore
+    if session == None:
+        raise Exception("Model failed to load")
 except Exception as e:
     print("Error while connecting to MySQL", e)
     print("is the database switched on")
@@ -21,6 +26,7 @@ except Exception as e:
 SECRET_KEY = b'b6M4CyDFtvXYFbQyHs7BT85ryH@NEQ9W'
 ORIGIN = "http://localhost:3000"
 
+SECRET_KEY = os.environb[b'SECRET_KEY']
 
 app = Flask(__name__)
 app.secret_key  = SECRET_KEY
@@ -38,6 +44,10 @@ with open("public_key.pem", "rb") as key_file:
     public_key = serialization.load_pem_public_key(
         key_file.read()
     )
+@app.route('/')
+def home():
+    return 'Welcome to Codecademy Survivors!'
+
 
 @app.route('/public-key', methods=['GET'])
 @login_required

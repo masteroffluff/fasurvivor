@@ -5,14 +5,27 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_login import UserMixin
 
-host='localhost'
-user='user'
-password='supersecretpassword'
-database='highscore'
-port = 3306
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+HOST = os.getenv('HOST')
+USER = os.getenv('USER_NAME')
+PASSWORD = os.getenv('PASSWORD')
+DATABASE = os.getenv('DATABASE')
+PORT = os.getenv('PORT')
+
+# HOST='localhost'
+# USER='user'
+# PASSWORD ='supersecretpassword'
+# DATABASE ='highscore'
+# PORT = 3306
 
 # mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DBNAME
-engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}")
+print("Loading Model")
+print(f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
 
 
 
