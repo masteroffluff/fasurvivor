@@ -111,14 +111,14 @@ async function score_login(user, password) {
   }
 }
 
-async function score_logout(user, password) {
+async function score_logout() {
   const content = {
     method: "POST",
-    body: JSON.stringify({ user, password }),
+    body: JSON.stringify(),
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   };
-  const response = await fetch(URL + "/login", content);
+  const response = await fetch(URL + "/logout", content);
   if (response.ok) {
     console.log("log out");
   }
@@ -126,6 +126,7 @@ async function score_logout(user, password) {
   publicKey = "";
   sessionId = "";
 }
+
 
 async function score_register(user, password) {
   const content = {

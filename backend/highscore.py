@@ -147,7 +147,7 @@ def register():
 
 
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 @cross_origin(origins=ORIGIN, supports_credentials=True)
 @login_required
 def logout():

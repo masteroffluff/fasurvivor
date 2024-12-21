@@ -22,13 +22,56 @@ class PauseScene extends Phaser.Scene {
 				textStyle
 		);
 
-		// Adding debug outline to see the bounding box of the text
-		//pauseText.setStroke('#ff0000', 2);
 
 		this.input.keyboard.on('keydown-P', () => {
 				this.scene.resume(data.level);  // Resume the Level scene
 				this.scene.stop();  // Stop the PauseScene
 		});
+		const doLoginButton = () => {
+			console.log("doing login")
+			if (this.loginButton) {
+			  this.loginButton.destroy();
+			}
+			if (login_name == "") {
+			  this.loginButton = this.button(
+			    config.width/2,
+			    400,
+			    70,
+			    25,
+				"Log In",
+				() => {
+				  //this.loginButton.hide()
+				  console.log("button login");
+				  this.scene.pause();
+				  this.scene.launch("LoginScene", { level: this.scene.key });
+				},
+				{ ...textStyle, fontSize: "16px" }
+			  );
+			} else {
+			  this.loginButton = this.button(
+			    config.width/2,
+			    400,
+			    70,
+			    25,
+			    "Log Out",
+			    () => {
+			      score_logout().then(()=>{
+					doLoginButton()
+					this.game.events.emit('loginChange')
+				  })
+			    },
+			    { ...textStyle, fontSize: "16px" }
+			  );
+	  
+			}
+		  }
+		  doLoginButton()
+		  this.game.events.on("loginChange",()=>{
 			
+			doLoginButton()
+		  })
+		  this.events.on('shutdown', () => {
+			this.game.events.off('loginChange');
+		  });
 	}
 }

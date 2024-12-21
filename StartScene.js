@@ -11,7 +11,7 @@ class StartScene extends Phaser.Scene {
   }
 
   startGame() {
-	this.scene.stop("StartScene");
+	this.scene.stop();
 	this.scene.start("GameScene");
   }
   create() {
@@ -98,49 +98,62 @@ class StartScene extends Phaser.Scene {
     spaceBar.on("down", this.startGame, this);
     enter.on("down", this.startGame, this);
 
-    const setupLogin = () => {
+    const doLoginButton = () => {
+      console.log("doing login")
+      if (this.loginButton) {
+        this.loginButton.destroy();
+      }
+      if (this.logoutButton) {
+        this.logoutButton.destroy();
+      }
       if (login_name == "") {
-        if(this.loggedInAsText ){
-          this.loggedInAsText.destroy()
-        }
-        
-        if(this.loginbutton){
-          this.loginbutton.show()
-        } else {
-        this.loginbutton = this.button(
-            40,
-            config.height - 20,
-            50,
-            25,
-            "Login",
-            () => {
-              this.scene.pause();
-              this.scene.launch("LoginScene", { level: this.scene.key });
-            },
-            { ...textStyle, fontSize: "16px" }
-          );
-        }
+        this.loginButton = this.button(
+          40,
+          config.height - 20,
+          60,
+          25,
+          "Log In",
+          () => {
+            this.loginButton.hide()
+            console.log("button login");
+            this.scene.pause();
+            this.scene.launch("LoginScene", { level: this.scene.key });
+          },
+          { ...textStyle, fontSize: "16px" }
+        );
       } else {
-        if(this.loginbutton){
-          this.loginbutton.hide()
-        }
-        if(this.loggedInAsText ){
-          this.loggedInAsText.setText(`Logged in as ${login_name}`)
-        }
-        this.loggedInAsText = this.add
+        this.loginButton = this.add
           .text(10, config.height - 20, `Logged in as ${login_name}`, {
             ...textStyle,
             fontSize: "16px",
           })
           .setDepth(101)
           .setOrigin(0, 0);
+        ///
+        this.logoutButton = this.button(
+          config.width - 50,
+          config.height - 20,
+          70,
+          25,
+          "Log Out",
+          () => {
+            score_logout().then(()=>{this.events.emit("loginChange")})
+          },
+          { ...textStyle, fontSize: "16px" }
+        );
+        
       }
     }
+    doLoginButton();
+    this.game.events.on("loginChange",()=>{
+      console.log('detected')
+      doLoginButton()
+    })
+    this.events.on('shutdown', () => {
+      this.game.events.off('loginChange');
+    });
 
-    setupLogin();
-
-    this.events.on('resume',setupLogin)
-
+    //this.events.on("resume",doLoginButton)
 
 
   }

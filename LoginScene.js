@@ -72,7 +72,7 @@ class LoginScene extends Phaser.Scene {
             } else {
                 alert('Login failed!');
             }
-            this.scene.get('HudScene').events.emit('loginChange', success)
+            this.game.events.emit('loginChange', success)
         });
         //////////////////// Register ///////////////
         // Display text
@@ -129,7 +129,7 @@ class LoginScene extends Phaser.Scene {
             } else {
                 alert('Register failed!');
             }
-            this.scene.get(data.level).events.emit('loginChange', success)
+            this.game.events.emit('loginChange', success)
         });
 
     }

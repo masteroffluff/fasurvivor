@@ -144,27 +144,31 @@ class HudScene extends Phaser.Scene {
   button(x, y, w, h, text, onClick, ts = textStyle) {
     const button1 = this.add.rectangle(x, y, w, h).setOrigin(0.5, 0.5);
     button1.graphics = this.add.graphics();
-    button1.graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-    
+    button1.graphics.fillGradientStyle(
+      0x00ffff,
+      0xffff00,
+      0xff00ff,
+      0x00ff00,
+      1
+    );
+
     const sb = button1.getBounds();
     button1.graphics.fillRect(sb.x, sb.y, sb.width, sb.height);
     button1.setStrokeStyle(1, 0x000000);
 
-    button1.text = this.add
-      .text(button1.x, button1.y, text, ts)
-      .setDepth(101);
+    button1.text = this.add.text(button1.x, button1.y, text, ts).setDepth(101);
     button1.text.setOrigin(0.5, 0.5);
     button1.setInteractive();
-		button1.on('pointerup', onClick, this)
-		button1.on('pointerover',()=>{
-			button1.setFillStyle(0xffffff, 0.4)
-		})
-		button1.on('pointerdown',()=>{
-			button1.setFillStyle(0x000000, 0.4)
-		})		
-		button1.on('pointerout',()=>{
-			button1.setFillStyle()
-		})
+    button1.on("pointerup", onClick, this);
+    button1.on("pointerover", () => {
+      button1.setFillStyle(0xffffff, 0.4);
+    });
+    button1.on("pointerdown", () => {
+      button1.setFillStyle(0x000000, 0.4);
+    });
+    button1.on("pointerout", () => {
+      button1.setFillStyle();
+    });
     return button1;
   }
   preload() {
@@ -267,40 +271,36 @@ class HudScene extends Phaser.Scene {
         }
       );
     }
-    const doLoginButton = () => {
-      console.log("doing login")
-      if (this.loginButton) {
-        this.loginButton.destroy();
+
+    this.loginText = this.add
+      .text(10, config.height - 20, `Not Loged In`, {
+        ...textStyle,
+        fontSize: "16px",
+      })
+      .setDepth(101)
+      .setOrigin(0, 0);
+
+    const doLoginButton = (error) => {
+      console.log("doing login hud");
+      if (error) {
+        this.loginText.setText(`Error Logging In`);
       }
       if (login_name == "") {
-        this.loginButton = this.button(
-          40,
-          config.height - 20,
-          50,
-          25,
-          "Login",
-          () => {
-            console.log("button login");
-            this.scene.pause("GameScene");
-            this.scene.launch("LoginScene", { level: "GameScene" });
-          },
-          { ...textStyle, fontSize: "16px" }
-        );
+        this.loginText.setText ( `Not Logged In`);
       } else {
-        this.loginButton = this.add
-          .text(10, config.height - 20, `Logged in as ${login_name}`, {
-            ...textStyle,
-            fontSize: "16px",
-          })
-          .setDepth(101)
-          .setOrigin(0, 0);
+        this.loginText.setText(`Logged in as ${login_name}`);
       }
-    }
+    };
+
     doLoginButton();
-    this.events.on("loginChange",doLoginButton)
+    this.game.events.on("loginChange",()=>{
+      console.log('detected')
+      doLoginButton()
+    })
+    this.events.on('shutdown', () => {
+      this.game.events.off('loginChange');
+    });
   }
-
-
 
   update() {
     this.healthBar.update(
