@@ -24,7 +24,7 @@ PORT = os.getenv('PORT')
 
 # mysql+pymysql://USERNAME:PASSWORD@HOST:PORT/DBNAME
 print("Loading Model")
-print(f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
+##print(f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
 engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}")
 
 
@@ -41,7 +41,7 @@ class User (Base, UserMixin):
     id = Column(Integer, primary_key=True)
     name = Column(String(50))
     email = Column(String(120))
-    password_hash = Column(String(128))
+    password_hash = Column(String(255))
     high_scores = relationship('HighScore', back_populates='user_rel')
     def get_id(self):
         return str(self.id)

@@ -1,52 +1,159 @@
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from cryptography.hazmat.primitives import serialization
+import sys, logging
 
-from flask import Flask, jsonify, request, session as flask_session
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, LoginManager, login_required, current_user
-from flask_cors import CORS, cross_origin
+# # Configure logging
+# logger = logging.getLogger()
+# logger.setLevel(logging.INFO)
 
-import base64, uuid, jwt, datetime, json
-from datetime import datetime, timedelta, timezone
-import os
-from dotenv import load_dotenv
+# # File handler for logs
+# open('./app.log', 'w').close()
+# file_handler = logging.FileHandler('./app.log')
+# file_handler.setLevel(logging.INFO)
+# file_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+# file_handler.setFormatter(file_formatter)
+# logger.addHandler(file_handler)
 
-load_dotenv()
+# # Console handler for logs
+# console_handler = logging.StreamHandler(sys.stdout)
+# console_handler.setLevel(logging.INFO)
+# console_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+# console_handler.setFormatter(console_formatter)
+# logger.addHandler(console_handler)
 
-from cryptography.hazmat.primitives import serialization
+# # Redirect stdout and stderr to logs
+# stdout_logger = logging.getLogger('STDOUT')
+# stderr_logger = logging.getLogger('STDERR')
+
+# class StreamToLogger:
+#     def __init__(self, logger, level):
+#         self.logger = logger
+#         self.level = level
+
+#     def write(self, message):
+#         if message.strip():  # Ignore empty messages
+#             self.logger.log(self.level, message.strip())
+
+#     def flush(self):
+#         pass  # Required for compatibility with sys.stdout and sys.stderr
+
+# sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
+# sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
+
+try:
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.asymmetric import padding, rsa
+    from cryptography.hazmat.primitives import serialization
+
+    from flask import Flask, jsonify, request, session as flask_session
+    from werkzeug.security import generate_password_hash, check_password_hash
+    from flask_login import login_user, logout_user, LoginManager, login_required, current_user
+    from flask_cors import CORS, cross_origin
+
+    import base64, uuid, jwt, datetime, json
+    from datetime import datetime, timedelta, timezone
+    import os
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    from cryptography.hazmat.primitives import serialization
+
+    from flask import Flask
+
+    app = Flask(__name__)
+
+    # Configure logging
+
+    open('./app.log', 'w').close()
+    logging.basicConfig(
+        filename='./app.log',  # Path to log file
+        level=logging.INFO,  # Set logging level to INFO
+        format='%(asctime)s %(levelname)s: %(message)s'  # Log format
+    )
+
+    # Log a startup message
+    app.logger.info("Flask application has started.")
+
+
+except Exception as e:
+    # app.logger.error(f"An error occurred: {e}")
+    # sys.stderr.write(e)
+    logging.error('Error at %s', 'division', exc_info=e)
+    exit(1)
+# app.logger.addHandler(console_handler)
+
+
+
 try:
     from model import session, User, HighScore
     if session == None:
         raise Exception("Model failed to load")
 except Exception as e:
+    app.logger.error(f"Error while connecting to MySQL: {e}")
     print("Error while connecting to MySQL", e)
     print("is the database switched on")
+    exit(1)
 
-SECRET_KEY = b'b6M4CyDFtvXYFbQyHs7BT85ryH@NEQ9W'
-ORIGIN = "http://localhost:3000"
+app.logger.info(f"Database connected")
 
-SECRET_KEY = os.environb[b'SECRET_KEY']
+try:
+    ORIGIN = os.getenv('ORIGIN')
+    SECRET_KEY = os.environb[b'SECRET_KEY']
+    app = Flask(__name__)
+    app.secret_key  = SECRET_KEY
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-app = Flask(__name__)
-app.secret_key  = SECRET_KEY
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+    used_nonces = set()
 
-used_nonces = set()
+    #SqlAlchemy Database Configuration With Mysqlpip list
+    HOST = os.getenv('HOST')
+    USER = os.getenv('USER_NAME')
+    PASSWORD = os.getenv('PASSWORD')
+    DATABASE = os.getenv('DATABASE')
+    PORT = os.getenv('PORT')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}"
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-with open("private_key.pem", "rb") as key_file:
-    private_key = serialization.load_pem_private_key(
-        key_file.read(),
-        password=None
-    )
+    login_manager = LoginManager()
+    login_manager.init_app(app)
 
-with open("public_key.pem", "rb") as key_file:
-    public_key = serialization.load_pem_public_key(
-        key_file.read()
-    )
+    with open("private_key.pem", "rb") as key_file:
+        private_key = serialization.load_pem_private_key(
+            key_file.read(),
+            password=None
+        )
+
+    with open("public_key.pem", "rb") as key_file:
+        public_key = serialization.load_pem_public_key(
+            key_file.read()
+        )
+except Exception as e:
+    app.logger.error(f"Error while setting up: {e}")
+    print("Error while connecting to MySQL", e)
+    exit(1)
+
+
 @app.route('/')
 def home():
     return 'Welcome to Codecademy Survivors!'
+
+
+@app.route('/check-login')
+@cross_origin(origins=ORIGIN, supports_credentials=True)
+def check_login():
+    try:
+        if current_user.is_authenticated:
+            user_id = current_user.id
+            current_record = session.query(HighScore).filter_by(user=user_id).first()
+            score = 100
+            if(current_record  != None):
+                score = current_record.score
+            return jsonify({'logged_in':True,'login_name':current_user.name, 'score':score})
+        else:
+            return jsonify({'logged_in':False})
+    except Exception as e:
+        app.logger.error(f"Error /check-login: {e}")
+        print("Error /check-login", e)
+        exit(1)
 
 
 @app.route('/public-key', methods=['GET'])
@@ -65,14 +172,7 @@ def get_public_key():
 
     
     return jsonify({"public_key": key_base64, "session_id":(flask_session['session_id'])})
-#SqlAlchemy Database Configuration With Mysqlpip list
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/highscore'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-
-login_manager = LoginManager()
-login_manager.init_app(app)
 
 
 @login_manager.user_loader
@@ -103,7 +203,8 @@ def highscore():
         ]
         return output
     except Exception as e:
-        print("Error while connecting to MySQL", e)
+        print("Error get /highscore", e)
+        app.logger.error(f"Error /highscore: {e}")
         return jsonify({"error": "Failed to connect to the database."}), 500
 
 
@@ -111,37 +212,55 @@ def highscore():
 @app.route('/login', methods=['POST'])
 @cross_origin(origins=ORIGIN, supports_credentials=True)
 def login():
-    data = request.json
-    user_name = data['user']
-    user_password = data['password']
-    user = session.query(User).filter_by(name=user_name).first()
-    if user == None :
-        return jsonify({"error": "User name not found."}), 400
-    if(not check_password_hash(password=user_password, pwhash = user.password_hash)):
-        return jsonify({"error": "Login Failed"}), 400
-    login_user(user, remember = True)
-    return jsonify({"sucess": f"Logged in {user_name}"}), 200
+    try:
+        data = request.json
+        user_name = data['user']
+        user_password = data['password']
+        user = session.query(User).filter_by(name=user_name).first()
+        if user == None :
+            return jsonify({"error": "User name not found."}), 400
+        if(not check_password_hash(password=user_password, pwhash = user.password_hash)):
+            app.logger.error(f"Login error no password \n {user.password_hash} vs {generate_password_hash(user_password)}")
+            return jsonify({"error": "Login Failed, no password match"}), 400
+        login_user(user, remember = True)
+        user_id = user.id
+        current_record = session.query(HighScore).filter_by(user=user_id).first()
+        score = 100
+        if(current_record  != None):
+            score = current_record.score
+        return jsonify({"sucess": f"Logged in {user_name}", "score": score}), 200
+    except Exception as e:
+        print("Error get /login", e)
+        app.logger.error(f"Error /login: {e}")
+        return "error /login", 500   
     
 
 @app.route('/register', methods=['POST'])
 @cross_origin(origins=ORIGIN, supports_credentials=True)
 def register():
     # body is username, email and password
-    data = request.form
-    user_name = data['user']
-    #user_email = data['email']
-    user_password = data['password']
+    try:
+        data = request.json
+        
+        user_name = data['user']
+        #user_email = data['email']
+        user_password = data['password']
+    except Exception as e:
+        # return jsonify({"error": e}), 500
+        return "error /register", 500
     try:
         user_exists = session.query(User).filter_by(name=user_name).first() != None
         if(user_exists):
             return jsonify({"error": "User name already exists."}), 400
         hashed_password = generate_password_hash(user_password)
+        app.logger.info({hash:hashed_password})
         user = User(name=user_name, password_hash=hashed_password)
         session.add(user)
         session.commit()
         login_user(user, remember = True)
-        return jsonify({"sucess": "Created user {user_name}."}), 200
-    except:
+        return jsonify({"sucess": f"Created user {user_name}."}), 200
+    except Exception as e:
+        app.logger.error(f"Error /register: {e}")
         return jsonify({"error": "Failed to create user"}), 500
     
 
@@ -180,7 +299,11 @@ def submit_score():
         # Extract submission details
         session_id = submission['sessionId']
         score = submission['score']
-        timestamp = datetime.fromisoformat(submission['timestamp'])
+        
+        parsed_time = datetime.strptime(submission['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ')
+
+        # Make parsed_time timezone-aware
+        timestamp = parsed_time.replace(tzinfo=timezone.utc)
         nonce = submission['nonce']
         
         # Verify the submission
@@ -194,8 +317,9 @@ def submit_score():
         #return jsonify(high_score_table), 200
     
     except Exception as e:
-        print({"error": str(e)})
-        return jsonify({"error": str(e)}), 500
+        app.logger.error(f"Error /submit_score: {e}", exc_info=True)
+        #print({"error /submit_score": str(e)})
+        return jsonify({"error": "Error in submit score"} ), 500
 
 def verify_submission(session_id, timestamp, nonce):
     # Verify flask_session ID (implement your flask_session management logic here)
@@ -237,7 +361,8 @@ def save_score(session_id, score, time_stamp):
         session.commit()
 
     except Exception as e:
-        print({'error':e})
+        app.logger.error(f"Error in save_score: {e}")
+        print({'error in save_score':e})
         session.rollback()
 
 

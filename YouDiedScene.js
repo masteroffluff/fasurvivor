@@ -25,8 +25,8 @@ class YouDiedScene extends Phaser.Scene {
     catcher.body.setImmovable();
     catcher.name = "catcher";
 
-	maskGraphics.fillStyle(0,0)
-    maskGraphics.fillRect(x, y+40, w, h-40);
+    maskGraphics.fillStyle(0, 0);
+    maskGraphics.fillRect(x, y + 40, w, h - 40);
     const mask = new Phaser.Display.Masks.GeometryMask(this, maskGraphics);
     const highScores = this.physics.add.group();
 
@@ -35,12 +35,12 @@ class YouDiedScene extends Phaser.Scene {
       highScore.y = this.lastYPos;
     });
     let i = 1;
-	this.add
-	.text(x + w / 2, y + 20, "High Scores", {
-	  ...textStyle,
-	  fontSize: "30px",
-	})
-	.setOrigin(0.5);
+    this.add
+      .text(x + w / 2, y + 20, "High Scores", {
+        ...textStyle,
+        fontSize: "30px",
+      })
+      .setOrigin(0.5);
     highScore.forEach((hs) => {
       console.log(hs);
       const text = this.add
@@ -83,13 +83,11 @@ class YouDiedScene extends Phaser.Scene {
       gameState.highScore = gameState.score;
       if (login_name == "") {
         message +=
-          "\nWhy not log in to register your score \non the high score table?";
+          "\nWhy not log in to submit your score \non the high score table?";
         this.button(config.width / 2, 350, 200, 50, "Login", () => {
           this.scene.pause();
           this.scene.launch("LoginScene", { level: this.scene.key });
-          this.events.on("resume", () => {
-            
-          });
+          this.events.on("resume", () => {});
         });
       } else {
         const pleaseWait = this.add.text(
@@ -97,9 +95,15 @@ class YouDiedScene extends Phaser.Scene {
           350,
           "Please wait",
           textStyle
-        );
+        ).setOrigin(0.5,0.5).setDepth(0);
+        const pleaseWaitbox = this.add.graphics().setDepth(-1)
+        const pwBounds = pleaseWait.getBounds()
+        pleaseWaitbox.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
+        pleaseWaitbox.fillRect(pwBounds.x,pwBounds.y,pwBounds.width,pwBounds.height)
+        
         score_submit(gameState.score).then((highScore) => {
           pleaseWait.destroy();
+          pleaseWaitbox.destroy();
           this.doHighScore(highScore);
         });
       }
@@ -121,7 +125,7 @@ class YouDiedScene extends Phaser.Scene {
       mtBounds.width + 40,
       mtBounds.height + 40
     ); // checked
-    // Adding debug outline to see the bounding box of the text
+    
     messageText.setStroke("#aaa", 1);
 
     this.button(config.width / 2, 500, 200, 50, "Exit", () => {

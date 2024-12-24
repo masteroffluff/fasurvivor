@@ -1,4 +1,4 @@
-const URL = "http://127.0.0.1:5000";
+const URL = "https://chrischapman.cc/CodecademySurvivorsPy/";
 
 function generateNonce() {
   return globalThis.crypto.getRandomValues(new Uint8Array(16)).join("");
@@ -51,6 +51,7 @@ async function score_submit(score) {
 
 async function importPublicKey(publicKeyB64) {
   // Convert base64 to ArrayBuffer
+  console.log(publicKeyB64)
   const binaryDer = Uint8Array.from(atob(publicKeyB64), (c) =>
     c.charCodeAt(0)
   ).buffer;
@@ -82,14 +83,34 @@ async function encryptWithPublicKey(data, publicKey) {
   return btoa(String.fromCharCode.apply(null, new Uint8Array(encrypted)));
 }
 
+async function check_login() {
+  const response = await fetch(URL + "/check-login", {
+    headers: { "Content-Type": "application/json", credentials: "include" },
+    credentials: "include",
+  });
+  const login_response =  await response.json();
+  if(login_response.logged_in){
+    await get_Public_key()
+    gameState.highScore = login_response.score
+  }
+  return login_response
+
+}
+
 async function get_Public_key() {
   const response = await fetch(URL + "/public-key", {
     headers: { "Content-Type": "application/json", credentials: "include" },
     credentials: "include",
   });
+  try{
   const key_data = await response.json();
   publicKey = key_data.public_key;
   sessionId = key_data.session_id;
+  return key_data
+  } catch(e) {
+    console.log(e)
+    console.log(response, response.body)
+  }
 }
 
 async function score_login(user, password) {

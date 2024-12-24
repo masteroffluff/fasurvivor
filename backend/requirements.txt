@@ -16,10 +16,10 @@ pyasn1
 pycparser
 PyJWT
 PyMySQL
+python-dotenv
 python-jose
 rsa
 six
 SQLAlchemy
 typing_extensions
 Werkzeug
-python-dotenv

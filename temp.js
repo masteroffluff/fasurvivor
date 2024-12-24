@@ -41,43 +41,52 @@
 //     }
 // }
 
-const gameState = {
-	score: 2,
-	money: 0,
-	width: 2000,
-  	height: 2000,
-	highScore:1,
-	debug:false
-};
+// const gameState = {
+// 	score: 2,
+// 	money: 0,
+// 	width: 2000,
+//   	height: 2000,
+// 	highScore:1,
+// 	debug:false
+// };
 
+// const textStyle = {
+// 	fill: '#000',
+// 	fontSize: '20px',
+// 	wordWrap: { width: 280, useAdvancedWrap: true },
+// 	align: 'center'
+// };
 
-const textStyle = { 
-	fill: '#000', 
-	fontSize: '20px', 
-	wordWrap: { width: 280, useAdvancedWrap: true }, 
-	align: 'center' 
-};
+var publicKey,
+  sessionId,
+  login_name = "fluffy";
 
-var publicKey, sessionId, login_name = "fluffy"
+// // Configuration for the Phaser game
+// const config = {
+//     type: Phaser.AUTO,
+//     width: 800,
+//     height: 600,
+//     backgroundColor: "aaaaaa",
+//     scene: [YouDiedScene],
+//     physics: {
+//         default: 'arcade',
+//         arcade: {
+//             gravity: { y: 0 },
+//             debug: false
+//         }
+//     }
+// };
+// const game = null;
 
-// Configuration for the Phaser game
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    backgroundColor: "aaaaaa",
-    scene: [YouDiedScene],
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 0 },
-            debug: false
-        }
-    }
-};
-const game = null;
-score_login(login_name,"fluffy1").then(()=>{
+score_login("fluffy", "fluffy1").then(() => {
+  score_submit(100)
+    .then((r) => {
+      console.log(r);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 
-console.log(sessionId)
-    game = new Phaser.Game(config);
-})
+  // console.log(sessionId)
+  //     game = new Phaser.Game(config);
+});
