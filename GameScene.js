@@ -878,6 +878,8 @@ class GameScene extends Phaser.Scene {
     // pointer/ mobile controls
     const { worldX, worldY } = this.input.activePointer;
 
+
+
     if (this.input.activePointer.isDown) {
       const angle = Phaser.Math.Angle.Between(
         gameState.player.x,
@@ -896,21 +898,29 @@ class GameScene extends Phaser.Scene {
     let dX = 0,
       dY = 0,
       keyPressed = false;
-    if (this.cursors.left.isDown) {
+      var keyObjects = this.input.keyboard.addKeys({
+        up: "W",
+        down: "S",
+        left: "A",
+        right: "D",
+      }); 
+
+
+      if (this.cursors.left.isDown||keyObjects.left.isDown) {
       dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
       gameState.player.flipX = true;
       keyPressed = true;
     }
-    if (this.cursors.right.isDown) {
+    if (this.cursors.right.isDown||keyObjects.right.isDown) {
       dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
       gameState.player.flipX = false;
       keyPressed = true;
     }
-    if (this.cursors.up.isDown) {
+    if (this.cursors.up.isDown||keyObjects.up.isDown) {
       dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
       keyPressed = true;
     }
-    if (this.cursors.down.isDown) {
+    if (this.cursors.down.isDown||keyObjects.down.isDown) {
       dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
       keyPressed = true;
     }
@@ -968,6 +978,7 @@ class GameScene extends Phaser.Scene {
         weapon.destroy();
       }
     });
+
     const player = gameState.player;
     // handle level up
     if (player.xp >= player.nextLevel) {
