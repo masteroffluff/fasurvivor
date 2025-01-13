@@ -196,11 +196,12 @@ class GameScene extends Phaser.Scene {
     this.enemyData = {
       enemy1: {
         name: "enemy1",
-        life: 1,
+        life: 2,
         damage: 1,
         xpGiven: 1,
         scale: 1,
         value: 1,
+        isBoss: false,
       },
       enemy2: {
         name: "enemy2",
@@ -208,14 +209,17 @@ class GameScene extends Phaser.Scene {
         damage: 2,
         xpGiven: 1,
         scale: 1,
-        value: 5,
+        value: 2,
+        isBoss: false,
       },
       boss1: {
         name: "enemy2",
-        life: 5,
-        damage: 2,
-        xpGiven: 1,
-        scale: 1,
+        life: 10,
+        damage: 5,
+        xpGiven: 10,
+        scale: 2,
+        value:10,
+        isBoss: true,
       },
     };
   }
