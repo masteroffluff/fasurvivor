@@ -3,3 +3,4 @@ backend/environment/*
 temp/*
 hidden/*
 app.log
+.env

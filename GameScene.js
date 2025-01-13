@@ -15,14 +15,14 @@ let maxEnemies = 15;
 
 const playAreaOffset = 50;
 
-let timer = 0;
+//let timer = 0;
 
 const backgroundDepth = -999;
 const floorItemDepth = -99;
 const playerDepth = 0;
 const enemyDepth = 99;
 
-var isClicking = false;
+//var isClicking = false;
 
 const playerStats = {
   startingHitpoints: 100,
@@ -222,7 +222,7 @@ class GameScene extends Phaser.Scene {
   getWave() {
     this.wave = this.waves[this.currentWaveIndex];
     this.currentWaveIndex++;
-    const directorLoop = this.time.addEvent({
+    this.waveLoop = this.time.addEvent({
       callback: this.getWave,
       delay: this.wave.waveLengthSeconds * 1000,
       callbackScope: this,
@@ -765,15 +765,48 @@ class GameScene extends Phaser.Scene {
         const r = item.onVacuum();
       }
     });
-    // * controller function for game
+    // * set up pointer controls 
+    this.pointerController = this.add
+    .sprite(0, 0, "playerController")
+    .setOrigin(0.5, 0.5)
+    .setVisible(false); // Initially hidden
 
+  this.pointerController.relX = 0;
+  this.pointerController.relY = 0;
+
+  // Flag to track pointer state
+  this.isClicking = false;
+
+  // Register a single pointerdown and pointerup event listener
+  this.input.on("pointerdown", (pointer) => {
+    if (!this.isClicking) {
+      this.isClicking = true;
+      this.pointerController.setVisible(true);
+
+      // Set initial pointerController position
+      this.pointerController.x = Math.floor(pointer.worldX);
+      this.pointerController.y = Math.floor(pointer.worldY);
+
+      // Calculate relative position to the player
+      this.pointerController.relX =
+        this.pointerController.x - gameState.player.x;
+      this.pointerController.relY =
+        this.pointerController.y - gameState.player.y;
+    }
+  });
+
+  this.input.on("pointerup", () => {
+    this.pointerController.setVisible(false);
+    this.isClicking = false;
+  });
     // **** game starting conditions *****
 
     // start hud
     this.scene.launch("HudScene");
     this.scene.get("HudScene").events.emit("UpdateHudItemTB"); // sent the event to tell the hud to update
     // initalise the enemy genrator
-    this.getWave(); // get the wave and set the timer for the next wave
+    this.currentWaveIndex = 0
+    //this.getWave(); // get the wave and set the timer for the next wave
     const directorLoop = this.time.addEvent({
       callback: this.director,
       delay: 100,
@@ -796,45 +829,15 @@ class GameScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       gameState.player = null; // Reset player on scene shutdown
+      delete this.wave 
+      this.waveLoop.destroy()
     });
 
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
     //new Gem(250, 250, 200, this)
         // Create a single instance of the pointerController
-        this.pointerController = this.add
-        .sprite(0, 0, "playerController")
-        .setOrigin(0.5, 0.5)
-        .setVisible(false); // Initially hidden
-  
-      this.pointerController.relX = 0;
-      this.pointerController.relY = 0;
-  
-      // Flag to track pointer state
-      this.isClicking = false;
-  
-      // Register a single pointerdown and pointerup event listener
-      this.input.on("pointerdown", (pointer) => {
-        if (!this.isClicking) {
-          this.isClicking = true;
-          this.pointerController.setVisible(true);
-  
-          // Set initial pointerController position
-          this.pointerController.x = Math.floor(pointer.worldX);
-          this.pointerController.y = Math.floor(pointer.worldY);
-  
-          // Calculate relative position to the player
-          this.pointerController.relX =
-            this.pointerController.x - gameState.player.x;
-          this.pointerController.relY =
-            this.pointerController.y - gameState.player.y;
-        }
-      });
-  
-      this.input.on("pointerup", () => {
-        this.pointerController.setVisible(false);
-        this.isClicking = false;
-      });
+ 
   }
 
   director() {
@@ -844,6 +847,7 @@ class GameScene extends Phaser.Scene {
     if (!this.wave) {
       this.getWave();
     }
+    
     const enemyCount = enemies.countActive();
     if (enemyCount <= this.wave.maxEnemies) {
       for (let i = enemyCount; i < this.wave.maxEnemies; i++) {
@@ -943,20 +947,6 @@ class GameScene extends Phaser.Scene {
         gameState.player.body.velocity
       );
     }
-
-    // if (this.input.activePointer.isDown) {
-    //   const angle = Phaser.Math.Angle.Between(
-    //     gameState.player.x,
-    //     gameState.player.y,
-    //     worldX,
-    //     worldY
-    //   );
-    //   this.physics.velocityFromRotation(
-    //     angle,
-    //     playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
-    //     gameState.player.body.velocity
-    //   );
-    // }
 
     // * keyboard contols
     // use dx and dy to control the player velocity initially zero as not movin
