@@ -33,7 +33,7 @@ class IconThingy {
     this.y = y;
     this.sprite.setPosition(x, y);
     this.text.setPosition(x, y + 16);
-    this.level = gameState.player.heldWeapons.get(this.thing) || 1;
+    this.level = gameState.player.heldWeapons.get(this.thing) || gameState.player.heldBonuses.get(this.thing) || 1; // todo: fix me!!
     this.text.setText(IconThingy.symbol.repeat(this.level));
   }
 }
