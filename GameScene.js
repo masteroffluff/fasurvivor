@@ -37,6 +37,7 @@ const playerStats = {
   bonusPen: 0,
   bonusROF: 0,
   bonusArea: 0,
+  bonusLuck: 0,
 };
 
 class Item {
@@ -233,27 +234,57 @@ class GameScene extends Phaser.Scene {
       loop: false,
     });
   }
+  // calculateDelay(weaponName) {
+  //   const weapon2 = this.weaponsData[weaponName];
+  //   return weapon2.delay * (1 - gameState.player.stats.bonusROF * 0.01);
+  // };
+  // calculateDelay(weaponName){
+  //   return this.getWeaponDetails(weaponName).delay
+  // }
+  getWeaponDetails(weaponName){
+    const weaponData = this.weaponsData[weaponName]
+    const level = gameState.player.heldWeapons.get(weaponData)
+    const { pen, damage: baseDamage, levels, spriteName, velocity, delay: baseDelay, scale:baseScale } = weaponData;
+    const weaponBonus = {}
+    for (let i = 1; i<=level; i++){
+      Object.assign (weaponBonus, levels[i-1].bonus)
+    } 
+    console.log(weaponName, weaponBonus, level)
+    const bonusROF = weaponBonus.rof || 0
+    const bonusDamage = weaponBonus.damage || 0
+    const bonusAmount = weaponBonus.amount || 0
+    const bonusProjSpeed = weaponBonus.proj_speed || 0
+    const bonusArea = weaponBonus.area || 0
+    const bonusLuck = weaponBonus.luck || 0
+    
+    const damage = baseDamage * (1 + (gameState.player.stats.bonusDamage + bonusDamage) * 0.1)
+    const amount = gameState.player.stats.projectileCount + bonusAmount
+    const projSpeed = velocity * (1 + (gameState.player.stats.projectileSpeed + bonusProjSpeed) * 0.1)
+    const area = baseScale + (bonusArea + gameState.player.stats.bonusArea) * 0.1 
+    const luck = (bonusLuck + gameState.player.stats.bonusLuck) * 0.1 
+    const delay = baseDelay * (1 - (gameState.player.stats.bonusROF+bonusROF) * 0.01)
+    
+    return {damage, pen, amount, projSpeed, area, luck, delay}
+  }
   getWeaponCallback(weaponName) {
     switch (("get,", weaponName)) {
       case "fireball":
         return function shootFireball() {
+          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay =
-              this.calculateDelay(weaponName);
+            gameState.player.weaponLoops[weaponName].delay = delay;
           }
-
-          const { pen, damage } = this.weaponsData[weaponName];
+          console.log(amount)
           for (
             let index = 0;
-            index <= gameState.player.stats.projectileCount;
+            index <= amount;
             index++
           ) {
             const sprite = weapons
               .create(gameState.player.x, gameState.player.y, weaponName)
               .setScale(0.2 + gameState.player.stats.bonusArea * 0.1);
-            sprite.damage =
-              damage * (1 + gameState.player.stats.bonusDamage * 0.1);
-            sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.1);
+            sprite.damage = damage;
+            sprite.pen = pen;
             const targeted =
               enemies.children.getArray()[
                 Math.floor(Math.random() * enemies.children.size)
@@ -262,12 +293,12 @@ class GameScene extends Phaser.Scene {
               this.physics.moveToObject(
                 sprite,
                 targeted,
-                100 * (1 + gameState.player.stats.projectileSpeed * 0.1)
+                projSpeed
               );
             } else {
               Phaser.Math.RandomXY(
                 sprite.body.velocity,
-                100 * (1 + gameState.player.stats.projectileSpeed * 0.1)
+                projSpeed
               );
             }
           }
@@ -275,11 +306,11 @@ class GameScene extends Phaser.Scene {
 
       case "sword":
         return function swingSword() {
+          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay =
-              this.calculateDelay(weaponName);
+            gameState.player.weaponLoops[weaponName].delay = delay
           }
-          const { pen, damage } = this.weaponsData[weaponName];
 
           const ang = 360 / (gameState.player.stats.projectileCount + 1);
 
@@ -287,11 +318,11 @@ class GameScene extends Phaser.Scene {
             const sprite = weapons
               .create(gameState.player.x, gameState.player.y, weaponName)
               .setOrigin(0, 0.5)
-              .setScale(1 + gameState.player.stats.bonusArea * 0.1);
+              .setScale(area);
 
             sprite.angle = -angle;
             sprite.damage =
-              damage * (1 + gameState.player.stats.bonusDamage * 0.1);
+              damage;
             sprite.pen = Infinity;
 
             const bodyRadius = 15;
@@ -305,7 +336,7 @@ class GameScene extends Phaser.Scene {
               paused: false,
               angle: -405 + sprite.angle,
               yoyo: false,
-              duration: 750 * 1 - gameState.player.stats.projectileSpeed * 0.1,
+              duration: 750 * (1/projSpeed),
               onComplete: () => {
                 sprite.destroy();
               },
@@ -337,15 +368,12 @@ class GameScene extends Phaser.Scene {
         };
       case "bomb":
         return function throwbomb() {
+          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay =
-              this.calculateDelay(weaponName);
-          }
-          const { pen, damage } = this.weaponsData[weaponName];
-
+            gameState.player.weaponLoops[weaponName].delay = delay}
           for (
             let index = 0;
-            index <= gameState.player.stats.projectileCount;
+            index <= amount;
             index++
           ) {
             const bomb = this.physics.add
@@ -354,7 +382,7 @@ class GameScene extends Phaser.Scene {
 
             Phaser.Math.RandomXY(
               bomb.body.velocity,
-              100 * 1 - gameState.player.stats.projectileSpeed * 0.1
+              projSpeed
             );
             this.tweens.add({
               targets: bomb,
@@ -365,9 +393,8 @@ class GameScene extends Phaser.Scene {
               onComplete: () => {
                 const bombExplosion = weapons
                   .create(bomb.x, bomb.y, "bombExplosion")
-                  .setScale(1 + gameState.player.stats.bonusArea * 0.1);
-                bombExplosion.damage =
-                  damage * (1 + gameState.player.stats.bonusDamage * 0.1);
+                  .setScale(area);
+                bombExplosion.damage = damage ;
                 bombExplosion.body.setCircle(bombExplosion.width / 2);
                 bombExplosion.on("animationcomplete", (e) => {
                   bombExplosion.destroy();
@@ -381,9 +408,9 @@ class GameScene extends Phaser.Scene {
 
       case "foot":
         return function putFootDown() {
+          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay =
-              this.calculateDelay(weaponName);
+            gameState.player.weaponLoops[weaponName].delay = delay
           }
           const foot = this.physics.add
             .sprite(gameState.player.x, gameState.player.y - 300, "foot")
@@ -398,11 +425,8 @@ class GameScene extends Phaser.Scene {
               foot.destroy();
             },
             onYoyo: () => {
-              const goodProc = Math.random() > 0.5;
+              const goodProc = Math.random() > 0.5-luck;
               enemies.children.each((e) => {
-                // e.body.destroy()
-                // e.dead = true
-                // e.deadTween.restart()
                 e.kill(goodProc);
               });
             },
@@ -410,27 +434,26 @@ class GameScene extends Phaser.Scene {
         };
       case "banana":
         return function flingBanana(rept = null) {
+          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay =
-              this.calculateDelay(weaponName);
+            gameState.player.weaponLoops[weaponName].delay = delay;
           }
 
-          const { pen, damage } = this.weaponsData[weaponName];
           for (
             let index = 0;
-            index <= gameState.player.stats.projectileCount;
+            index <= amount;
             index++
           ) {
             const sprite = weapons
               .create(gameState.player.x, gameState.player.y, weaponName)
-              .setScale(1.2 + gameState.player.stats.bonusArea * 0.1);
-            sprite.damage =
-              damage * (1 + gameState.player.stats.bonusDamage * 0.1);
-            sprite.pen = pen * (1 + gameState.player.stats.bonusPen * 0.1);
+              .setScale(area);
+            sprite.damage = damage;
+            sprite.pen = pen;
             //let bananaX = gameState.player.x;
             sprite.bananaFlip = false;
             sprite.offset = 1;
             sprite.orientationX = gameState.player.flipX ? -1 : 1;
+            sprite.setVelocityX = projSpeed * sprite.orientationX;
             const bananarang = this.tweens.add({
               name: "bananarang",
               targets: sprite,
@@ -439,11 +462,14 @@ class GameScene extends Phaser.Scene {
               yoyo: false,
               repeat: -1,
               duration: 150,
+              // onYoyo:()=>{
+              //   sprite.setVelocityX = -projSpeed * sprite.orientationX
+              // },
               onUpdate: () => {
                 if (sprite.body) {
                   sprite.setVelocityY(gameState.player.body.velocity.y * 0.75);
                 }
-                //sprite.y=gameState.player.y;
+                sprite.y=gameState.player.y;
                 if (!sprite.bananaFlip) {
                   sprite.offset++;
                 } else {
@@ -463,7 +489,7 @@ class GameScene extends Phaser.Scene {
             });
           }
           if (rept === null) {
-            rept = gameState.player.stats.projectileCount;
+            rept = amount;
           }
 
           if (rept > 0) {
@@ -480,12 +506,10 @@ class GameScene extends Phaser.Scene {
 
       default:
         return function genericAction() {
+          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay =
-              this.calculateDelay(weaponName);
+            gameState.player.weaponLoops[weaponName].delay = delay
           }
-
-          const { pen, damage } = this.weaponsData[weaponName];
           for (
             let index = 0;
             index <= gameState.player.stats.projectileCount;
@@ -532,10 +556,7 @@ class GameScene extends Phaser.Scene {
     this.load.pack("bonusesPack", "./data/bonusesPack.json");
     this.load.pack("weaponsPack", "./data/weaponsPack.json");
 
-    this.calculateDelay = function calculateDelay(weaponName) {
-      const weapon2 = this.weaponsData[weaponName];
-      return weapon2.delay * (1 - gameState.player.stats.bonusROF * 0.01);
-    };
+    
   }
 
   //// ***** CREATE FUNCTION *******
@@ -543,10 +564,10 @@ class GameScene extends Phaser.Scene {
     function weaponLoop(weaponName) {
       //context = context || this
       //const weapon2 = this.weaponsData[weaponName];
-      this.getWeaponCallback(weaponName).call(this);
+      //this.getWeaponCallback(weaponName).call(this);
       return this.time.addEvent({
         callback: this.getWeaponCallback(weaponName),
-        delay: this.calculateDelay.call(this, weaponName),
+        delay: this.getWeaponDetails(weaponName).delay,
         callbackScope: this,
         loop: true,
       });
@@ -643,19 +664,19 @@ class GameScene extends Phaser.Scene {
       (w) => {
         if (this.idempotenceFlag) {
           this.idempotenceFlag = false;
-          const { player } = gameState;
+          // const { player } = gameState;
 
           const weaponObject = this.weaponsData[w.trim()];
-          if (!player.heldWeapons.has(weaponObject)) {
-            player.heldWeapons.set(weaponObject, 1);
+          if (!gameState.player.heldWeapons.has(weaponObject)) {
+            gameState.player.heldWeapons.set(weaponObject, 1);
             gameState.player.weaponLoops[weaponObject] = weaponLoop.call(
               this,
               weaponObject.name
             ); // creates a weaponloop for the weapon and adds it to the weaponloops hashmap
           } else {
-            player.heldWeapons.set(
+            gameState.player.heldWeapons.set(
               weaponObject,
-              player.heldWeapons.get(weaponObject) + 1
+              gameState.player.heldWeapons.get(weaponObject) + 1
             );
           }
         }
