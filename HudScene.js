@@ -9,7 +9,7 @@ class IconThingy {
     wordWrap: { width: 40, useAdvancedWrap: true },
   };
   constructor(scene, thing, x, y) {
-    console.log("creating");
+    //console.log("creating");
     this.sprite = scene.add
       .sprite(x, y, thing.icon)
       .setScale(0.5)
@@ -28,7 +28,7 @@ class IconThingy {
   }
 
   update(x, y) {
-    console.log("updating");
+    //console.log("updating");
     this.x = x;
     this.y = y;
     this.sprite.setPosition(x, y);
@@ -235,6 +235,12 @@ class HudScene extends Phaser.Scene {
     this.scoreText = this.add.text(
       this.game.config.width - 200,
       30,
+      `Score:0`,
+      this.defaultTextStyle
+    );
+    this.killedText = this.add.text(
+      this.game.config.width - 200,
+      50,
       `Killed:0`,
       this.defaultTextStyle
     );
@@ -308,9 +314,10 @@ class HudScene extends Phaser.Scene {
       gameState.player.maxHitpoints
     );
     this.xpBar.update(gameState.player.xp, gameState.player.nextLevel);
-    this.scoreText.setText(`Killed:${gameState.score}`);
+    this.scoreText.setText(`Score:${gameState.score}`);
+    this.killedText.setText(`Kills:${gameState.kills}`);
     if (gameState.debug) {
-      this.scoreTextDemo.setText(`Killed:${gameState.score}`);
+      this.scoreTextDemo.setText(`Score:${gameState.score}`);
       this.healthText.setText(
         `Health:${Math.floor(gameState.player.hitpoints)}`
       );

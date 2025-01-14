@@ -74,11 +74,11 @@
   "investments":{
       "name": "investments",
       "type": "bonus",
-      "stat": "goldBonus",
+      "stat": "scoreBonus",
       "icon": "icon_linegoup",
-      "amt": 0.1,
+      "amt": 0.5,
       "max": 5,
-      "desc": "Invest wisely. Gives you more gold per coin picked up."
+      "desc": "Invest wisely. Gives you more points per kill."
   },
   "zoom":{
       "name": "zoom",

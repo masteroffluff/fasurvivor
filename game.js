@@ -1,4 +1,5 @@
 const gameState = {
+  kills:0,
   score: 0,
   money: 0,
   width: 2000,

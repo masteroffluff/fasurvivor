@@ -32,7 +32,8 @@ const playerStats = {
   collectionRadius: 0,
   projectileSpeed: 0,
   projectileCount: 0,
-  goldBonus: 0, // todo: add gold
+  // goldBonus: 0, // todo: add gold
+  scoreBonus: 0,
   bonusDamage: 0,
   bonusPen: 0,
   bonusROF: 0,
@@ -208,7 +209,7 @@ class GameScene extends Phaser.Scene {
         name: "enemy2",
         life: 5,
         damage: 2,
-        xpGiven: 1,
+        xpGiven: 3,
         scale: 1,
         value: 2,
         isBoss: false,
@@ -905,13 +906,15 @@ class GameScene extends Phaser.Scene {
           });
         };
         enemy.kill = (goodProc = true) => {
+          
           //enemy.body.destroy()
           if (enemy.state != "dead") {
-            gameState.score++;
+            gameState.kills++
+            gameState.score+= Math.ceil( enemy.data.value * (1 + gameState.player.stats.scoreBonus * this.bonusesData.investments.amt));
             enemy.state = "dead";
             enemy.deadTween.play();
             if (goodProc) {
-              if (Math.random() > 0.75) {
+              if (Math.random()+ (gameState.player.stats.bonusLuck * 0.1) > 0.75) {
                 new Gem(enemy.x, enemy.y, enemy.data.xpGiven, this);
               }
             }
