@@ -6,6 +6,7 @@
   <title>Codecademy Survivors</title>
   <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" href="reset.css"> 
+  <link rel="stylesheet" href="preloader.css"> 
   <style>
     canvas {
       width: 500px;
@@ -15,15 +16,25 @@
 </head>
 
 <body>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/jose@5.9.6/dist/browser/index.min.js"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@9.0.2/dist/index.umd.min.js"></script> -->
+  <div id="preloader">
+    <!-- <img src="https://content.codecademy.com/courses/learn-phaser/codey.png"> -->
+    <p>Loading</p>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
   
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.js"></script>
+  <script src="submit_score.js"></script>
+  <script src="button.js"></script>
   <script src="GameScene.js"></script>
+  <script src="LoginScene.js"></script>
   <script src="PauseScene.js"></script>
   <script src="StartScene.js"></script>
   <script src="HudScene.js"></script>
   <script src="YouDiedScene.js"></script>
   <script src="LevelUpScene.js"></script>
   <script src="PickUpItemScene.js"></script>
+  <script src="HighScoreScene.js"></script>
   <script src="game.js"></script>
 </body>
 

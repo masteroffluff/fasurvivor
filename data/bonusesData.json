@@ -6,7 +6,7 @@
       "icon": "icon_explosives",
       "amt": 0.1,
       "max": 5,
-      "desc": "Add ing punch to you weapons increases damage"
+      "desc": "Add punch to your weapons, increases damage"
   },
   "drilling":{
       "name": "drilling",
@@ -33,7 +33,7 @@
       "icon": "icon_runningShoe",
       "amt": 0.1,
       "max": 5,
-      "desc": "run fast, increases player movement speed"
+      "desc": "Run fast, increases player movement speed"
   },
   "vitamins":{
       "name": "vitamins",
@@ -69,16 +69,16 @@
       "icon": "icon_grease",
       "amt": 0.1,
       "max": 5,
-      "desc": "Its greaed lightning. Increases projectile speed"
+      "desc": "Its Greased lightning! Increases projectile speed"
   },
   "investments":{
       "name": "investments",
       "type": "bonus",
-      "stat": "goldBonus",
+      "stat": "scoreBonus",
       "icon": "icon_linegoup",
-      "amt": 0.1,
+      "amt": 0.5,
       "max": 5,
-      "desc": "Invest wisely, give you more gold per coin picked up."
+      "desc": "Invest wisely. Gives you more points per kill."
   },
   "zoom":{
       "name": "zoom",

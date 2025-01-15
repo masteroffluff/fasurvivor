@@ -1,0 +1,63 @@
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    overflow: hidden;
+    background: #fff;
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    
+    
+}
+#preloader p{
+    padding-top:120px;
+    /* text-align: center; */
+    top: calc(50% - 70px);
+}
+
+#preloader:before {
+    content: "";
+    position: fixed;
+    top: calc(50% - 30px);
+    left: calc(50% - 30px);
+    /* border: 6px solid #f2f2f2;
+    border-top: 6px solid #56829e; */
+    background-image: url("https://content.codecademy.com/courses/learn-phaser/codey.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    /* border-radius: 50%; */
+    width: 76px;
+    height: 76px;
+    -webkit-animation: animate-preloader 1s linear infinite;
+    animation: animate-preloader 1s linear infinite
+}
+
+
+@-webkit-keyframes animate-preloader {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0)
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes animate-preloader {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0)
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg)
+    }
+}
+
