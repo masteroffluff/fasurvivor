@@ -96,7 +96,7 @@ except Exception as e:
 app.logger.info(f"Database connected")
 
 try:
-    ORIGIN = os.getenv('ORIGIN')
+    ORIGIN = os.getenv('ORIGIN').split(",")
     SECRET_KEY = os.environb[b'SECRET_KEY']
     app = Flask(__name__)
     app.secret_key  = SECRET_KEY

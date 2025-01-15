@@ -156,7 +156,7 @@ async function score_register(user, password) {
     headers: { "Content-Type": "application/json" },
     credentials: "include",
   };
-  const response = await fetch(URL + "/login", content);
+  const response = await fetch(URL + "/register", content);
   if (response.ok) {
     console.log("register successful");
     await get_Public_key();

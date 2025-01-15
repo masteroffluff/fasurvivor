@@ -137,7 +137,7 @@ class StartScene extends Phaser.Scene {
           25,
           "Log Out",
           () => {
-            score_logout().then(()=>{this.events.emit("loginChange")})
+            score_logout().then(()=>{doLoginButton()})
           },
           { ...textStyle, fontSize: "16px" }
         );
@@ -146,7 +146,7 @@ class StartScene extends Phaser.Scene {
     }
     doLoginButton();
     this.game.events.on("loginChange",()=>{
-      console.log('detected')
+      //console.log('detected')
       doLoginButton()
     })
     this.events.on('shutdown', () => {
