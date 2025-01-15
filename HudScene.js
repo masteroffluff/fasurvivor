@@ -257,7 +257,7 @@ class HudScene extends Phaser.Scene {
 
       this.xpText = this.add.text(
         150,
-        player.maxHitpoints`XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
+        `XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
         this.defaultTextStyle
       );
       this.levelText = this.add.text(

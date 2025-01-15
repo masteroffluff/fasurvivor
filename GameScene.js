@@ -220,7 +220,7 @@ class GameScene extends Phaser.Scene {
         damage: 5,
         xpGiven: 10,
         scale: 2,
-        value:10,
+        value: 10,
         isBoss: true,
       },
     };
@@ -242,45 +242,56 @@ class GameScene extends Phaser.Scene {
   // calculateDelay(weaponName){
   //   return this.getWeaponDetails(weaponName).delay
   // }
-  getWeaponDetails(weaponName){
-    const weaponData = this.weaponsData[weaponName]
-    const level = gameState.player.heldWeapons.get(weaponData)
-    const { pen, damage: baseDamage, levels, spriteName, velocity, delay: baseDelay, scale:baseScale } = weaponData;
-    const weaponBonus = {}
-    for (let i = 1; i<=level; i++){
-      Object.assign (weaponBonus, levels[i-1].bonus)
-    } 
-    console.log(weaponName, weaponBonus, level)
-    const bonusROF = weaponBonus.rof || 0
-    const bonusDamage = weaponBonus.damage || 0
-    const bonusAmount = weaponBonus.amount || 0
-    const bonusProjSpeed = weaponBonus.proj_speed || 0
-    const bonusArea = weaponBonus.area || 0
-    const bonusLuck = weaponBonus.luck || 0
-    
-    const damage = baseDamage * (1 + (gameState.player.stats.bonusDamage + bonusDamage) * 0.1)
-    const amount = gameState.player.stats.projectileCount + bonusAmount
-    const projSpeed = velocity * (1 + (gameState.player.stats.projectileSpeed + bonusProjSpeed) * 0.1)
-    const area = baseScale + (bonusArea + gameState.player.stats.bonusArea) * 0.1 
-    const luck = (bonusLuck + gameState.player.stats.bonusLuck) * 0.1 
-    const delay = baseDelay * (1 - (gameState.player.stats.bonusROF+bonusROF) * 0.01)
-    
-    return {damage, pen, amount, projSpeed, area, luck, delay}
+  getWeaponDetails(weaponName) {
+    const weaponData = this.weaponsData[weaponName];
+    const level = gameState.player.heldWeapons.get(weaponData);
+    const {
+      pen,
+      damage: baseDamage,
+      levels,
+      spriteName,
+      velocity,
+      delay: baseDelay,
+      scale: baseScale,
+    } = weaponData;
+    const weaponBonus = {};
+    for (let i = 1; i <= level; i++) {
+      Object.assign(weaponBonus, levels[i - 1].bonus);
+    }
+    console.log(weaponName, weaponBonus, level);
+    const bonusROF = weaponBonus.rof || 0;
+    const bonusDamage = weaponBonus.damage || 0;
+    const bonusAmount = weaponBonus.amount || 0;
+    const bonusProjSpeed = weaponBonus.proj_speed || 0;
+    const bonusArea = weaponBonus.area || 0;
+    const bonusLuck = weaponBonus.luck || 0;
+
+    const damage =
+      baseDamage *
+      (1 + (gameState.player.stats.bonusDamage + bonusDamage) * 0.1);
+    const amount = gameState.player.stats.projectileCount + bonusAmount;
+    const projSpeed =
+      velocity *
+      (1 + (gameState.player.stats.projectileSpeed + bonusProjSpeed) * 0.1);
+    const area =
+      baseScale + (bonusArea + gameState.player.stats.bonusArea) * 0.1;
+    const luck = (bonusLuck + gameState.player.stats.bonusLuck) * 0.1;
+    const delay =
+      baseDelay * (1 - (gameState.player.stats.bonusROF + bonusROF) * 0.01);
+
+    return { damage, pen, amount, projSpeed, area, luck, delay };
   }
   getWeaponCallback(weaponName) {
     switch (("get,", weaponName)) {
       case "fireball":
         return function shootFireball() {
-          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+          const { damage, pen, amount, projSpeed, area, luck, delay } =
+            this.getWeaponDetails(weaponName);
           if (gameState.player.weaponLoops[weaponName]) {
             gameState.player.weaponLoops[weaponName].delay = delay;
           }
-          console.log(amount)
-          for (
-            let index = 0;
-            index <= amount;
-            index++
-          ) {
+          console.log(amount);
+          for (let index = 0; index <= amount; index++) {
             const sprite = weapons
               .create(gameState.player.x, gameState.player.y, weaponName)
               .setScale(0.2 + gameState.player.stats.bonusArea * 0.1);
@@ -291,26 +302,20 @@ class GameScene extends Phaser.Scene {
                 Math.floor(Math.random() * enemies.children.size)
               ];
             if (targeted) {
-              this.physics.moveToObject(
-                sprite,
-                targeted,
-                projSpeed
-              );
+              this.physics.moveToObject(sprite, targeted, projSpeed);
             } else {
-              Phaser.Math.RandomXY(
-                sprite.body.velocity,
-                projSpeed
-              );
+              Phaser.Math.RandomXY(sprite.body.velocity, projSpeed);
             }
           }
         };
 
       case "sword":
         return function swingSword() {
-          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+          const { damage, pen, amount, projSpeed, area, luck, delay } =
+            this.getWeaponDetails(weaponName);
 
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay = delay
+            gameState.player.weaponLoops[weaponName].delay = delay;
           }
 
           const ang = 360 / (gameState.player.stats.projectileCount + 1);
@@ -322,8 +327,7 @@ class GameScene extends Phaser.Scene {
               .setScale(area);
 
             sprite.angle = -angle;
-            sprite.damage =
-              damage;
+            sprite.damage = damage;
             sprite.pen = Infinity;
 
             const bodyRadius = 15;
@@ -337,7 +341,7 @@ class GameScene extends Phaser.Scene {
               paused: false,
               angle: -405 + sprite.angle,
               yoyo: false,
-              duration: 750 * (1/projSpeed),
+              duration: 750 * (1 / projSpeed),
               onComplete: () => {
                 sprite.destroy();
               },
@@ -369,22 +373,17 @@ class GameScene extends Phaser.Scene {
         };
       case "bomb":
         return function throwbomb() {
-          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+          const { damage, pen, amount, projSpeed, area, luck, delay } =
+            this.getWeaponDetails(weaponName);
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay = delay}
-          for (
-            let index = 0;
-            index <= amount;
-            index++
-          ) {
+            gameState.player.weaponLoops[weaponName].delay = delay;
+          }
+          for (let index = 0; index <= amount; index++) {
             const bomb = this.physics.add
               .sprite(gameState.player.x, gameState.player.y, weaponName)
               .setScale(0.2);
 
-            Phaser.Math.RandomXY(
-              bomb.body.velocity,
-              projSpeed
-            );
+            Phaser.Math.RandomXY(bomb.body.velocity, projSpeed);
             this.tweens.add({
               targets: bomb,
               paused: false,
@@ -395,7 +394,7 @@ class GameScene extends Phaser.Scene {
                 const bombExplosion = weapons
                   .create(bomb.x, bomb.y, "bombExplosion")
                   .setScale(area);
-                bombExplosion.damage = damage ;
+                bombExplosion.damage = damage;
                 bombExplosion.body.setCircle(bombExplosion.width / 2);
                 bombExplosion.on("animationcomplete", (e) => {
                   bombExplosion.destroy();
@@ -409,9 +408,10 @@ class GameScene extends Phaser.Scene {
 
       case "foot":
         return function putFootDown() {
-          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+          const { damage, pen, amount, projSpeed, area, luck, delay } =
+            this.getWeaponDetails(weaponName);
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay = delay
+            gameState.player.weaponLoops[weaponName].delay = delay;
           }
           const foot = this.physics.add
             .sprite(gameState.player.x, gameState.player.y - 300, "foot")
@@ -426,7 +426,7 @@ class GameScene extends Phaser.Scene {
               foot.destroy();
             },
             onYoyo: () => {
-              const goodProc = Math.random() > 0.5-luck;
+              const goodProc = Math.random() > 0.5 - luck;
               enemies.children.each((e) => {
                 e.kill(goodProc);
               });
@@ -435,16 +435,13 @@ class GameScene extends Phaser.Scene {
         };
       case "banana":
         return function flingBanana(rept = null) {
-          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+          const { damage, pen, amount, projSpeed, area, luck, delay } =
+            this.getWeaponDetails(weaponName);
           if (gameState.player.weaponLoops[weaponName]) {
             gameState.player.weaponLoops[weaponName].delay = delay;
           }
 
-          for (
-            let index = 0;
-            index <= amount;
-            index++
-          ) {
+          for (let index = 0; index <= amount; index++) {
             const sprite = weapons
               .create(gameState.player.x, gameState.player.y, weaponName)
               .setScale(area);
@@ -470,7 +467,7 @@ class GameScene extends Phaser.Scene {
                 if (sprite.body) {
                   sprite.setVelocityY(gameState.player.body.velocity.y * 0.75);
                 }
-                sprite.y=gameState.player.y;
+                sprite.y = gameState.player.y;
                 if (!sprite.bananaFlip) {
                   sprite.offset++;
                 } else {
@@ -507,9 +504,10 @@ class GameScene extends Phaser.Scene {
 
       default:
         return function genericAction() {
-          const {damage, pen, amount, projSpeed, area, luck, delay} = this.getWeaponDetails(weaponName)
+          const { damage, pen, amount, projSpeed, area, luck, delay } =
+            this.getWeaponDetails(weaponName);
           if (gameState.player.weaponLoops[weaponName]) {
-            gameState.player.weaponLoops[weaponName].delay = delay
+            gameState.player.weaponLoops[weaponName].delay = delay;
           }
           for (
             let index = 0;
@@ -548,7 +546,10 @@ class GameScene extends Phaser.Scene {
       frameHeight: 64,
     });
 
-    this.load.image("playerController", "./imgs/controller.png");
+    this.load.spritesheet("playerController", "./imgs/controller.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
 
     this.load.image("gem1", "./imgs/gem1.png");
     this.load.image("heart", "./imgs/heart.png");
@@ -556,8 +557,6 @@ class GameScene extends Phaser.Scene {
     this.load.image("background", "./imgs/grassTile.png");
     this.load.pack("bonusesPack", "./data/bonusesPack.json");
     this.load.pack("weaponsPack", "./data/weaponsPack.json");
-
-    
   }
 
   //// ***** CREATE FUNCTION *******
@@ -791,47 +790,47 @@ class GameScene extends Phaser.Scene {
         const r = item.onVacuum();
       }
     });
-    // * set up pointer controls 
+    // * set up pointer controls
     this.pointerController = this.add
-    .sprite(0, 0, "playerController")
-    .setOrigin(0.5, 0.5)
-    .setVisible(false); // Initially hidden
+      .sprite(0, 0, "playerController")
+      .setOrigin(0.5, 0.5)
+      .setVisible(false); // Initially hidden
 
-  this.pointerController.relX = 0;
-  this.pointerController.relY = 0;
+    this.pointerController.relX = 0;
+    this.pointerController.relY = 0;
 
-  // Flag to track pointer state
-  this.isClicking = false;
-
-  // Register a single pointerdown and pointerup event listener
-  this.input.on("pointerdown", (pointer) => {
-    if (!this.isClicking) {
-      this.isClicking = true;
-      this.pointerController.setVisible(true);
-
-      // Set initial pointerController position
-      this.pointerController.x = Math.floor(pointer.worldX);
-      this.pointerController.y = Math.floor(pointer.worldY);
-
-      // Calculate relative position to the player
-      this.pointerController.relX =
-        this.pointerController.x - gameState.player.x;
-      this.pointerController.relY =
-        this.pointerController.y - gameState.player.y;
-    }
-  });
-
-  this.input.on("pointerup", () => {
-    this.pointerController.setVisible(false);
+    // Flag to track pointer state
     this.isClicking = false;
-  });
+
+    // Register a single pointerdown and pointerup event listener
+    this.input.on("pointerdown", (pointer) => {
+      if (!this.isClicking) {
+        this.isClicking = true;
+        this.pointerController.setVisible(true);
+
+        // Set initial pointerController position
+        this.pointerController.x = Math.floor(pointer.worldX);
+        this.pointerController.y = Math.floor(pointer.worldY);
+
+        // Calculate relative position to the player
+        this.pointerController.relX =
+          this.pointerController.x - gameState.player.x;
+        this.pointerController.relY =
+          this.pointerController.y - gameState.player.y;
+      }
+    });
+
+    this.input.on("pointerup", () => {
+      this.pointerController.setVisible(false);
+      this.isClicking = false;
+    });
     // **** game starting conditions *****
 
     // start hud
     this.scene.launch("HudScene");
     this.scene.get("HudScene").events.emit("UpdateHudItemTB"); // sent the event to tell the hud to update
     // initalise the enemy genrator
-    this.currentWaveIndex = 0
+    this.currentWaveIndex = 0;
     //this.getWave(); // get the wave and set the timer for the next wave
     const directorLoop = this.time.addEvent({
       callback: this.director,
@@ -855,15 +854,14 @@ class GameScene extends Phaser.Scene {
 
     this.events.on("shutdown", () => {
       gameState.player = null; // Reset player on scene shutdown
-      delete this.wave 
-      this.waveLoop.destroy()
+      delete this.wave;
+      this.waveLoop.destroy();
     });
 
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
     //new Gem(250, 250, 200, this)
-        // Create a single instance of the pointerController
- 
+    // Create a single instance of the pointerController
   }
 
   director() {
@@ -873,7 +871,7 @@ class GameScene extends Phaser.Scene {
     if (!this.wave) {
       this.getWave();
     }
-    
+
     const enemyCount = enemies.countActive();
     if (enemyCount <= this.wave.maxEnemies) {
       for (let i = enemyCount; i < this.wave.maxEnemies; i++) {
@@ -906,15 +904,22 @@ class GameScene extends Phaser.Scene {
           });
         };
         enemy.kill = (goodProc = true) => {
-          
           //enemy.body.destroy()
           if (enemy.state != "dead") {
-            gameState.kills++
-            gameState.score+= Math.ceil( enemy.data.value * (1 + gameState.player.stats.scoreBonus * this.bonusesData.investments.amt));
+            gameState.kills++;
+            gameState.score += Math.ceil(
+              enemy.data.value *
+                (1 +
+                  gameState.player.stats.scoreBonus *
+                    this.bonusesData.investments.amt)
+            );
             enemy.state = "dead";
             enemy.deadTween.play();
             if (goodProc) {
-              if (Math.random()+ (gameState.player.stats.bonusLuck * 0.1) > 0.75) {
+              if (
+                Math.random() + gameState.player.stats.bonusLuck * 0.1 >
+                0.75
+              ) {
                 new Gem(enemy.x, enemy.y, enemy.data.xpGiven, this);
               }
             }
@@ -940,7 +945,6 @@ class GameScene extends Phaser.Scene {
         });
       }
     }
-
   }
 
   //// ***** UPDATE FUNCTION *******
@@ -948,9 +952,34 @@ class GameScene extends Phaser.Scene {
     // player controls
     // Reset player velocity
     gameState.player.setVelocity(0);
-
     // Update the pointerController's position to follow the player
     if (this.isClicking) {
+      //const { worldX, worldY } = this.input.activePointer;
+      const camera = this.cameras.main;
+
+      // Adjust pointer position for camera scroll
+      const worldX = this.input.activePointer.x + camera.scrollX;
+      const worldY = this.input.activePointer.y + camera.scrollY;
+
+      if (gameState.debug) {
+        if (this.debugCircle) {
+          this.debugCircle.destroy();
+        }
+        this.debugCircle = this.add.circle(worldX, worldY, 5, 0x00ff00);
+        if (this.debugLine) this.debugLine.destroy();
+
+        this.debugLine = this.add
+          .line(
+            0,
+            0,
+            this.pointerController.x,
+            this.pointerController.y,
+            worldX,
+            worldY,
+            0xff0000
+          )
+          .setOrigin(0, 0);
+      }
       this.pointerController.setX(
         Math.floor(this.pointerController.relX + gameState.player.x)
       );
@@ -958,22 +987,31 @@ class GameScene extends Phaser.Scene {
         Math.floor(this.pointerController.relY + gameState.player.y)
       );
 
-      const { worldX, worldY } = this.input.activePointer;
-
-      // Calculate the angle between the pointerController and the touch position
-      const angle = Phaser.Math.Angle.Between(
+      const distance = Phaser.Math.Distance.Between(
         this.pointerController.x,
         this.pointerController.y,
         worldX,
         worldY
       );
-      this.pointerController.rotation = angle
-      // Apply velocity in the direction of the angle
-      this.physics.velocityFromRotation(
-        angle,
-        playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
-        gameState.player.body.velocity
-      );
+      if (distance > 10) {
+        this.pointerController.setFrame(0);
+        // Calculate the angle between the pointerController and the touch position
+        const angle = Phaser.Math.Angle.Between(
+          this.pointerController.x,
+          this.pointerController.y,
+          worldX,
+          worldY
+        );
+        this.pointerController.rotation = angle;
+        // Apply velocity in the direction of the angle
+        this.physics.velocityFromRotation(
+          angle,
+          playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
+          gameState.player.body.velocity
+        );
+      } else {
+        this.pointerController.setFrame(1);
+      }
     }
 
     // * keyboard contols
