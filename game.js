@@ -86,6 +86,7 @@ check_login()
 
   })
   .finally(()=>{
+    document.getElementById("preloader").style.display = "none";
     game = new Phaser.Game(config);
   })
   ;
