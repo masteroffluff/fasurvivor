@@ -114,6 +114,7 @@ async function get_Public_key() {
 }
 
 async function score_login(user, password) {
+  document.getElementById("preloader").style.display = "flex";
   const content = {
     method: "POST",
     body: JSON.stringify({ user, password }),
@@ -125,14 +126,17 @@ async function score_login(user, password) {
     console.log("login successful");
     await get_Public_key();
     login_name = user;
+    document.getElementById("preloader").style.display = "none";
     return true;
   } else {
+    document.getElementById("preloader").style.display = "none";
     return false;
     login_name = "";
   }
 }
 
 async function score_logout() {
+  document.getElementById("preloader").style.display = "flex";
   const content = {
     method: "POST",
     body: JSON.stringify(),
@@ -146,10 +150,12 @@ async function score_logout() {
   login_name = "";
   publicKey = "";
   sessionId = "";
+  document.getElementById("preloader").style.display = "none";
 }
 
 
 async function score_register(user, password) {
+  document.getElementById("preloader").style.display = "flex";
   const content = {
     method: "POST",
     body: JSON.stringify({ user, password }),
@@ -161,8 +167,10 @@ async function score_register(user, password) {
     console.log("register successful");
     await get_Public_key();
     login_name = user;
+    document.getElementById("preloader").style.display = "none";
     return "true";
   } else {
+    document.getElementById("preloader").style.display = "none";
     return false;
     login_name = "";
   }
