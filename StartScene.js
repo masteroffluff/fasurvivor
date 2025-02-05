@@ -137,7 +137,7 @@ class StartScene extends Phaser.Scene {
           25,
           "Log Out",
           () => {
-            score_logout().then(()=>{doLoginButton()})
+            doLogout().then(()=>{doLoginButton()})
           },
           { ...textStyle, fontSize: "16px" }
         );

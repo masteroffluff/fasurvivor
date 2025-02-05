@@ -4,9 +4,7 @@ function generateNonce() {
   return globalThis.crypto.getRandomValues(new Uint8Array(16)).join("");
 }
 
-
 async function score_submit(score) {
-
   console.log({ publicKey, sessionId });
 
   const serverPublicKey = await importPublicKey(publicKey);
@@ -42,7 +40,7 @@ async function score_submit(score) {
 
     const result = await response.json();
     console.log("Submission successful:", result);
-    return result
+    return result;
   } catch (error) {
     console.error("Error submitting score:", error);
     console.error(response);
@@ -51,7 +49,7 @@ async function score_submit(score) {
 
 async function importPublicKey(publicKeyB64) {
   // Convert base64 to ArrayBuffer
-  console.log(publicKeyB64)
+  console.log(publicKeyB64);
   const binaryDer = Uint8Array.from(atob(publicKeyB64), (c) =>
     c.charCodeAt(0)
   ).buffer;
@@ -88,13 +86,12 @@ async function check_login() {
     headers: { "Content-Type": "application/json", credentials: "include" },
     credentials: "include",
   });
-  const login_response =  await response.json();
-  if(login_response.logged_in){
-    await get_Public_key()
-    gameState.highScore = login_response.score
+  const login_response = await response.json();
+  if (login_response.logged_in) {
+    await get_Public_key();
+    gameState.highScore = login_response.score;
   }
-  return login_response
-
+  return login_response;
 }
 
 async function get_Public_key() {
@@ -102,18 +99,18 @@ async function get_Public_key() {
     headers: { "Content-Type": "application/json", credentials: "include" },
     credentials: "include",
   });
-  try{
-  const key_data = await response.json();
-  publicKey = key_data.public_key;
-  sessionId = key_data.session_id;
-  return key_data
-  } catch(e) {
-    console.log(e)
-    console.log(response, response.body)
+  try {
+    const key_data = await response.json();
+    publicKey = key_data.public_key;
+    sessionId = key_data.session_id;
+    return key_data;
+  } catch (e) {
+    console.log(e);
+    console.log(response, response.body);
   }
 }
 
-async function score_login(user, password) {
+async function dologin(user, password) {
   document.getElementById("preloader").style.display = "flex";
   const content = {
     method: "POST",
@@ -124,18 +121,21 @@ async function score_login(user, password) {
   const response = await fetch(URL + "/login", content);
   if (response.ok) {
     console.log("login successful");
+    const login_response = await response.json();
     await get_Public_key();
+    gameState.highScore = login_response.score;
     login_name = user;
     document.getElementById("preloader").style.display = "none";
     return true;
   } else {
     document.getElementById("preloader").style.display = "none";
-    return false;
     login_name = "";
+    return false;
+    
   }
 }
 
-async function score_logout() {
+async function doLogout() {
   document.getElementById("preloader").style.display = "flex";
   const content = {
     method: "POST",
@@ -150,9 +150,9 @@ async function score_logout() {
   login_name = "";
   publicKey = "";
   sessionId = "";
+  gameState.highScore = 100;
   document.getElementById("preloader").style.display = "none";
 }
-
 
 async function score_register(user, password) {
   document.getElementById("preloader").style.display = "flex";

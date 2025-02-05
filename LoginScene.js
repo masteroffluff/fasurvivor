@@ -19,7 +19,7 @@ class LoginScene extends Phaser.Scene {
         graphics.strokePath();
         
         
-        // Add exit button
+        // Add exit button TODO Turn into a regular button
         const exitButton = this.add.dom(410+ x_offset, 70 + y_offset, 'button', {
             style: 'width: 40px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
         }, 'X').setOrigin(0,0);
@@ -65,7 +65,7 @@ class LoginScene extends Phaser.Scene {
             const username = usernameInput_login.node.value;
             const password = passwordInput_login.node.value;
 			
-            const success = await score_login(username, password);
+            const success = await dologin(username, password);
             if (success) {
                 this.scene.resume(data.level);
                 this.scene.stop();

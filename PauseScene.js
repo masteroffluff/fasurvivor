@@ -55,7 +55,7 @@ class PauseScene extends Phaser.Scene {
 			    25,
 			    "Log Out",
 			    () => {
-			      score_logout().then(()=>{
+			      doLogout().then(()=>{
 					doLoginButton()
 					this.game.events.emit('loginChange')
 				  })

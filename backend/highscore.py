@@ -187,11 +187,6 @@ def holla():
 @cross_origin(origins=ORIGIN, supports_credentials=True)
 def highscore():
     try:
-        # high_scores=session.query(HighScore).order_by(HighScore.score.desc()).all()
-        # output = []
-        # for high_score in high_scores:
-        #     user = session.query(User).get(high_score.user)
-        #     output.append({"Name":user.name, "Score":high_score.score, "Date":high_score.date})
         high_scores = (
             session.query(HighScore, User)
             .join(User, HighScore.user == User.id)
