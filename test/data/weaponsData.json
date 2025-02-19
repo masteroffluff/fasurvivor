@@ -1,0 +1,191 @@
+{
+  "fireball": {
+    "name": "fireball",
+    "type": "weapon",
+    "desc": "Fires balls of flames at the nearest enemy.",
+    "spriteName": "fireball",
+    "icon": "icon_fireball",
+    "scale": 0.2,
+    "damage": 1,
+    "velocity": 100,
+    "delay": 750,
+    "pen": 1,
+    "levels":[
+      {
+        "desc":"Fires balls of flames at the nearest enemy.",
+        "bonus":{}
+      },
+      {
+        "desc":"Add one more fireball",
+        "bonus":{"amount":1}
+      },
+      {
+        "desc":"Increase Rate of Fire",
+        "bonus":{"rof":1}
+      },
+      {
+        "desc":"Add another fireball",
+        "bonus":{"amount":2}
+      },
+      {
+        "desc":"Further increase ROF",
+        "bonus":{"rof":2}
+      },
+      {
+        "desc":"Add yet another fireball",
+        "bonus":{"amount":3}
+      }
+    ]
+  },
+  "sword": {
+    "name": "sword",
+    "type": "weapon",
+    "desc": "Sweeps around the player hitting all enemies",
+    "spriteName": "sword",
+    "icon": "icon_sword",
+    "scale": 1,
+    "damage": 1,
+    "velocity": 1,
+    "delay": 3000,
+    "pen": "Infinity",
+    "levels":[
+      {
+        "desc":"Sweeps around the player hitting all enemies",
+        "bonus":{}
+      },
+      {
+        "desc":"Add another blade",
+        "bonus":{"amount":1}
+      },
+      {
+        "desc":"Increase damage",
+        "bonus":{"damage":1}
+      },
+      {
+        "desc":"Increase the rate",
+        "bonus":{"rof":1}
+      },
+      {
+        "desc":"Further increase ROF",
+        "bonus":{"rof":2}
+      },
+      {
+        "desc":"increase the blade speed",
+        "bonus":{"proj_speed":3}
+      }
+    ]
+  },
+  "bomb": {
+    "name": "bomb",
+    "type": "weapon",
+    "desc": "Travels a short distance and exlodes.",
+    "spriteName": "bomb",
+    "icon": "icon_bomb",
+    "scale":1,
+    "damage": 1,
+    "velocity": 30,
+    "delay": 3000,
+    "pen": 1,
+    "levels":[
+      {
+        "desc":"Travels a short distance and exlodes.",
+        "bonus":{}
+      },
+      {
+        "desc":"Increase the rate of fire",
+        "bonus":{"rof":1}
+      },
+      {
+        "desc":"Increase damage",
+        "bonus":{"damage":1}
+      },
+      {
+        "desc":"Increase the area of the explosion",
+        "bonus":{"area":1}
+      },
+      {
+        "desc":"Increase the amount of bombs",
+        "bonus":{"amount":1}
+      },
+      {
+        "desc":"Increase the area of the explosion further",
+        "bonus":{"area":2}
+      }
+    ]
+  },
+  "banana": {
+    "name": "banana",
+    "type": "weapon",
+    "desc": "Bananarangs out and back",
+    "spriteName": "banana",
+    "icon": "icon_banana",
+    "scale": 1.2,
+    "damage": 1,
+    "velocity": 2,
+    "delay": 3000,
+    "pen": 1,
+    "levels":[
+      {
+        "desc":"Bananarangs out and back",
+        "bonus":{}
+      },
+      {
+        "desc":"More bananas.",
+        "bonus":{"amount":1}
+      },
+      {
+        "desc":"More bananas!",
+        "bonus":{"amount":2}
+      },
+      {
+        "desc":"More bananas!!",
+        "bonus":{"amount":3}
+      },
+      {
+        "desc":"More bananas!!!",
+        "bonus":{"amount":4}
+      },
+      {
+        "desc":"More bananas!!!!",
+        "bonus":{"amount":5}
+      }
+    ]
+  },
+  "foot": {
+    "name": "foot",
+    "type": "weapon",
+    "desc": "And now for something completely different. Squishes all enemies on screen.",
+    "spriteName": "foot",
+    "icon": "icon_foot",
+    "damage": 1,
+    "velocity": 2,
+    "delay": 15000,
+    "pen": 1,
+    "levels":[
+      {
+        "desc":"And now for something completely different. Squishes all enemies on screen.",
+        "bonus":{"rof":1}
+      },
+      {
+        "desc":"Increase the rate of fire.",
+        "bonus":{"rof":1}
+      },
+      {
+        "desc":"Increase change of getting a good proc.",
+        "bonus":{"luck":1}
+      },
+      {
+        "desc":"Increase the rate of fire",
+        "bonus":{"rof":2}
+      },
+      {
+        "desc":"Increase change of getting a good proc.",
+        "bonus":{"luck":2}
+      },
+      {
+        "desc":"Increase change of getting a good proc.",
+        "bonus":{"luck":3}
+      }
+    ]
+  }
+}

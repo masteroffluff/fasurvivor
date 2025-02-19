@@ -1,5 +1,5 @@
 const gameState = {
-  kills:0,
+  kills: 0,
   score: 0,
   money: 0,
   width: 2000,
@@ -29,11 +29,26 @@ window.addEventListener("load", function () {
 var publicKey,
   sessionId,
   login_name = "";
+let w = window.innerWidth;
+let h = window.innerHeight;
+let scaleMode = Phaser.Scale.FIT
+if (window.innerWidth > 1280) {
+  h = window.innerHeight/1.5;
+  w = 1280/1.5
+  // scaleMode= Phaser.Scale.RESIZE
+}
 
+console.log();
 const config = {
   type: Phaser.AUTO,
-  width: 500,
-  height: 600,
+  width: w,
+  height: h,
+
+  scale: {
+    // Fit to window
+    mode: scaleMode,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
   backgroundColor: "aaaaaa",
   physics: {
     default: "arcade",
@@ -42,18 +57,14 @@ const config = {
       debug: gameState.debug,
     },
   },
-  scale: {
-    // Fit to window
-    mode: Phaser.Scale.FIT,
-    // Center vertically and horizontally
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
+
   callbacks: {
     preBoot: (game) => {
       game.events.emit("game-start", { message: "Game has started!" });
     },
   },
   scene: [
+    BootScene,
     StartScene,
     GameScene,
     PauseScene,
@@ -74,20 +85,15 @@ check_login()
   .then((result) => {
     if (result.logged_in) {
       login_name = result.login_name;
-
     }
-
-
   })
   .catch((error) => {
     console.error("Error during login check:", error);
     alert("Failed to reach server.");
     // Optionally still initialize the game
-
   })
-  .finally(()=>{
+  .finally(() => {
     document.getElementById("preloader").style.display = "none";
     game = new Phaser.Game(config);
-  })
-  ;
+  });
 // var game = new Phaser.Game(config);

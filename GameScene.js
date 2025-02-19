@@ -186,12 +186,6 @@ class GameScene extends Phaser.Scene {
       },
       { enemyPool: ["enemy2"], maxEnemies: 45, waveLengthSeconds: 90 },
     ];
-    // let period = 0
-    // this.waves.forEach((w)=>{
-    //   w.period = period
-    //   period+=w.waveLengthSeconds
-    //   //w.to = period
-    // })
 
     this.currentWaveIndex = 0;
 
@@ -525,39 +519,7 @@ class GameScene extends Phaser.Scene {
     }
   }
   //// ***** PRELOAD FUNCTION *******
-  preload() {
-    this.load.json("bonusesData", "data/bonusesData.json");
-    this.load.json("weaponsData", "data/weaponsData.json");
-
-    this.load.image(
-      "enemy1",
-      "https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_1.png"
-    );
-    this.load.image(
-      "enemy2",
-      "https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_2.png"
-    );
-    this.load.image(
-      "player",
-      "https://content.codecademy.com/courses/learn-phaser/codey.png"
-    );
-    this.load.spritesheet("bombExplosion", "./imgs/bombExplosion.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-
-    this.load.spritesheet("playerController", "./imgs/controller.png", {
-      frameWidth: 64,
-      frameHeight: 64,
-    });
-
-    this.load.image("gem1", "./imgs/gem1.png");
-    this.load.image("heart", "./imgs/heart.png");
-    this.load.image("crate", "./imgs/crate.png");
-    this.load.image("background", "./imgs/grassTile.png");
-    this.load.pack("bonusesPack", "./data/bonusesPack.json");
-    this.load.pack("weaponsPack", "./data/weaponsPack.json");
-  }
+  // moved to boot scene
 
   //// ***** CREATE FUNCTION *******
   create() {
@@ -762,7 +724,7 @@ class GameScene extends Phaser.Scene {
     //* Weapons
     weapons = this.physics.add.group();
     this.physics.add.overlap(weapons, enemies, (w, e) => {
-      //if(!e.dead){
+
       w.pen--;
       e.data.life -= w.damage;
       if (w.pen <= 0) {
@@ -770,11 +732,9 @@ class GameScene extends Phaser.Scene {
       }
 
       if (e.data.life <= 0) {
-        //e.disableBody(e.body)
+
         e.kill();
-        // e.body.destroy()
-        // e.dead = true;
-        // e.deadTween.restart()
+
       }
     });
 
@@ -831,20 +791,13 @@ class GameScene extends Phaser.Scene {
     this.scene.get("HudScene").events.emit("UpdateHudItemTB"); // sent the event to tell the hud to update
     // initalise the enemy genrator
     this.currentWaveIndex = 0;
-    //this.getWave(); // get the wave and set the timer for the next wave
+    // start the director
     const directorLoop = this.time.addEvent({
       callback: this.director,
       delay: 100,
       callbackScope: this,
       loop: true,
     });
-
-    // const waveLoop = this.time.addEvent({
-    //   callback: getWave,
-    //   delay: ()=>this.waveDelay,
-    //   callbackScope: this,
-    //   loop: true,
-    // });
 
     heldWeapons.forEach((w) => {
       // start weapon loops for weapons held at the start
@@ -860,11 +813,12 @@ class GameScene extends Phaser.Scene {
 
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
-    //new Gem(250, 250, 200, this)
-    // Create a single instance of the pointerController
+    // new Gem(250, 250, 200, this)
+    
   }
 
   director() {
+    // this is a separate function to the updates as we don't need it running every frame. 
     // * crates and objects
 
     // * enemies

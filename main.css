@@ -1,0 +1,28 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-image: url("./imgs/grassTile.png");
+    background-repeat: repeat;
+    overflow: hidden;
+    
+
+}
+.darkness {
+    position: fixed;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    background-color: black;
+    opacity: 50%;
+}
+canvas {
+    display: block;
+    width: 500px;
+    border: 2px grey solid;
+    z-index: 99;
+}

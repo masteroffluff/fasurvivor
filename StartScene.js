@@ -3,20 +3,19 @@ class StartScene extends Phaser.Scene {
     super({ key: "StartScene" });
   }
   preload() {
-    this.load.svg(
-      "logo",
-      "https://upload.wikimedia.org/wikipedia/commons/6/6c/Codecademy.svg"
-    );
-    this.load.svg("survivors", "./imgs/survivors.svg");
+    // moved to boot scene
   }
 
   startGame() {
-	this.scene.stop();
-	this.scene.start("GameScene");
+    console.log("this.scene:", this.scene);
+    console.log("starting game scene")
+    this.scene.start("GameScene");
+    console.log("stopping start scene")
+    this.scene.stop("StartScene");
+
   }
   create() {
     gameState.score = 0;
-    //this.cameras.main.setBounds(0, 0, gameState.width, gameState.height);
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
     // Access game config bounds
@@ -24,23 +23,30 @@ class StartScene extends Phaser.Scene {
     const gameWidth = gameConfig.width;
     const gameHeight = gameConfig.height;
     graphics.fillRect(0, 0, gameWidth, gameHeight);
-    this.add.image(200, 100, "logo").setScale(1.2);
-    //const survivorImage2 = this.add.image(350, 250, 'survivors').setScale(0.3).setTint(0x111).setAlpha(0);
+    let logoScale = 1.2
+    let survivorsScale = 1
+    let survivorsOffset = 250;
+    if(gameWidth<400){
+      logoScale = 0.9
+      survivorsScale = 0.75
+      survivorsOffset = 200;
+    }
+    this.add.image(gameWidth/2 - 50, 100, "logo").setScale(logoScale);
 
     const survivorImage = this.add
-      .image(350, 250, "survivors")
+      .image(gameWidth/2 + 100, survivorsOffset, "survivors")
       .setVisible(false);
 
     this.tweens.add({
       targets: survivorImage,
       paused: false,
       scaleX: {
-        getStart: () => 2.5,
-        getEnd: () => 0.3,
+        getStart: () => 2.5 * survivorsScale,
+        getEnd: () => 0.3 * survivorsScale,
       },
       scaleY: {
-        getStart: () => 2.5,
-        getEnd: () => 0.3,
+        getStart: () => 2.5 * survivorsScale,
+        getEnd: () => 0.3 * survivorsScale,
       },
       alpha: {
         getStart: () => 0,
@@ -48,13 +54,9 @@ class StartScene extends Phaser.Scene {
       },
       yoyo: false,
       duration: 1000,
-    //   onUpdate: (tween) => {
-    //     if (tween.progress > 0.9) {
-    //       //survivorImage2.setAlpha(Math.cos(Math.PI+(((tween.progress-0.9)*10)*Math.PI)))
-    //     }
-    //   },
+
       onComplete:  ()=> {
-        //survivorImage	2.destroy()
+
 		this.startButton = this.button(
 			config.width / 2,
 			300,
@@ -72,11 +74,11 @@ class StartScene extends Phaser.Scene {
 			"High Scores",
 			() => {
 				console.log("click")
-			if(this.loginbutton){
-				this.loginbutton.hide()
-			}
-			  this.scene.pause();
-			  this.scene.launch("HighScoreScene", { level: this.scene.key });
+			if(this.loginbutton){    
+          this.loginbutton.hide()
+        }
+          this.scene.pause();
+          this.scene.launch("HighScoreScene", { level: this.scene.key });
 			}
 		  )
       },
@@ -84,11 +86,7 @@ class StartScene extends Phaser.Scene {
         survivorImage.setVisible(true);
       },
     });
-	
-    //const text = this.add.text(150, 250, 'Click to start!', { fill: '#000', fontSize: '20px' })
-    //text.setLineSpacing(5)
 
-    //this.input.on('pointerdown', startGame, this)
     const spaceBar = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     );
@@ -137,7 +135,7 @@ class StartScene extends Phaser.Scene {
           25,
           "Log Out",
           () => {
-            score_logout().then(()=>{this.events.emit("loginChange")})
+            doLogout().then(()=>{doLoginButton()})
           },
           { ...textStyle, fontSize: "16px" }
         );
@@ -146,15 +144,18 @@ class StartScene extends Phaser.Scene {
     }
     doLoginButton();
     this.game.events.on("loginChange",()=>{
-      console.log('detected')
+      //console.log('detected')
       doLoginButton()
     })
     this.events.on('shutdown', () => {
+      console.log("Start Screen shutdown")
       this.game.events.off('loginChange');
     });
 
     //this.events.on("resume",doLoginButton)
 
 
+  console.log({list:this.list})
+  document.getElementById("preloader").style.display = "none";
   }
 }
