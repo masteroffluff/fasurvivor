@@ -32,10 +32,10 @@ var publicKey,
 let w = window.innerWidth;
 let h = window.innerHeight;
 let scaleMode = Phaser.Scale.FIT
-if (window.innerWidth > 800) {
-  h = window.innerHeight / 1.5;
-  w = window.innerWidth / 1.5
-  scaleMode= Phaser.Scale.FIT
+if (window.innerWidth > 1280) {
+  h = window.innerHeight/1.5;
+  w = 1280/1.5
+  // scaleMode= Phaser.Scale.RESIZE
 }
 
 console.log();
@@ -43,16 +43,7 @@ const config = {
   type: Phaser.AUTO,
   width: w,
   height: h,
-  // min: {
-  //   width: 480,
-  //   height: 720,
-  // },
-  // max: {
-  //   width: 1280,
-  //   height: 1280,
-  // },
-  // width: 1000,
-  // height: 600,
+
   scale: {
     // Fit to window
     mode: scaleMode,
@@ -73,6 +64,7 @@ const config = {
     },
   },
   scene: [
+    BootScene,
     StartScene,
     GameScene,
     PauseScene,
