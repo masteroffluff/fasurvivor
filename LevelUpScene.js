@@ -11,7 +11,7 @@ class LevelUpScene extends Phaser.Scene {
 
     const graphics = this.add.graphics();
     graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-    graphics.fillRect(120, 100, 300, 50);
+    graphics.fillRect(this.game.config.width/2-150, 100, 300, 50);
 
     const textStyle = {
       fill: "#000",
@@ -30,10 +30,10 @@ class LevelUpScene extends Phaser.Scene {
     };
 
     const messageText = this.add.text(
-      130,
+      this.game.config.width/2-140,
       100,
       "Level Up!!\nPick One",
-      textStyle
+      {...textStyle, justify: "center"}
     );
     const value = Phaser.Math.Between(2, 3);
     const offset = 200;
@@ -65,16 +65,22 @@ class LevelUpScene extends Phaser.Scene {
     const buttons = [];
 
     for (let i = 0; i <= value; i++) {
-      graphics.fillRect(120, offset + margin * i, 300, 50);
-      const button = this.add
-        .rectangle(120, offset + margin * i, 300, 50)
-        .setOrigin(0, 0);
-      button.setDepth(100);
-      button.isStroked = false;
+      const button = this.button(
+        config.width / 2,
+        offset + margin * i,
+        300,
+        50,
+        "",
+        function (b) {
+            selected = i;
+            updateSelected.call(this);
+          }
+        )
+      const {x, height} = button.getBounds()
       this.add
         .sprite(
-          120 + 5,
-          offset + margin * i + margin / 2,
+          x + 5,
+          offset + margin * i ,
           selectableItems[i].icon
         )
         .setScale(0.5)
@@ -83,53 +89,47 @@ class LevelUpScene extends Phaser.Scene {
       //* title text
       this.add
         .text(
-          130 + 16 + 20,
-          5 + offset + margin * i,
+          x + 40,
+          offset-height/2 + margin * i,
           `${selectableItems[i].name}`,
           textStyle
         )
         .setDepth(101);
+        // .setOrigin(0, 1);
       //* description text
       this.add
         .text(
-          130 + 16 + 20,
-          20 + 5 + offset + margin * i,
+          x + 40,
+          20 + offset -height/2 + margin * i,
           `${selectableItems[i].desc}`,
           textStyle_small
         )
         .setDepth(101);
 
-      button.setInteractive();
-      button.on("pointerup", function (b) {
-        selected = i;
-        updateSelected.call(this);
-      });
+      // button.setInteractive();
+      // button.on("pointerup", function (b) {
+      //   selected = i;
+      //   updateSelected.call(this);
+      // });
       buttons.push(button); // asdded to array to control bounding box
     }
 
-    graphics.fillRect(120, offset + margin * 5, 300, 50);
-
-    const exitButton = this.add
-      .rectangle(120, offset + margin * 5, 300, 50)
-      .setOrigin(0, 0);
-    this.exitButtonText = this.add
-      .text(
-        130,
-        5 + offset + margin * 5,
-        `Click to select ${selectableItems[selected].name}`,
-        textStyle_exitButton
+    const exitButton = this.button(
+      config.width / 2,
+      offset + margin * 5,
+      300,
+      50,
+      `Exit`,
+      resumeGame
       )
-      .setDepth(101);
 
-    exitButton.setInteractive();
-    exitButton.on("pointerup", resumeGame, this);
     const updateSelected = () => {
       buttons.forEach((button) => {
         button.isStroked = false;
       });
       buttons[selected].setStrokeStyle(2, 0xffffff);
-      this.exitButtonText.setText(
-        `Click to select ${selectableItems[selected].name}`
+      exitButton.setText(
+        `Click to select\n${selectableItems[selected].name}`
       );
     };
     updateSelected.call(this);

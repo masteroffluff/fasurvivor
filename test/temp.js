@@ -19,7 +19,7 @@ let weaponsData, bonusesData;
 
 var publicKey,
   sessionId,
-  login_name = "";
+  login_name = "dave";
 
 // Configuration for the Phaser game
 const config = {
@@ -53,8 +53,8 @@ const config = {
     YouDiedScene,
     // LevelUpScene,
     // PickUpItemScene,
-    LoginScene,
-    // HighScoreScene,
+    // LoginScene,
+    HighScoreScene,
   ],
   parent: "phaser-container",
   dom: {

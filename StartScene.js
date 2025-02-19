@@ -11,8 +11,12 @@ class StartScene extends Phaser.Scene {
   }
 
   startGame() {
-	this.scene.stop();
-	this.scene.start("GameScene");
+    console.log("this.scene:", this.scene);
+    console.log("starting game scene")
+    this.scene.start("GameScene");
+    console.log("stopping start scene")
+    this.scene.stop("StartScene");
+
   }
   create() {
     gameState.score = 0;
@@ -24,23 +28,31 @@ class StartScene extends Phaser.Scene {
     const gameWidth = gameConfig.width;
     const gameHeight = gameConfig.height;
     graphics.fillRect(0, 0, gameWidth, gameHeight);
-    this.add.image(200, 100, "logo").setScale(1.2);
+    let logoScale = 1.2
+    let survivorsScale = 1
+    let survivorsOffset = 250;
+    if(gameWidth<400){
+      logoScale = 0.9
+      survivorsScale = 0.75
+      survivorsOffset = 200;
+    }
+    this.add.image(gameWidth/2 - 50, 100, "logo").setScale(logoScale);
     //const survivorImage2 = this.add.image(350, 250, 'survivors').setScale(0.3).setTint(0x111).setAlpha(0);
 
     const survivorImage = this.add
-      .image(350, 250, "survivors")
+      .image(gameWidth/2 + 100, survivorsOffset, "survivors")
       .setVisible(false);
 
     this.tweens.add({
       targets: survivorImage,
       paused: false,
       scaleX: {
-        getStart: () => 2.5,
-        getEnd: () => 0.3,
+        getStart: () => 2.5 * survivorsScale,
+        getEnd: () => 0.3 * survivorsScale,
       },
       scaleY: {
-        getStart: () => 2.5,
-        getEnd: () => 0.3,
+        getStart: () => 2.5 * survivorsScale,
+        getEnd: () => 0.3 * survivorsScale,
       },
       alpha: {
         getStart: () => 0,
@@ -48,13 +60,9 @@ class StartScene extends Phaser.Scene {
       },
       yoyo: false,
       duration: 1000,
-    //   onUpdate: (tween) => {
-    //     if (tween.progress > 0.9) {
-    //       //survivorImage2.setAlpha(Math.cos(Math.PI+(((tween.progress-0.9)*10)*Math.PI)))
-    //     }
-    //   },
+
       onComplete:  ()=> {
-        //survivorImage	2.destroy()
+
 		this.startButton = this.button(
 			config.width / 2,
 			300,
@@ -72,11 +80,13 @@ class StartScene extends Phaser.Scene {
 			"High Scores",
 			() => {
 				console.log("click")
-			if(this.loginbutton){
-				this.loginbutton.hide()
-			}
-			  this.scene.pause();
-			  this.scene.launch("HighScoreScene", { level: this.scene.key });
+			if(this.loginbutton){    
+          // console.log("stopping start scene")
+          // this.scene.stop("StartScene");
+          this.loginbutton.hide()
+        }
+          this.scene.pause();
+          this.scene.launch("HighScoreScene", { level: this.scene.key });
 			}
 		  )
       },
@@ -150,11 +160,14 @@ class StartScene extends Phaser.Scene {
       doLoginButton()
     })
     this.events.on('shutdown', () => {
+      console.log("Start Screen shutdown")
       this.game.events.off('loginChange');
     });
 
     //this.events.on("resume",doLoginButton)
 
 
+  console.log({list:this.list})
+  document.getElementById("preloader").style.display = "none";
   }
 }

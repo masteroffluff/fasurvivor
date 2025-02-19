@@ -47,31 +47,27 @@ class PickUpItemScene extends Phaser.Scene {
 
 		const graphics = this.add.graphics();
 		graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-		graphics.fillRect(120, 100, 300, 250);
+		graphics.fillRect(config.width / 2 -150, 100, 300, 250);
 		const messageText = this.add.text(
-			130,
-			100,
+			config.width / 2 ,
+			120,
 			`${titleCase(data.value)} Found!!!`,
 			textStyle
-		);
-		this.add.sprite(270, 200, icon).setOrigin(0.5, 0.5);
+		).setOrigin(0.5,0.5);
+		this.add.sprite(config.width / 2, 200, icon).setOrigin(0.5, 0.5);
 		const descText = this.add.text(
-			130,
+			config.width / 2,
 			300,
 			desc,
 			textStyle_small
-		);
+		).setOrigin(0.5,0.5);
 
 		const offset = 200;
 		const margin = 50;
-		graphics.fillRect(120, offset + margin * 4, 300, 50);
 
 		function emitMessage() {
 			if (ok) {
 				ok = false
-
-
-
 				if (type === 'weapon') {
 
 					this.scene.get(data.level).events.emit('getWeapon', value)
@@ -92,33 +88,26 @@ class PickUpItemScene extends Phaser.Scene {
 		}
 
 
-		const yesButton = this.add.rectangle(120, offset + margin * 4, 300, 50).setOrigin(0, 0);
 
-		this.yesButtonText = this.add.text(
-			130,
-			5 + offset + margin * 4,
-			`Yes`,
-			textStyle_exitButton
-		).setDepth(101);
+		const yesButton = this.button(
+			config.width / 2,
+			offset + margin * 4,
+			300,
+			50,
+			"Yes",
+			emitMessage
+		  )
+		  const noButton = this.button(
+			config.width / 2,
+			offset + margin * 5,
+			300,
+			50,
+			"No",
+			resumeGame
+		  )
 
-		yesButton.setInteractive();
-		yesButton.on('pointerup', emitMessage, this);
-
-		graphics.fillRect(120, offset + margin * 5, 300, 50);
-
-		const noButton = this.add.rectangle(120, offset + margin * 5, 300, 50).setOrigin(0, 0);
-
-		this.noButtonText = this.add.text(
-			130,
-			5 + offset + margin * 5,
-			`No`,
-			textStyle_exitButton
-		).setDepth(101);
-
-		noButton.setInteractive();
-		noButton.on('pointerup', resumeGame, this);
 		const buttons = [yesButton, noButton]
-		let selected = 1
+		let selected = 0
 		const updateSelected = () => {
 			buttons.forEach((button) => {
 				button.isStroked = false

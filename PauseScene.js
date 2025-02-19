@@ -6,7 +6,7 @@ class PauseScene extends Phaser.Scene {
 	create(data) {
 		const graphics = this.add.graphics();
 		graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-		graphics.fillRect(120, 250, 300, 50);
+		graphics.fillRect(config.width / 2-150, 250, 300, 50);
 
 		const textStyle = { 
 				fill: '#000', 
@@ -14,9 +14,10 @@ class PauseScene extends Phaser.Scene {
 				wordWrap: { width: 280, useAdvancedWrap: true }, 
 				align: 'center' 
 		};
+		
 
 		const pauseText = this.add.text(
-				130, 
+			config.width / 2-120, 
 				250, 
 				'Paused:\nPress "P" to unpause.', 
 				textStyle

@@ -186,12 +186,6 @@ class GameScene extends Phaser.Scene {
       },
       { enemyPool: ["enemy2"], maxEnemies: 45, waveLengthSeconds: 90 },
     ];
-    // let period = 0
-    // this.waves.forEach((w)=>{
-    //   w.period = period
-    //   period+=w.waveLengthSeconds
-    //   //w.to = period
-    // })
 
     this.currentWaveIndex = 0;
 
@@ -526,6 +520,7 @@ class GameScene extends Phaser.Scene {
   }
   //// ***** PRELOAD FUNCTION *******
   preload() {
+    console.log("gamescene preload")
     this.load.json("bonusesData", "data/bonusesData.json");
     this.load.json("weaponsData", "data/weaponsData.json");
 
@@ -860,7 +855,7 @@ class GameScene extends Phaser.Scene {
 
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
-    //new Gem(250, 250, 200, this)
+    new Gem(250, 250, 200, this)
     // Create a single instance of the pointerController
   }
 

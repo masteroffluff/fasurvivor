@@ -152,13 +152,17 @@ class YouDiedScene extends Phaser.Scene {
       .setOrigin(0.5, 0);
     const mtBounds = messageText.getBounds();
     graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-    graphics.fillRect(40, 60, 420, 500);
-    // graphics.fillRect(
-    //   mtBounds.x - 210,
-    //   mtBounds.y - 20,
-    //   420,
-    //   mtBounds.height + 40
-    // ); // checked
+    //graphics.fillRect(40, 60, 420, 500);
+    const y = mtBounds.y - 20,
+    w = 420,
+    h = 500,
+    x = config.width / 2 - w / 2 + 10;
+    graphics.fillRect(
+      x-10,
+      mtBounds.y - 20,
+      w,
+      h
+    ); // checked
 
     messageText.setStroke("#aaa", 1);
 

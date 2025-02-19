@@ -190,14 +190,14 @@ class HudScene extends Phaser.Scene {
     graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
     graphics.fillRect(
       0,
-      this.game.config.height - 85,
-      this.game.config.height,
-      85
+      this.game.config.height - 70,
+      this.game.config.width,
+      70
     );
     this.healthBar = new StatusBar(
       this,
       0,
-      this.game.config.height - 80,
+      this.game.config.height - 65,
       "HP:",
       0xff0000,
       100,
@@ -206,7 +206,7 @@ class HudScene extends Phaser.Scene {
     this.xpBar = new StatusBar(
       this,
       0,
-      this.game.config.height - 60,
+      this.game.config.height - 40,
       "XP:",
       0x707ef9,
       0,

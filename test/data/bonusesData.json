@@ -1,0 +1,102 @@
+{
+  "explosives":{
+      "name": "explosives",
+      "type": "bonus",
+      "stat": "bonusDamage",
+      "icon": "icon_explosives",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Add punch to your weapons, increases damage"
+  },
+  "drilling":{
+      "name": "drilling",
+      "type": "bonus",
+      "stat": "bonusPen",
+      "icon": "icon_drills",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Drill through enemies, shot penetrates through to the next enemy."
+  },
+  "air cooled":{
+      "name": "air cooled",
+      "type": "bonus",
+      "stat": "bonusROF",
+      "icon": "icon_aircooling",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Air cooling for your equipment, increases ROF"
+  },
+  "running shoes":{
+      "name": "running shoes",
+      "type": "bonus",
+      "stat": "playerSpeed",
+      "icon": "icon_runningShoe",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Run fast, increases player movement speed"
+  },
+  "vitamins":{
+      "name": "vitamins",
+      "type": "bonus",
+      "stat": "maxHitpoints",
+      "icon": "icon_vitamins",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Eat you vitamins! Increases max HP"
+  },
+  "kevlar":{
+      "name": "kevlar",
+      "type": "bonus",
+      "stat": "armour",
+      "icon": "icon_armour",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Armour for today, reduces damage."
+  },
+  "vacuum":{
+      "name": "vacuum",
+      "type": "bonus",
+      "stat": "collectionRadius",
+      "icon": "icon_hoover",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Vrooom increases collection distance."
+  },
+ "grease":{
+      "name": "grease",
+      "type": "bonus",
+      "stat": "projectileSpeed",
+      "icon": "icon_grease",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Its Greased lightning! Increases projectile speed"
+  },
+  "investments":{
+      "name": "investments",
+      "type": "bonus",
+      "stat": "scoreBonus",
+      "icon": "icon_linegoup",
+      "amt": 0.5,
+      "max": 5,
+      "desc": "Invest wisely. Gives you more points per kill."
+  },
+  "zoom":{
+      "name": "zoom",
+      "type": "bonus",
+      "stat": "bonusArea",
+      "icon": "icon_zoom",
+      "amt": 0.1,
+      "max": 5,
+      "desc": "Zoomed In, increases the size of weapons."
+  },
+  "duplicator":{
+    "name": "duplicator",
+    "type": "bonus",
+    "stat": "projectileCount",
+    "icon": "icon_duplicator",
+    "amt": 0.1,
+    "max": 5,
+    "desc": "Increases the amount of weapons fired"
+}
+}
+
