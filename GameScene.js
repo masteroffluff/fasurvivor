@@ -906,6 +906,7 @@ class GameScene extends Phaser.Scene {
     // player controls
     // Reset player velocity
     gameState.player.setVelocity(0);
+    
     // Update the pointerController's position to follow the player
     if (this.isClicking) {
       //const { worldX, worldY } = this.input.activePointer;
@@ -915,25 +916,25 @@ class GameScene extends Phaser.Scene {
       const worldX = this.input.activePointer.x + camera.scrollX;
       const worldY = this.input.activePointer.y + camera.scrollY;
 
-      if (gameState.debug) {
-        if (this.debugCircle) {
-          this.debugCircle.destroy();
-        }
-        this.debugCircle = this.add.circle(worldX, worldY, 5, 0x00ff00);
-        if (this.debugLine) this.debugLine.destroy();
+      // if (gameState.debug) {
+      //   if (this.debugCircle) {
+      //     this.debugCircle.destroy();
+      //   }
+      //   this.debugCircle = this.add.circle(worldX, worldY, 5, 0x00ff00);
+      //   if (this.debugLine) this.debugLine.destroy();
 
-        this.debugLine = this.add
-          .line(
-            0,
-            0,
-            this.pointerController.x,
-            this.pointerController.y,
-            worldX,
-            worldY,
-            0xff0000
-          )
-          .setOrigin(0, 0);
-      }
+      //   this.debugLine = this.add
+      //     .line(
+      //       0,
+      //       0,
+      //       this.pointerController.x,
+      //       this.pointerController.y,
+      //       worldX,
+      //       worldY,
+      //       0xff0000
+      //     )
+      //     .setOrigin(0, 0);
+      // }
       this.pointerController.setX(
         Math.floor(this.pointerController.relX + gameState.player.x)
       );

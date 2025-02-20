@@ -32,13 +32,32 @@ var publicKey,
 let w = window.innerWidth;
 let h = window.innerHeight;
 let scaleMode = Phaser.Scale.FIT
+console.log({w,h})
 if (window.innerWidth > 1280) {
-  h = window.innerHeight/1.5;
-  w = 1280/1.5
+  h /=1.5;
+  w = 800
   // scaleMode= Phaser.Scale.RESIZE
 }
+if (window.innerWidth < 500) {
+  const ratio = w/500
+  w = 500
+  
+  h /= ratio
+}
 
-console.log();
+fixForm = () => {
+  const phaserDiv = document.querySelector("body > div:nth-of-type(3)");
+  const phaserCanvas = document.querySelector("canvas")
+  console.log(phaserCanvas)
+  if (phaserDiv&&phaserCanvas) {
+      phaserDiv.style.width = phaserCanvas.style.width;
+      phaserDiv.style.height = "100%";
+  }
+  console.log(phaserDiv)
+};
+
+
+console.log({w,h})
 const config = {
   type: Phaser.AUTO,
   width: w,

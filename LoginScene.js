@@ -4,23 +4,23 @@ class LoginScene extends Phaser.Scene {
     }
 
     create(data) {
-        const x_offset = 20
+        const x_offset = this.game.config.width/2 -210
         const y_offset = data.y_offset||160
 
         const graphics = this.add.graphics();
 		graphics.fillGradientStyle(0x00ffff, 0xffff00, 0xff00ff, 0x00ff00, 1);
-        graphics.fillRect(20 + x_offset, 60 + y_offset, 420, 340);
+        graphics.fillRect(x_offset, 60 + y_offset, 420, 340);
         graphics.lineStyle(1, 0x000000, 1.0);
-        graphics.strokeRect(20 + x_offset, 60 + y_offset, 420, 340);
+        graphics.strokeRect(x_offset, 60 + y_offset, 420, 340);
         graphics.beginPath();
-        graphics.moveTo(230+ x_offset, 60 + y_offset);
-        graphics.lineTo(230+ x_offset, 400 + y_offset);
+        graphics.moveTo(210+ x_offset, 60 + y_offset);
+        graphics.lineTo(210+ x_offset, 400 + y_offset);
         graphics.closePath();
         graphics.strokePath();
         
         
         // Add exit button TODO Turn into a regular button
-        const exitButton = this.add.dom(410+ x_offset, 70 + y_offset, 'button', {
+        const exitButton = this.add.dom(390+ x_offset, 70 + y_offset, 'button', {
             style: 'width: 40px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
         }, 'X').setOrigin(0,0);
 
@@ -35,18 +35,18 @@ class LoginScene extends Phaser.Scene {
        /////////////// Login ///////////////
        
         // Display text
-        this.add.text(40+ x_offset, 80 + y_offset, 'Login', { fontSize: '32px', ...textStyle }).setOrigin(0,0);
+        this.add.text(20+ x_offset, 80 + y_offset, 'Login', { fontSize: '32px', ...textStyle }).setOrigin(0,0);
         // Add username input
-        this.add.text(40+ x_offset, 130 + y_offset, 'User Name', { ...textStyle, fontSize: '16px' }).setOrigin(0,0);
-        const usernameInput_login = this.add.dom(40+ x_offset, 160 + y_offset, 'input', {
+        this.add.text(20+ x_offset, 130 + y_offset, 'User Name', { ...textStyle, fontSize: '16px' }).setOrigin(0,0);
+        const usernameInput_login = this.add.dom(20+ x_offset, 160 + y_offset, 'input', {
             type: 'text',
             placeholder: 'Username',
             style: 'width: 200px; height: 30px; font-size: 16px;',
         });
         usernameInput_login.setOrigin(0,0)
         // Add password input
-        this.add.text(40+ x_offset, 190 + y_offset, 'Password', { ...textStyle, fontSize: '16px' });
-        const passwordInput_login = this.add.dom(40+ x_offset, 220 + y_offset, 'input', {
+        this.add.text(20+ x_offset, 190 + y_offset, 'Password', { ...textStyle, fontSize: '16px' });
+        const passwordInput_login = this.add.dom(20+ x_offset, 220 + y_offset, 'input', {
             //type: 'password',
             placeholder: 'Password',
             style: 'width: 200px; height: 30px; font-size: 16px;',
@@ -55,7 +55,8 @@ class LoginScene extends Phaser.Scene {
         passwordInput_login.node.setAttribute('type', 'password');
 
         // Add login button
-        const loginButton = this.add.dom(40+ x_offset, 260 + y_offset, 'button', {
+        const loginButton = this.add.dom(20+ x_offset, 260 + y_offset, 'button', {
+            class: 'form-control',
             style: 'width: 100px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
         }, 'Login').setOrigin(0,0);
 
@@ -76,13 +77,14 @@ class LoginScene extends Phaser.Scene {
         });
         //////////////////// Register ///////////////
         // Display text
-        this.add.text(240+ x_offset, 80 + y_offset, 'Register', { fontSize: '32px', ...textStyle }).setOrigin(0,0);
+        this.add.text(220+ x_offset, 80 + y_offset, 'Register', { fontSize: '32px', ...textStyle }).setOrigin(0,0);
 
         // Add username input
-        this.add.text(240+ x_offset, 130 + y_offset, 'User Name', { ...textStyle, fontSize: '16px' }).setOrigin(0,0);
-        const usernameInput_register = this.add.dom(240+ x_offset, 160 + y_offset, 'input', {
+        this.add.text(220+ x_offset, 130 + y_offset, 'User Name', { ...textStyle, fontSize: '16px' }).setOrigin(0,0);
+        const usernameInput_register = this.add.dom(220+ x_offset, 160 + y_offset, 'input', {
             type: 'text',
             placeholder: 'Username',
+            class: 'form-control',
             style: 'width: 200px; height: 30px; font-size: 16px;',
         });
         usernameInput_register.setOrigin(0,0)
@@ -93,17 +95,19 @@ class LoginScene extends Phaser.Scene {
         //     placeholder: 'Password',
         //     style: 'width: 200px; height: 30px; font-size: 16px;',
         // });
-        this.add.text(240+ x_offset, 190 + y_offset, 'Password', { ...textStyle, fontSize: '16px' });
-        const passwordInput_register = this.add.dom(240+ x_offset, 220 + y_offset, 'input', {
+        this.add.text(220+ x_offset, 190 + y_offset, 'Password', { ...textStyle, fontSize: '16px' });
+        const passwordInput_register = this.add.dom(220+ x_offset, 220 + y_offset, 'input', {
             //type: 'password',
+            class: 'form-control',
             placeholder: 'Password',
             style: 'width: 200px; height: 30px; font-size: 16px;',
         });
-        this.add.text(240+ x_offset, 250 + y_offset, 'Repeat Pasword', { ...textStyle, fontSize: '16px' });
-        const password2Input_register = this.add.dom(240+ x_offset, 280 + y_offset, 'input', {
+        this.add.text(220+ x_offset, 250 + y_offset, 'Repeat Pasword', { ...textStyle, fontSize: '16px' });
+        const password2Input_register = this.add.dom(220+ x_offset, 280 + y_offset, 'input', {
             //type: 'password',
+            class: 'form-control',
             placeholder: 'Password',
-            style: 'width: 200px; height: 30px; font-size: 16px;',
+            style: 'z-index: 99999; width: 200px; height: 30px; font-size: 16px;',
         });
         // emailInput_register.setOrigin(0,0)
         passwordInput_register.setOrigin(0,0)
@@ -111,11 +115,13 @@ class LoginScene extends Phaser.Scene {
         passwordInput_register.node.setAttribute('type', 'password');
         password2Input_register.node.setAttribute('type', 'password');
         // Add login button
-        const registerButton = this.add.dom(240+ x_offset, 320 + y_offset, 'button', {
-            style: 'width: 100px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
+        const registerButton = this.add.dom(220+ x_offset, 320 + y_offset, 'button', {
+            class: 'form-control',
+            style: 'z-index: 999; width: 100px; height: 40px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 5px;',
         }, 'Register').setOrigin(0,0);
 
         // Handle button click
+
         registerButton.addListener('click');
         registerButton.on('click', async () => {
             const username = usernameInput_register.node.value;
@@ -138,6 +144,7 @@ class LoginScene extends Phaser.Scene {
         this.events.on('shutdown', () => {
             this.game.events.emit('loginChange')
           });
+        
 
     }
     

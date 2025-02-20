@@ -8,7 +8,7 @@ body {
     background-image: url("./imgs/grassTile.png");
     background-repeat: repeat;
     overflow: hidden;
-    
+    z-index: -999;
 
 }
 .darkness {
@@ -19,10 +19,22 @@ body {
     left:0;
     background-color: black;
     opacity: 50%;
+    z-index: -99
 }
 canvas {
     display: block;
     width: 500px;
     border: 2px grey solid;
-    z-index: 99;
+    
+}
+
+body > div:nth-of-type(3) {
+    /* position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+    width: 90vw;
+    max-width: 400px;
+    border:blue 5px solid; */
 }

@@ -44,11 +44,9 @@ class BootScene extends Phaser.Scene {
     create() {
 
         // Start the next scene after loading the stuffs
+
+        fixForm();
+
         this.scene.start('StartScene');
     }
-}
-
-// Function to check if running on mobile
-function isMobileDevice() {
-    return window.innerWidth < 768; // Adjust threshold as needed
 }
