@@ -48,12 +48,12 @@ if (window.innerWidth < 500) {
 fixForm = () => {
   const phaserDiv = document.querySelector("body > div:nth-of-type(3)");
   const phaserCanvas = document.querySelector("canvas")
-  console.log(phaserCanvas)
+  
   if (phaserDiv&&phaserCanvas) {
       phaserDiv.style.width = phaserCanvas.style.width;
-      phaserDiv.style.height = "100%";
+      phaserDiv.style.height = phaserCanvas.style.height;
   }
-  console.log(phaserDiv)
+  
 };
 
 
@@ -116,3 +116,7 @@ check_login()
     game = new Phaser.Game(config);
   });
 // var game = new Phaser.Game(config);
+window.addEventListener("resize", () => {
+  console.log("window changed")
+  fixForm();
+});

@@ -145,7 +145,9 @@ class LoginScene extends Phaser.Scene {
             this.game.events.emit('loginChange')
           });
         
-
+          this.scale.on('resize', (gameSize) => {
+            fixForm()
+        });
     }
     
 }
