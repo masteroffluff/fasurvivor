@@ -204,6 +204,12 @@ class GameScene extends Phaser.Scene {
         healthBugChance: 0.5,
       },
       {
+        enemyPool: ["enemy1"],
+        maxEnemies: 50,
+        waveLengthSeconds: 15,
+        healthBugChance:0.5,
+      },      
+      {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy1", "enemy1"],
         maxEnemies: 30,
         waveLengthSeconds: 90,
@@ -270,6 +276,17 @@ class GameScene extends Phaser.Scene {
         isBoss: false,
         healthGiven: 20,
       },
+      healthBug: {
+        name: "healthBug",
+        speed: 15,
+        life: 10,
+        damage: 5,
+        xpGiven: 10,
+        scale: 1,
+        value: 10,
+        isBoss: false,
+        healthGiven: 20,
+      }
     };
   }
   d;
@@ -950,7 +967,7 @@ class GameScene extends Phaser.Scene {
           this.gameState.cameraView
         );
         // crates
-
+        
         let randomEnemy =
           this.wave.enemyPool[
             Math.floor(Math.random() * this.wave.enemyPool.length)
@@ -998,8 +1015,7 @@ class GameScene extends Phaser.Scene {
                 new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this);
               }
               if (
-                Math.random() + gameState.player.stats.bonusLuck * 0.1 >
-                0.75
+                Math.random() + gameState.player.stats.bonusLuck * 0.1 >0.75
               ) {
                 // if(enemy.healthGiven){
                 //   new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this)
