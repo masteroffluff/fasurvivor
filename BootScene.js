@@ -16,6 +16,10 @@ class BootScene extends Phaser.Scene {
           "https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_2.png"
         );
         this.load.image(
+          "healthBug",
+          "https://s3.amazonaws.com/codecademy-content/courses/learn-phaser/physics/bug_3.png"
+        );
+        this.load.image(
           "player",
           "https://content.codecademy.com/courses/learn-phaser/codey.png"
         );
