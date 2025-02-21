@@ -71,12 +71,15 @@ class Item {
 class Heart extends Item {
   constructor(x, y, value, context) {
     super("heart", x, y, context);
-    this.value = parseInt(value)
-    
+    this.value = parseInt(value);
+
     this.item.onPickup = () => {
       //console.log(this.value,gameState.player.hitpoints )
-      const tempHitpoints = gameState.player.hitpoints
-      gameState.player.hitpoints = Math.min(tempHitpoints + this.value, gameState.player.maxHitpoints)
+      const tempHitpoints = gameState.player.hitpoints;
+      gameState.player.hitpoints = Math.min(
+        tempHitpoints + this.value,
+        gameState.player.maxHitpoints
+      );
       this.item.vacuumTween.stop();
       this.item.destroy();
     };
@@ -158,51 +161,66 @@ class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: "GameScene" });
     this.waves = [
-      { enemyPool: ["enemy1"], maxEnemies: 5, waveLengthSeconds: 30, healthBugChance:0 },
-      { enemyPool: ["enemy1"], maxEnemies: 15, waveLengthSeconds: 90, healthBugChance:0 },
+      {
+        enemyPool: ["enemy1"],
+        maxEnemies: 5,
+        waveLengthSeconds: 30,
+        healthBugChance: 0,
+      },
+      {
+        enemyPool: ["enemy1"],
+        maxEnemies: 15,
+        waveLengthSeconds: 90,
+        healthBugChance: 0,
+      },
       {
         enemyPool: ["enemy1", "enemy1", "enemy1", "enemy1", "enemy2"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
-        healthBugChance:1,
+        healthBugChance: 1,
       },
       {
         enemyPool: ["enemy1", "enemy1", "enemy1", "enemy1", "enemy2", "enemy2"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
-        healthBugChance:1,
+        healthBugChance: 1,
       },
       {
         enemyPool: ["enemy1", "enemy2"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
-        healthBugChance:1,
+        healthBugChance: 1,
       },
       {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy1", "enemy1"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
-        healthBugChance:0.5,
+        healthBugChance: 0.5,
       },
       {
         enemyPool: ["enemy1"],
         maxEnemies: 50,
         waveLengthSeconds: 15,
-        healthBugChance:0.5,
-      },      
+        healthBugChance: 0.5,
+      },
       {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy1", "enemy1"],
         maxEnemies: 30,
         waveLengthSeconds: 90,
-        healthBugChance:0.2,
+        healthBugChance: 0.2,
       },
       {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy2", "enemy1"],
         maxEnemies: 45,
         waveLengthSeconds: 90,
-        healthBugChance:0.2,
+        healthBugChance: 0.2,
       },
-      { enemyPool: ["enemy2"], maxEnemies: 45, waveLengthSeconds: 90,healthBugChance: 1 },
+      {
+        enemyPool: ["enemy2"],
+        maxEnemies: 45,
+        waveLengthSeconds: 90,
+        healthBugChance: 1,
+      },
     ];
 
     this.currentWaveIndex = 0;
@@ -251,9 +269,10 @@ class GameScene extends Phaser.Scene {
         value: 10,
         isBoss: false,
         healthGiven: 20,
-      }
+      },
     };
-  }d
+  }
+  d;
   getWave() {
     this.wave = this.waves[this.currentWaveIndex];
     this.currentWaveIndex++;
@@ -691,7 +710,7 @@ class GameScene extends Phaser.Scene {
     gameState.player.maxHitpoints = playerStats.startingHitpoints; // initialise max hitpoints as the current max
     gameState.player.immune = false; // set state for layer immunity
     gameState.player.xp = 0; // set up xp
-    gameState.kills = 0 // reset kill count
+    gameState.kills = 0; // reset kill count
     gameState.player.nextLevel = 5; // set next level xp
     gameState.player.level = 0; // set level
     //gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
@@ -769,7 +788,7 @@ class GameScene extends Phaser.Scene {
       if (e.data.life <= 0) {
         e.kill();
       } else {
-        e.stun(100)
+        e.stun(100);
       }
     });
 
@@ -786,7 +805,7 @@ class GameScene extends Phaser.Scene {
       }
     });
     // * set up pointer controls
-    this.pointerController = this.add
+    this.pointerController = this.physics.add
       .sprite(0, 0, "playerController")
       .setOrigin(0.5, 0.5)
       .setVisible(false) // Initially hidden
@@ -868,6 +887,10 @@ class GameScene extends Phaser.Scene {
             playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
             gameState.player.body.velocity
           );
+          const vx = gameState.player.body.velocity.x;
+          const vy = gameState.player.body.velocity.y;
+          this.pointerController.setVelocity(vx,vy)
+          gameState.player.flipX = gameState.player.body.velocity.x<0;
         } else {
           this.pointerController.setFrame(1);
         }
@@ -904,8 +927,10 @@ class GameScene extends Phaser.Scene {
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
     // new Gem(250, 250, 200, this)
-    new Heart(250, 250, 200, this)
+    // new Heart(250, 250, 200, this);
   }
+
+  //// DIRECTOR FUNCTION /////
 
   director() {
     // this is a separate function to the updates as we don't need it running every frame.
@@ -925,28 +950,29 @@ class GameScene extends Phaser.Scene {
           this.gameState.cameraView
         );
         // crates
-        
+
         let randomEnemy =
           this.wave.enemyPool[
             Math.floor(Math.random() * this.wave.enemyPool.length)
           ];
         //enemies.create(xCoord, yCoord, randomEnemy)
-        
-        if(Math.random()*100<this.wave.healthBugChance){
-          console.log("healthbug")
-          randomEnemy = "healthBug"
+        const healthBugBoost =
+          (1 - gameState.player.hitpoints / gameState.player.maxHitpoints) *  this.wave.healthBugChance;
+        if (Math.random() * 100 < this.wave.healthBugChance + healthBugBoost) {
+          console.log("healthbug spawned");
+          randomEnemy = "healthBug";
         }
         let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy);
         enemy.data = { ...this.enemyData[randomEnemy] };
         enemy.state = "ok";
         enemy.stun = (time) => {
           enemy.status = "stunned";
-          enemy.setTint(0xffffff)
+          enemy.setTint(0xffffff);
           this.time.addEvent({
             callback: () => {
               if (enemy.state === "stunned") {
                 enemy.state = "ok";
-                enemy.clearTint()
+                enemy.clearTint();
               }
             },
             delay: time,
@@ -968,18 +994,18 @@ class GameScene extends Phaser.Scene {
             enemy.state = "dead";
             enemy.deadTween.play();
             if (goodProc) {
-              if(enemy.data.healthGiven > 0){
-                new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this)
+              if (enemy.data.healthGiven > 0) {
+                new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this);
               }
               if (
-                Math.random() + gameState.player.stats.bonusLuck * 0.1 >0.75
+                Math.random() + gameState.player.stats.bonusLuck * 0.1 >
+                0.75
               ) {
                 // if(enemy.healthGiven){
                 //   new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this)
                 // } else {
-                  new Gem(enemy.x, enemy.y, enemy.data.xpGiven, this)
+                new Gem(enemy.x, enemy.y, enemy.data.xpGiven, this);
                 // }
-                ;
               }
             }
           }
@@ -1027,12 +1053,12 @@ class GameScene extends Phaser.Scene {
 
       if (this.cursors.left.isDown || keyObjects.left.isDown) {
         dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
-        gameState.player.flipX = true;
+        // gameState.player.flipX = true;
         keyPressed = true;
       }
       if (this.cursors.right.isDown || keyObjects.right.isDown) {
         dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
-        gameState.player.flipX = false;
+        // gameState.player.flipX = false;
         keyPressed = true;
       }
       if (this.cursors.up.isDown || keyObjects.up.isDown) {
@@ -1051,8 +1077,11 @@ class GameScene extends Phaser.Scene {
           playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
           gameState.player.body.velocity
         );
+        gameState.player.flipX = gameState.player.body.velocity.x<0;
       }
+      
     }
+    
     // make the vacuum follow the player
     gameState.vacuum.x = gameState.player.x;
     gameState.vacuum.y = gameState.player.y;
