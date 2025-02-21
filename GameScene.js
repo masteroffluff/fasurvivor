@@ -21,6 +21,7 @@ const backgroundDepth = -999;
 const floorItemDepth = -99;
 const playerDepth = 0;
 const enemyDepth = 99;
+const controllerDepth = 999;
 
 //var isClicking = false;
 
@@ -724,7 +725,6 @@ class GameScene extends Phaser.Scene {
     //* Weapons
     weapons = this.physics.add.group();
     this.physics.add.overlap(weapons, enemies, (w, e) => {
-
       w.pen--;
       e.data.life -= w.damage;
       if (w.pen <= 0) {
@@ -732,9 +732,7 @@ class GameScene extends Phaser.Scene {
       }
 
       if (e.data.life <= 0) {
-
         e.kill();
-
       }
     });
 
@@ -754,7 +752,8 @@ class GameScene extends Phaser.Scene {
     this.pointerController = this.add
       .sprite(0, 0, "playerController")
       .setOrigin(0.5, 0.5)
-      .setVisible(false); // Initially hidden
+      .setVisible(false) // Initially hidden
+      .setDepth(controllerDepth);
 
     this.pointerController.relX = 0;
     this.pointerController.relY = 0;
@@ -784,6 +783,60 @@ class GameScene extends Phaser.Scene {
       this.pointerController.setVisible(false);
       this.isClicking = false;
     });
+    //TODO: add pointer event here
+    this.input.on("pointermove", (pointer) => {
+      if (this.isClicking) {
+        //const { worldX, worldY } = this.input.activePointer;
+        const camera = this.cameras.main;
+
+        // Adjust pointer position for camera scroll
+        const worldX = this.input.activePointer.x + camera.scrollX;
+        const worldY = this.input.activePointer.y + camera.scrollY;
+
+        this.pointerController.setX(
+          Math.floor(this.pointerController.relX + gameState.player.x)
+        );
+        this.pointerController.setY(
+          Math.floor(this.pointerController.relY + gameState.player.y)
+        );
+        let distance = Infinity;
+        if (
+          Phaser.Geom.Rectangle.Contains(
+            this.pointerController.getBounds(),
+            this.input.activePointer.x,
+            this.input.activePointer.y
+          )
+        ) {
+          distance = Phaser.Math.Distance.Between(
+            this.pointerController.x,
+            this.pointerController.y,
+            worldX,
+            worldY
+          );
+        }
+
+        if (distance > 10) {
+          this.pointerController.setFrame(0);
+          // Calculate the angle between the pointerController and the touch position
+          const angle = Phaser.Math.Angle.Between(
+            this.pointerController.x,
+            this.pointerController.y,
+            worldX,
+            worldY
+          );
+          this.pointerController.rotation = angle;
+          // Apply velocity in the direction of the angle
+          this.physics.velocityFromRotation(
+            angle,
+            playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
+            gameState.player.body.velocity
+          );
+        } else {
+          this.pointerController.setFrame(1);
+        }
+      }
+    });
+
     // **** game starting conditions *****
 
     // start hud
@@ -814,11 +867,10 @@ class GameScene extends Phaser.Scene {
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
     // new Gem(250, 250, 200, this)
-    
   }
 
   director() {
-    // this is a separate function to the updates as we don't need it running every frame. 
+    // this is a separate function to the updates as we don't need it running every frame.
     // * crates and objects
 
     // * enemies
@@ -905,109 +957,50 @@ class GameScene extends Phaser.Scene {
   update() {
     // player controls
     // Reset player velocity
-    gameState.player.setVelocity(0);
-    
-    // Update the pointerController's position to follow the player
-    if (this.isClicking) {
-      //const { worldX, worldY } = this.input.activePointer;
-      const camera = this.cameras.main;
+    if (!this.isClicking) {
+      gameState.player.setVelocity(0);
+      // * keyboard contols
+      // use dx and dy to control the player velocity initially zero as not movin
+      let direction = 0;
+      let dX = 0,
+        dY = 0,
+        keyPressed = false;
+      var keyObjects = this.input.keyboard.addKeys({
+        up: "W",
+        down: "S",
+        left: "A",
+        right: "D",
+      });
 
-      // Adjust pointer position for camera scroll
-      const worldX = this.input.activePointer.x + camera.scrollX;
-      const worldY = this.input.activePointer.y + camera.scrollY;
-
-      // if (gameState.debug) {
-      //   if (this.debugCircle) {
-      //     this.debugCircle.destroy();
-      //   }
-      //   this.debugCircle = this.add.circle(worldX, worldY, 5, 0x00ff00);
-      //   if (this.debugLine) this.debugLine.destroy();
-
-      //   this.debugLine = this.add
-      //     .line(
-      //       0,
-      //       0,
-      //       this.pointerController.x,
-      //       this.pointerController.y,
-      //       worldX,
-      //       worldY,
-      //       0xff0000
-      //     )
-      //     .setOrigin(0, 0);
-      // }
-      this.pointerController.setX(
-        Math.floor(this.pointerController.relX + gameState.player.x)
-      );
-      this.pointerController.setY(
-        Math.floor(this.pointerController.relY + gameState.player.y)
-      );
-
-      const distance = Phaser.Math.Distance.Between(
-        this.pointerController.x,
-        this.pointerController.y,
-        worldX,
-        worldY
-      );
-      if (distance > 10) {
-        this.pointerController.setFrame(0);
-        // Calculate the angle between the pointerController and the touch position
-        const angle = Phaser.Math.Angle.Between(
-          this.pointerController.x,
-          this.pointerController.y,
-          worldX,
-          worldY
-        );
-        this.pointerController.rotation = angle;
-        // Apply velocity in the direction of the angle
+      if (this.cursors.left.isDown || keyObjects.left.isDown) {
+        dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
+        gameState.player.flipX = true;
+        keyPressed = true;
+      }
+      if (this.cursors.right.isDown || keyObjects.right.isDown) {
+        dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
+        gameState.player.flipX = false;
+        keyPressed = true;
+      }
+      if (this.cursors.up.isDown || keyObjects.up.isDown) {
+        dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
+        keyPressed = true;
+      }
+      if (this.cursors.down.isDown || keyObjects.down.isDown) {
+        dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
+        keyPressed = true;
+      }
+      // we then multiply dx and dy by the velocityx and velovity y times the speed
+      if (keyPressed) {
+        const angle = Phaser.Math.Angle.Between(0, 0, dX, dY);
         this.physics.velocityFromRotation(
           angle,
           playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
           gameState.player.body.velocity
         );
-      } else {
-        this.pointerController.setFrame(1);
       }
     }
-
-    // * keyboard contols
-    // use dx and dy to control the player velocity initially zero as not movin
-    let dX = 0,
-      dY = 0,
-      keyPressed = false;
-    var keyObjects = this.input.keyboard.addKeys({
-      up: "W",
-      down: "S",
-      left: "A",
-      right: "D",
-    });
-
-    if (this.cursors.left.isDown || keyObjects.left.isDown) {
-      dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
-      gameState.player.flipX = true;
-      keyPressed = true;
-    }
-    if (this.cursors.right.isDown || keyObjects.right.isDown) {
-      dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
-      gameState.player.flipX = false;
-      keyPressed = true;
-    }
-    if (this.cursors.up.isDown || keyObjects.up.isDown) {
-      dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
-      keyPressed = true;
-    }
-    if (this.cursors.down.isDown || keyObjects.down.isDown) {
-      dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
-      keyPressed = true;
-    }
-    // we then multiply dx and dy by the velocityx and velovity y times the speed
-    if (keyPressed) {
-      gameState.player.setVelocityX(
-        dX * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1)
-      );
-      gameState.player.setVelocityY(
-        dY * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1)
-      );
-    }
+    // make the vacuum follow the player
     gameState.vacuum.x = gameState.player.x;
     gameState.vacuum.y = gameState.player.y;
 

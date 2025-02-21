@@ -28,13 +28,3 @@ canvas {
     
 }
 
-body > div:nth-of-type(3) {
-    /* position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    z-index: 9999 !important;
-    width: 90vw;
-    max-width: 400px;
-    border:blue 5px solid; */
-}
