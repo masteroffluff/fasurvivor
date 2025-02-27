@@ -29,7 +29,7 @@ canvas {
 .form-container-parent {
   display: flex;
   position: fixed;
-  flex-direction: column;  
+  flex-direction: column;
   top: 33%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -49,10 +49,9 @@ canvas {
   width: auto;
   height: auto;
   font-family: Courier, monospace;
-
 }
-.form-container{
-    font-size: larger;
+.form-container {
+  font-size: larger;
 }
 
 .form-container label {
@@ -62,9 +61,9 @@ canvas {
   padding-bottom: 5px;
 }
 .form-container input {
-    display: block;
-    margin: 0px 10px;
-  }
+  display: block;
+  margin: 0px 10px;
+}
 
 .form-container .button {
   justify-self: flex-end;
@@ -76,10 +75,9 @@ canvas {
   margin: 10px;
   display: flex;
   flex-direction: column;
-  
 }
-.login-form{
-    border-right: solid 1px black;
+.login-form {
+  border-right: solid 1px black;
 }
 .backgrounded {
   background: linear-gradient(to top left, #0f0, rgba(255, 153, 150, 0), cyan),
@@ -88,15 +86,25 @@ canvas {
 }
 
 .exit-form-button {
-
- 
-    margin: 5px;
-    align-self:flex-end;
-
-    
-
+  margin: 5px;
+  align-self: flex-end;
 }
 
-.hidden{
-    display:none
+.hidden {
+  display: none;
+}
+
+@media only screen and (max-width: 450px) {
+  .form-container-parent{
+    top: 50%;
+    left: 50%;
+  }
+
+  .form-container {
+    flex-direction: column;
+  }
+  .login-form {
+    border-right: none;
+    border-bottom: solid 1px black;
+  }
 }

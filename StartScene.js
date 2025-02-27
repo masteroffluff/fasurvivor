@@ -111,7 +111,7 @@ class StartScene extends Phaser.Scene {
             ...this.defaultTextStyle,
             fill: "#000",
             fontSize: "12px",
-            wordWrap: { width: 600, useAdvancedWrap: true },
+            wordWrap: { width: Math.min(600,config.width-20), useAdvancedWrap: true },
           }
         )
         .setOrigin(0.5,0);
