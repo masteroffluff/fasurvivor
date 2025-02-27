@@ -1,3 +1,6 @@
+// Hide the address bar
+window.scrollTo(0, 1);
+
 const gameState = {
   kills: 0,
   score: 0,
@@ -13,7 +16,7 @@ const textStyle = {
   fontSize: "20px",
   wordWrap: { width: 280, useAdvancedWrap: true },
   align: "center",
-  fontFamily:"courier"
+  fontFamily: "courier",
 };
 
 let weaponsData, bonusesData;
@@ -30,25 +33,27 @@ window.addEventListener("load", function () {
 var publicKey,
   sessionId,
   login_name = "";
-let w = window.innerWidth;
-let h = window.innerHeight;
-let scaleMode = Phaser.Scale.FIT
-console.log({w,h})
-if (window.innerWidth > 1280) {
-  h /=1.5;
-  w = 800
-  // scaleMode= Phaser.Scale.RESIZE
+function windowConfig() {
+  let w = window.innerWidth;
+  let h = window.innerHeight;
+  let scaleMode = Phaser.Scale.FIT;
+  console.log({ w, h });
+  if (window.innerWidth > 1280) {
+    h /= 1.5;
+    w = 800;
+    // scaleMode= Phaser.Scale.RESIZE
+  }
+  if (window.innerWidth < 500) {
+    const ratio = w / 500;
+    w = 500;
+
+    h /= ratio;
+  }
+  return { w, h,scaleMode };
 }
-if (window.innerWidth < 500) {
-  const ratio = w/500
-  w = 500
-  
-  h /= ratio
-}
+const { w, h, scaleMode } = windowConfig();
 
-
-
-console.log({w,h})
+console.log({ w, h });
 const config = {
   type: Phaser.AUTO,
   width: w,
