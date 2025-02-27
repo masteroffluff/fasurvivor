@@ -13,6 +13,7 @@ const textStyle = {
   fontSize: "20px",
   wordWrap: { width: 280, useAdvancedWrap: true },
   align: "center",
+  fontFamily:"courier"
 };
 
 let weaponsData, bonusesData;
@@ -45,16 +46,6 @@ if (window.innerWidth < 500) {
   h /= ratio
 }
 
-fixForm = () => {
-  const phaserDiv = document.querySelector("body > div:nth-of-type(3)");
-  const phaserCanvas = document.querySelector("canvas")
-  
-  if (phaserDiv&&phaserCanvas) {
-      phaserDiv.style.width = phaserCanvas.style.width;
-      phaserDiv.style.height = phaserCanvas.style.height;
-  }
-  
-};
 
 
 console.log({w,h})
@@ -116,7 +107,7 @@ check_login()
     game = new Phaser.Game(config);
   });
 // var game = new Phaser.Game(config);
-window.addEventListener("resize", () => {
-  console.log("window changed")
-  fixForm();
-});
+// window.addEventListener("resize", () => {
+//   console.log("window changed")
+//   fixForm();
+// });

@@ -49,7 +49,7 @@ class BootScene extends Phaser.Scene {
 
         // Start the next scene after loading the stuffs
 
-        fixForm();
+        // fixForm();
 
         this.scene.start('StartScene');
     }

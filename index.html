@@ -16,6 +16,30 @@
   <div id="preloader">
     <p>Please Wait</p>
   </div>
+  <div id="form-container-parent" class="form-container-parent backgrounded hidden">
+    <button id="exit-form-button" class="exit-form-button backgrounded">X</button>
+    
+    <div class="form-container">
+      <form class="login-form form">
+        <h3>Log In</h3>
+        <label form="login-user-name">Username</label>
+        <input id="login-user-name" type="text">
+        <label for="login-password">Password</label>
+        <input id="login-password" type="password" >
+        <input id="submit-login" class="button backgrounded" type="submit" value="Log-In">
+      </form>
+      <form class="register-form form">
+        <h3>Register</h3>
+        <label form="register-user-name">Username</label>
+        <input id="register-user-name" type="text">
+        <label for="register-password-1">Password</label>
+        <input id="register-password-1" type="password">
+        <label for="register-password-2">Repeat Password</label>
+        <input id="register-password-2" type="password" >
+        <input id="submit-register" class="button backgrounded" type="submit" value="Register">
+      </form>
+    </div>
+  </div>
   <!-- <script src="./temp/phaser.js"></script> -->
   <script src="https://cdn.jsdelivr.net/npm/phaser@v3.88.0/dist/phaser.js"></script>
   
