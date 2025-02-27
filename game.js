@@ -91,9 +91,6 @@ const config = {
     HighScoreScene,
   ],
   parent: "phaser-container",
-  dom: {
-    createContainer: true, // Enable DOM elements
-  },
 };
 var game;
 check_login()
