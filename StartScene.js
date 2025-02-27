@@ -106,7 +106,7 @@ class StartScene extends Phaser.Scene {
         this.add.text(
           config.width / 2,
           740,
-          `Codecademy Logo, Codey and the bug sprites are all copyright and trademark Codecademy and used without permission.\nAll other code and graphics by Chris Chapman aka MasterOfFluff`,
+          `Codecademy Logo, Codey and the bug sprites are all copyright and trademark Codecademy (www.codecademy.com) and used without permission.\nAll other code and graphics by Chris Chapman aka MasterOfFluff`,
           {
             ...this.defaultTextStyle,
             fill: "#000",
