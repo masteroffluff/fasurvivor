@@ -33,7 +33,6 @@ window.addEventListener("load", function () {
 var publicKey,
   sessionId,
   login_name = "";
-
 function windowConfig() {
   let w = window.innerWidth;
   let h = window.innerHeight;
