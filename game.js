@@ -33,6 +33,7 @@ window.addEventListener("load", function () {
 var publicKey,
   sessionId,
   login_name = "";
+
 function windowConfig() {
   let w = window.innerWidth;
   let h = window.innerHeight;
@@ -109,7 +110,4 @@ check_login()
     game = new Phaser.Game(config);
   });
 // var game = new Phaser.Game(config);
-// window.addEventListener("resize", () => {
-//   console.log("window changed")
-//   fixForm();
-// });
+
