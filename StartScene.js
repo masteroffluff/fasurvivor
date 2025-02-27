@@ -8,11 +8,18 @@ class StartScene extends Phaser.Scene {
 
   startGame() {
     console.log("this.scene:", this.scene);
-    console.log("starting game scene")
+    console.log("starting game scene");
     this.scene.start("GameScene");
-    console.log("stopping start scene")
+    console.log("stopping start scene");
     this.scene.stop("StartScene");
+  }
 
+
+  kofiTab() {
+    window.open("https://ko-fi.com/C0C51B5HEB", "_blank");
+  }
+  codecademyTab() {
+    window.open("https://www.codecademy.com/learn/learn-phaser", "_blank");
   }
   create() {
     gameState.score = 0;
@@ -23,18 +30,18 @@ class StartScene extends Phaser.Scene {
     const gameWidth = gameConfig.width;
     const gameHeight = gameConfig.height;
     graphics.fillRect(0, 0, gameWidth, gameHeight);
-    let logoScale = 1.2
-    let survivorsScale = 1
+    let logoScale = 1.2;
+    let survivorsScale = 1;
     let survivorsOffset = 250;
-    if(gameWidth<400){
-      logoScale = 0.9
-      survivorsScale = 0.75
+    if (gameWidth < 400) {
+      logoScale = 0.9;
+      survivorsScale = 0.75;
       survivorsOffset = 200;
     }
-    this.add.image(gameWidth/2 - 50, 100, "logo").setScale(logoScale);
+    this.add.image(gameWidth / 2 - 50, 100, "logo").setScale(logoScale);
 
     const survivorImage = this.add
-      .image(gameWidth/2 + 100, survivorsOffset, "survivors")
+      .image(gameWidth / 2 + 100, survivorsOffset, "survivors")
       .setVisible(false);
 
     this.tweens.add({
@@ -55,32 +62,59 @@ class StartScene extends Phaser.Scene {
       yoyo: false,
       duration: 1000,
 
-      onComplete:  ()=> {
+      onComplete: () => {
+        this.startButton = this.button(
+          config.width / 2,
+          300,
+          300,
+          50,
+          "Start Game",
+          this.startGame
+        );
 
-		this.startButton = this.button(
-			config.width / 2,
-			300,
-			300,
-			50,
-			"Start Game",
-			this.startGame
-		  )
-	  
-		this.highScorebutton = this.button(
-			config.width / 2,
-			370,
-			300,
-			50,
-			"High Scores",
-			() => {
-				console.log("click")
-			if(this.loginbutton){    
-          this.loginbutton.hide()
-        }
-          this.scene.pause();
-          this.scene.launch("HighScoreScene", { level: this.scene.key });
-			}
-		  )
+        this.highScorebutton = this.button(
+          config.width / 2,
+          370,
+          300,
+          50,
+          "High Scores",
+          () => {
+            console.log("click");
+            if (this.loginbutton) {
+              this.loginbutton.hide();
+            }
+            this.scene.pause();
+            this.scene.launch("HighScoreScene", { level: this.scene.key });
+          }
+        );
+        this.kofiButton = this.button(
+          config.width / 2,
+          440,
+          300,
+          50,
+          "Support me on Ko-Fi",
+          this.kofiTab
+        );
+        this.codecademyButton = this.button(
+          config.width / 2,
+          510,
+          300,
+          50,
+          "Learn Phaser.js",
+          this.codecademyTab
+        );
+        this.add.text(
+          config.width / 2,
+          config.height - 100,
+          `Codecademy Logo, Codey and the bug sprites are all copyright and trademark Codecademy (www.codecademy.com) and used without permission.\nAll other code and graphics by Chris Chapman aka MasterOfFluff`,
+          {
+            ...this.defaultTextStyle,
+            fill: "#000",
+            fontSize: "12px",
+            wordWrap: { width: Math.min(600,config.width-20), useAdvancedWrap: true },
+          }
+        )
+        .setOrigin(0.5,0);
       },
       onStart: () => {
         survivorImage.setVisible(true);
@@ -97,7 +131,7 @@ class StartScene extends Phaser.Scene {
     enter.on("down", this.startGame, this);
 
     const doLoginButton = () => {
-      console.log("doing login")
+      console.log("doing login");
       if (this.loginButton) {
         this.loginButton.destroy();
       }
@@ -112,7 +146,7 @@ class StartScene extends Phaser.Scene {
           25,
           "Log In",
           () => {
-            this.loginButton.hide()
+            this.loginButton.hide();
             console.log("button login");
             this.scene.pause();
             this.scene.launch("LoginScene", { level: this.scene.key });
@@ -135,27 +169,28 @@ class StartScene extends Phaser.Scene {
           25,
           "Log Out",
           () => {
-            doLogout().then(()=>{doLoginButton()})
+            doLogout().then(() => {
+              doLoginButton();
+            });
           },
           { ...textStyle, fontSize: "16px" }
         );
-        
       }
-    }
+    };
+
     doLoginButton();
-    this.game.events.on("loginChange",()=>{
+    this.game.events.on("loginChange", () => {
       //console.log('detected')
-      doLoginButton()
-    })
-    this.events.on('shutdown', () => {
-      console.log("Start Screen shutdown")
-      this.game.events.off('loginChange');
+      doLoginButton();
+    });
+    this.events.on("shutdown", () => {
+      console.log("Start Screen shutdown");
+      this.game.events.off("loginChange");
     });
 
     //this.events.on("resume",doLoginButton)
 
-
-  console.log({list:this.list})
-  document.getElementById("preloader").style.display = "none";
+    console.log({ list: this.list });
+    document.getElementById("preloader").style.display = "none";
   }
 }

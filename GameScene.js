@@ -21,6 +21,7 @@ const backgroundDepth = -999;
 const floorItemDepth = -99;
 const playerDepth = 0;
 const enemyDepth = 99;
+const controllerDepth = 999;
 
 //var isClicking = false;
 
@@ -70,8 +71,15 @@ class Item {
 class Heart extends Item {
   constructor(x, y, value, context) {
     super("heart", x, y, context);
+    this.value = parseInt(value);
+
     this.item.onPickup = () => {
-      gameState.player.hitpoints += value;
+      //console.log(this.value,gameState.player.hitpoints )
+      const tempHitpoints = gameState.player.hitpoints;
+      gameState.player.hitpoints = Math.min(
+        tempHitpoints + this.value,
+        gameState.player.maxHitpoints
+      );
       this.item.vacuumTween.stop();
       this.item.destroy();
     };
@@ -109,6 +117,7 @@ class WeaponPickup extends Item {
     };
   }
 }
+
 class BonusPickup extends Item {
   constructor(x, y, value, context) {
     super(`icon_${value}`, x, y);
@@ -152,39 +161,66 @@ class GameScene extends Phaser.Scene {
   constructor() {
     super({ key: "GameScene" });
     this.waves = [
-      { enemyPool: ["enemy1"], maxEnemies: 5, waveLengthSeconds: 30 },
-      { enemyPool: ["enemy1"], maxEnemies: 15, waveLengthSeconds: 90 },
+      {
+        enemyPool: ["enemy1"],
+        maxEnemies: 5,
+        waveLengthSeconds: 30,
+        healthBugChance: 0,
+      },
+      {
+        enemyPool: ["enemy1"],
+        maxEnemies: 15,
+        waveLengthSeconds: 90,
+        healthBugChance: 0,
+      },
       {
         enemyPool: ["enemy1", "enemy1", "enemy1", "enemy1", "enemy2"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
+        healthBugChance: 1,
       },
       {
         enemyPool: ["enemy1", "enemy1", "enemy1", "enemy1", "enemy2", "enemy2"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
+        healthBugChance: 1,
       },
       {
         enemyPool: ["enemy1", "enemy2"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
+        healthBugChance: 1,
       },
       {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy1", "enemy1"],
         maxEnemies: 15,
         waveLengthSeconds: 90,
+        healthBugChance: 0.5,
+      },
+      {
+        enemyPool: ["enemy1"],
+        maxEnemies: 50,
+        waveLengthSeconds: 15,
+        healthBugChance: 0.5,
       },
       {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy1", "enemy1"],
         maxEnemies: 30,
         waveLengthSeconds: 90,
+        healthBugChance: 0.2,
       },
       {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy2", "enemy1"],
         maxEnemies: 45,
         waveLengthSeconds: 90,
+        healthBugChance: 0.2,
       },
-      { enemyPool: ["enemy2"], maxEnemies: 45, waveLengthSeconds: 90 },
+      {
+        enemyPool: ["enemy2"],
+        maxEnemies: 45,
+        waveLengthSeconds: 90,
+        healthBugChance: 1,
+      },
     ];
 
     this.currentWaveIndex = 0;
@@ -192,33 +228,51 @@ class GameScene extends Phaser.Scene {
     this.enemyData = {
       enemy1: {
         name: "enemy1",
+        speed: 50,
         life: 2,
         damage: 1,
         xpGiven: 1,
         scale: 1,
         value: 1,
         isBoss: false,
+        healthGiven: 0,
       },
       enemy2: {
         name: "enemy2",
+        speed: 50,
         life: 5,
         damage: 2,
         xpGiven: 3,
         scale: 1,
         value: 2,
         isBoss: false,
+        healthGiven: 0,
       },
       boss1: {
         name: "enemy2",
+        speed: 50,
         life: 10,
         damage: 5,
         xpGiven: 10,
         scale: 2,
         value: 10,
         isBoss: true,
+        healthGiven: 0,
+      },
+      healthBug: {
+        name: "healthBug",
+        speed: 15,
+        life: 10,
+        damage: 5,
+        xpGiven: 10,
+        scale: 1,
+        value: 10,
+        isBoss: false,
+        healthGiven: 20,
       },
     };
   }
+  d;
   getWave() {
     this.wave = this.waves[this.currentWaveIndex];
     this.currentWaveIndex++;
@@ -252,7 +306,7 @@ class GameScene extends Phaser.Scene {
     for (let i = 1; i <= level; i++) {
       Object.assign(weaponBonus, levels[i - 1].bonus);
     }
-    console.log(weaponName, weaponBonus, level);
+    //console.log(weaponName, weaponBonus, level);
     const bonusROF = weaponBonus.rof || 0;
     const bonusDamage = weaponBonus.damage || 0;
     const bonusAmount = weaponBonus.amount || 0;
@@ -284,7 +338,7 @@ class GameScene extends Phaser.Scene {
           if (gameState.player.weaponLoops[weaponName]) {
             gameState.player.weaponLoops[weaponName].delay = delay;
           }
-          console.log(amount);
+          //console.log(amount);
           for (let index = 0; index <= amount; index++) {
             const sprite = weapons
               .create(gameState.player.x, gameState.player.y, weaponName)
@@ -656,6 +710,7 @@ class GameScene extends Phaser.Scene {
     gameState.player.maxHitpoints = playerStats.startingHitpoints; // initialise max hitpoints as the current max
     gameState.player.immune = false; // set state for layer immunity
     gameState.player.xp = 0; // set up xp
+    gameState.kills = 0; // reset kill count
     gameState.player.nextLevel = 5; // set next level xp
     gameState.player.level = 0; // set level
     //gameState.player.heldWeapons = [...heldWeapons];           // load weapons array
@@ -724,7 +779,6 @@ class GameScene extends Phaser.Scene {
     //* Weapons
     weapons = this.physics.add.group();
     this.physics.add.overlap(weapons, enemies, (w, e) => {
-
       w.pen--;
       e.data.life -= w.damage;
       if (w.pen <= 0) {
@@ -732,9 +786,9 @@ class GameScene extends Phaser.Scene {
       }
 
       if (e.data.life <= 0) {
-
         e.kill();
-
+      } else {
+        e.stun(100);
       }
     });
 
@@ -751,10 +805,11 @@ class GameScene extends Phaser.Scene {
       }
     });
     // * set up pointer controls
-    this.pointerController = this.add
+    this.pointerController = this.physics.add
       .sprite(0, 0, "playerController")
       .setOrigin(0.5, 0.5)
-      .setVisible(false); // Initially hidden
+      .setVisible(false) // Initially hidden
+      .setDepth(controllerDepth);
 
     this.pointerController.relX = 0;
     this.pointerController.relY = 0;
@@ -784,6 +839,64 @@ class GameScene extends Phaser.Scene {
       this.pointerController.setVisible(false);
       this.isClicking = false;
     });
+    //TODO: add pointer event here
+    this.input.on("pointermove", (pointer) => {
+      if (this.isClicking) {
+        //const { worldX, worldY } = this.input.activePointer;
+        const camera = this.cameras.main;
+
+        // Adjust pointer position for camera scroll
+        const worldX = this.input.activePointer.x + camera.scrollX;
+        const worldY = this.input.activePointer.y + camera.scrollY;
+
+        this.pointerController.setX(
+          Math.floor(this.pointerController.relX + gameState.player.x)
+        );
+        this.pointerController.setY(
+          Math.floor(this.pointerController.relY + gameState.player.y)
+        );
+        let distance = Infinity;
+        if (
+          Phaser.Geom.Rectangle.Contains(
+            this.pointerController.getBounds(),
+            this.input.activePointer.x,
+            this.input.activePointer.y
+          )
+        ) {
+          distance = Phaser.Math.Distance.Between(
+            this.pointerController.x,
+            this.pointerController.y,
+            worldX,
+            worldY
+          );
+        }
+
+        if (distance > 10) {
+          this.pointerController.setFrame(0);
+          // Calculate the angle between the pointerController and the touch position
+          const angle = Phaser.Math.Angle.Between(
+            this.pointerController.x,
+            this.pointerController.y,
+            worldX,
+            worldY
+          );
+          this.pointerController.rotation = angle;
+          // Apply velocity in the direction of the angle
+          this.physics.velocityFromRotation(
+            angle,
+            playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
+            gameState.player.body.velocity
+          );
+          const vx = gameState.player.body.velocity.x;
+          const vy = gameState.player.body.velocity.y;
+          this.pointerController.setVelocity(vx,vy)
+          gameState.player.flipX = gameState.player.body.velocity.x<0;
+        } else {
+          this.pointerController.setFrame(1);
+        }
+      }
+    });
+
     // **** game starting conditions *****
 
     // start hud
@@ -814,11 +927,13 @@ class GameScene extends Phaser.Scene {
     // level specific setup
     new WeaponPickup(500, 500, "sword", this);
     // new Gem(250, 250, 200, this)
-    
+    // new Heart(250, 250, 200, this);
   }
 
+  //// DIRECTOR FUNCTION /////
+
   director() {
-    // this is a separate function to the updates as we don't need it running every frame. 
+    // this is a separate function to the updates as we don't need it running every frame.
     // * crates and objects
 
     // * enemies
@@ -841,15 +956,23 @@ class GameScene extends Phaser.Scene {
             Math.floor(Math.random() * this.wave.enemyPool.length)
           ];
         //enemies.create(xCoord, yCoord, randomEnemy)
+        const healthBugBoost =
+          (1 - gameState.player.hitpoints / gameState.player.maxHitpoints) *  this.wave.healthBugChance;
+        if (Math.random() * 100 < this.wave.healthBugChance + healthBugBoost) {
+          console.log("healthbug spawned");
+          randomEnemy = "healthBug";
+        }
         let enemy = enemies.create(spawnPoint.x, spawnPoint.y, randomEnemy);
         enemy.data = { ...this.enemyData[randomEnemy] };
         enemy.state = "ok";
         enemy.stun = (time) => {
           enemy.status = "stunned";
+          enemy.setTint(0xffffff);
           this.time.addEvent({
             callback: () => {
               if (enemy.state === "stunned") {
                 enemy.state = "ok";
+                enemy.clearTint();
               }
             },
             delay: time,
@@ -857,6 +980,7 @@ class GameScene extends Phaser.Scene {
             loop: false,
           });
         };
+        // TODO: add health drop
         enemy.kill = (goodProc = true) => {
           //enemy.body.destroy()
           if (enemy.state != "dead") {
@@ -870,11 +994,18 @@ class GameScene extends Phaser.Scene {
             enemy.state = "dead";
             enemy.deadTween.play();
             if (goodProc) {
+              if (enemy.data.healthGiven > 0) {
+                new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this);
+              }
               if (
                 Math.random() + gameState.player.stats.bonusLuck * 0.1 >
                 0.75
               ) {
+                // if(enemy.healthGiven){
+                //   new Heart(enemy.x, enemy.y, enemy.data.healthGiven, this)
+                // } else {
                 new Gem(enemy.x, enemy.y, enemy.data.xpGiven, this);
+                // }
               }
             }
           }
@@ -905,109 +1036,53 @@ class GameScene extends Phaser.Scene {
   update() {
     // player controls
     // Reset player velocity
-    gameState.player.setVelocity(0);
-    
-    // Update the pointerController's position to follow the player
-    if (this.isClicking) {
-      //const { worldX, worldY } = this.input.activePointer;
-      const camera = this.cameras.main;
+    if (!this.isClicking) {
+      gameState.player.setVelocity(0);
+      // * keyboard contols
+      // use dx and dy to control the player velocity initially zero as not movin
+      let direction = 0;
+      let dX = 0,
+        dY = 0,
+        keyPressed = false;
+      var keyObjects = this.input.keyboard.addKeys({
+        up: "W",
+        down: "S",
+        left: "A",
+        right: "D",
+      });
 
-      // Adjust pointer position for camera scroll
-      const worldX = this.input.activePointer.x + camera.scrollX;
-      const worldY = this.input.activePointer.y + camera.scrollY;
-
-      // if (gameState.debug) {
-      //   if (this.debugCircle) {
-      //     this.debugCircle.destroy();
-      //   }
-      //   this.debugCircle = this.add.circle(worldX, worldY, 5, 0x00ff00);
-      //   if (this.debugLine) this.debugLine.destroy();
-
-      //   this.debugLine = this.add
-      //     .line(
-      //       0,
-      //       0,
-      //       this.pointerController.x,
-      //       this.pointerController.y,
-      //       worldX,
-      //       worldY,
-      //       0xff0000
-      //     )
-      //     .setOrigin(0, 0);
-      // }
-      this.pointerController.setX(
-        Math.floor(this.pointerController.relX + gameState.player.x)
-      );
-      this.pointerController.setY(
-        Math.floor(this.pointerController.relY + gameState.player.y)
-      );
-
-      const distance = Phaser.Math.Distance.Between(
-        this.pointerController.x,
-        this.pointerController.y,
-        worldX,
-        worldY
-      );
-      if (distance > 10) {
-        this.pointerController.setFrame(0);
-        // Calculate the angle between the pointerController and the touch position
-        const angle = Phaser.Math.Angle.Between(
-          this.pointerController.x,
-          this.pointerController.y,
-          worldX,
-          worldY
-        );
-        this.pointerController.rotation = angle;
-        // Apply velocity in the direction of the angle
+      if (this.cursors.left.isDown || keyObjects.left.isDown) {
+        dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
+        // gameState.player.flipX = true;
+        keyPressed = true;
+      }
+      if (this.cursors.right.isDown || keyObjects.right.isDown) {
+        dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
+        // gameState.player.flipX = false;
+        keyPressed = true;
+      }
+      if (this.cursors.up.isDown || keyObjects.up.isDown) {
+        dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
+        keyPressed = true;
+      }
+      if (this.cursors.down.isDown || keyObjects.down.isDown) {
+        dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
+        keyPressed = true;
+      }
+      // we then multiply dx and dy by the velocityx and velovity y times the speed
+      if (keyPressed) {
+        const angle = Phaser.Math.Angle.Between(0, 0, dX, dY);
         this.physics.velocityFromRotation(
           angle,
           playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1),
           gameState.player.body.velocity
         );
-      } else {
-        this.pointerController.setFrame(1);
+        gameState.player.flipX = gameState.player.body.velocity.x<0;
       }
+      
     }
-
-    // * keyboard contols
-    // use dx and dy to control the player velocity initially zero as not movin
-    let dX = 0,
-      dY = 0,
-      keyPressed = false;
-    var keyObjects = this.input.keyboard.addKeys({
-      up: "W",
-      down: "S",
-      left: "A",
-      right: "D",
-    });
-
-    if (this.cursors.left.isDown || keyObjects.left.isDown) {
-      dX = -1; // we want to apply a negative x velocity to go left on the screen so dx = -1
-      gameState.player.flipX = true;
-      keyPressed = true;
-    }
-    if (this.cursors.right.isDown || keyObjects.right.isDown) {
-      dX = 1; // we want to apply a positive x velocity to go right on the screen so dx = 1
-      gameState.player.flipX = false;
-      keyPressed = true;
-    }
-    if (this.cursors.up.isDown || keyObjects.up.isDown) {
-      dY = -1; // we want to apply a negative y velocity to go up on the screen so dy = -1
-      keyPressed = true;
-    }
-    if (this.cursors.down.isDown || keyObjects.down.isDown) {
-      dY = 1; // we want to apply a positive y velocity to go down on the screen sop dy = 1
-      keyPressed = true;
-    }
-    // we then multiply dx and dy by the velocityx and velovity y times the speed
-    if (keyPressed) {
-      gameState.player.setVelocityX(
-        dX * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1)
-      );
-      gameState.player.setVelocityY(
-        dY * playerSpeed * (1 + gameState.player.stats.playerSpeed * 0.1)
-      );
-    }
+    
+    // make the vacuum follow the player
     gameState.vacuum.x = gameState.player.x;
     gameState.vacuum.y = gameState.player.y;
 
@@ -1036,7 +1111,7 @@ class GameScene extends Phaser.Scene {
         )
       ) {
         if (enemy.state === "ok") {
-          this.physics.moveToObject(enemy, gameState.player, 50);
+          this.physics.moveToObject(enemy, gameState.player, enemy.data.speed);
         }
       } else {
         enemy.destroy();

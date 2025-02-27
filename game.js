@@ -1,3 +1,6 @@
+// Hide the address bar
+window.scrollTo(0, 1);
+
 const gameState = {
   kills: 0,
   score: 0,
@@ -13,6 +16,7 @@ const textStyle = {
   fontSize: "20px",
   wordWrap: { width: 280, useAdvancedWrap: true },
   align: "center",
+  fontFamily: "courier",
 };
 
 let weaponsData, bonusesData;
@@ -29,35 +33,28 @@ window.addEventListener("load", function () {
 var publicKey,
   sessionId,
   login_name = "";
-let w = window.innerWidth;
-let h = window.innerHeight;
-let scaleMode = Phaser.Scale.FIT
-console.log({w,h})
-if (window.innerWidth > 1280) {
-  h /=1.5;
-  w = 800
-  // scaleMode= Phaser.Scale.RESIZE
-}
-if (window.innerWidth < 500) {
-  const ratio = w/500
-  w = 500
-  
-  h /= ratio
-}
 
-fixForm = () => {
-  const phaserDiv = document.querySelector("body > div:nth-of-type(3)");
-  const phaserCanvas = document.querySelector("canvas")
-  
-  if (phaserDiv&&phaserCanvas) {
-      phaserDiv.style.width = phaserCanvas.style.width;
-      phaserDiv.style.height = phaserCanvas.style.height;
+function windowConfig() {
+  let w = window.innerWidth;
+  let h = window.innerHeight;
+  let scaleMode = Phaser.Scale.FIT;
+  console.log({ w, h });
+  if (window.innerWidth > 1280) {
+    h /= 1.5;
+    w = 800;
+    // scaleMode= Phaser.Scale.RESIZE
   }
-  
-};
+  if (window.innerWidth < 500) {
+    const ratio = w / 500;
+    w = 500;
 
+    h /= ratio;
+  }
+  return { w, h,scaleMode };
+}
+const { w, h, scaleMode } = windowConfig();
 
-console.log({w,h})
+console.log({ w, h });
 const config = {
   type: Phaser.AUTO,
   width: w,
@@ -95,9 +92,6 @@ const config = {
     HighScoreScene,
   ],
   parent: "phaser-container",
-  dom: {
-    createContainer: true, // Enable DOM elements
-  },
 };
 var game;
 check_login()
@@ -116,7 +110,4 @@ check_login()
     game = new Phaser.Game(config);
   });
 // var game = new Phaser.Game(config);
-window.addEventListener("resize", () => {
-  console.log("window changed")
-  fixForm();
-});
+

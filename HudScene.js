@@ -141,36 +141,36 @@ class HudScene extends Phaser.Scene {
   constructor() {
     super({ key: "HudScene" });
   }
-  button(x, y, w, h, text, onClick, ts = textStyle) {
-    const button1 = this.add.rectangle(x, y, w, h).setOrigin(0.5, 0.5);
-    button1.graphics = this.add.graphics();
-    button1.graphics.fillGradientStyle(
-      0x00ffff,
-      0xffff00,
-      0xff00ff,
-      0x00ff00,
-      1
-    );
+  // button(x, y, w, h, text, onClick, ts = textStyle) {
+  //   const button1 = this.add.rectangle(x, y, w, h).setOrigin(0.5, 0.5);
+  //   button1.graphics = this.add.graphics();
+  //   button1.graphics.fillGradientStyle(
+  //     0x00ffff,
+  //     0xffff00,
+  //     0xff00ff,
+  //     0x00ff00,
+  //     1
+  //   );
 
-    const sb = button1.getBounds();
-    button1.graphics.fillRect(sb.x, sb.y, sb.width, sb.height);
-    button1.setStrokeStyle(1, 0x000000);
+  //   const sb = button1.getBounds();
+  //   button1.graphics.fillRect(sb.x, sb.y, sb.width, sb.height);
+  //   button1.setStrokeStyle(1, 0x000000);
 
-    button1.text = this.add.text(button1.x, button1.y, text, ts).setDepth(101);
-    button1.text.setOrigin(0.5, 0.5);
-    button1.setInteractive();
-    button1.on("pointerup", onClick, this);
-    button1.on("pointerover", () => {
-      button1.setFillStyle(0xffffff, 0.4);
-    });
-    button1.on("pointerdown", () => {
-      button1.setFillStyle(0x000000, 0.4);
-    });
-    button1.on("pointerout", () => {
-      button1.setFillStyle();
-    });
-    return button1;
-  }
+  //   button1.text = this.add.text(button1.x, button1.y, text, ts).setDepth(101);
+  //   button1.text.setOrigin(0.5, 0.5);
+  //   button1.setInteractive();
+  //   button1.on("pointerup", onClick, this);
+  //   button1.on("pointerover", () => {
+  //     button1.setFillStyle(0xffffff, 0.4);
+  //   });
+  //   button1.on("pointerdown", () => {
+  //     button1.setFillStyle(0x000000, 0.4);
+  //   });
+  //   button1.on("pointerout", () => {
+  //     button1.setFillStyle();
+  //   });
+  //   return button1;
+  // }
   preload() {
     this.load.pack("bonusesPack", "./data/bonusesPack.json");
     this.load.pack("weaponsPack", "./data/weaponsPack.json");
@@ -257,6 +257,7 @@ class HudScene extends Phaser.Scene {
 
       this.xpText = this.add.text(
         150,
+        0,
         `XP:${gameState.player.xp}/${gameState.player.nextLevel}`,
         this.defaultTextStyle
       );
@@ -279,7 +280,7 @@ class HudScene extends Phaser.Scene {
     }
 
     this.loginText = this.add
-      .text(10, config.height - 20, `Not Loged In`, {
+      .text(10, config.height - 20, `Not Logged In`, {
         ...textStyle,
         fontSize: "16px",
       })
