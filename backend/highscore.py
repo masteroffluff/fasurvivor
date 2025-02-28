@@ -1,43 +1,5 @@
 import sys, logging
 
-# # Configure logging
-# logger = logging.getLogger()
-# logger.setLevel(logging.INFO)
-
-# # File handler for logs
-# open('./app.log', 'w').close()
-# file_handler = logging.FileHandler('./app.log')
-# file_handler.setLevel(logging.INFO)
-# file_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
-# file_handler.setFormatter(file_formatter)
-# logger.addHandler(file_handler)
-
-# # Console handler for logs
-# console_handler = logging.StreamHandler(sys.stdout)
-# console_handler.setLevel(logging.INFO)
-# console_formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
-# console_handler.setFormatter(console_formatter)
-# logger.addHandler(console_handler)
-
-# # Redirect stdout and stderr to logs
-# stdout_logger = logging.getLogger('STDOUT')
-# stderr_logger = logging.getLogger('STDERR')
-
-# class StreamToLogger:
-#     def __init__(self, logger, level):
-#         self.logger = logger
-#         self.level = level
-
-#     def write(self, message):
-#         if message.strip():  # Ignore empty messages
-#             self.logger.log(self.level, message.strip())
-
-#     def flush(self):
-#         pass  # Required for compatibility with sys.stdout and sys.stderr
-
-# sys.stdout = StreamToLogger(stdout_logger, logging.INFO)
-# sys.stderr = StreamToLogger(stderr_logger, logging.ERROR)
-
 try:
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -71,15 +33,14 @@ try:
     )
 
     # Log a startup message
-    app.logger.info("Flask application has started.")
+    app.logger.info(f"{datetime.now(timezone.utc)} Flask application has started.")
 
 
 except Exception as e:
-    # app.logger.error(f"An error occurred: {e}")
-    # sys.stderr.write(e)
+
     logging.error('Error at %s', 'division', exc_info=e)
     exit(1)
-# app.logger.addHandler(console_handler)
+
 
 
 
@@ -88,12 +49,12 @@ try:
     if session == None:
         raise Exception("Model failed to load")
 except Exception as e:
-    app.logger.error(f"Error while connecting to MySQL: {e}")
+    app.logger.error(f"{datetime.now(timezone.utc)} Error while connecting to MySQL: {e}")
     print("Error while connecting to MySQL", e)
     print("is the database switched on")
     exit(1)
 
-app.logger.info(f"Database connected")
+app.logger.info(f"{datetime.now(timezone.utc)} Database connected")
 
 try:
     ORIGIN = os.getenv('ORIGIN').split(",")
@@ -127,7 +88,7 @@ try:
             key_file.read()
         )
 except Exception as e:
-    app.logger.error(f"Error while setting up: {e}")
+    app.logger.error(f"{datetime.now(timezone.utc)} Error while setting up: {e}")
     print("Error while connecting to MySQL", e)
     exit(1)
 
@@ -151,7 +112,7 @@ def check_login():
         else:
             return jsonify({'logged_in':False})
     except Exception as e:
-        app.logger.error(f"Error /check-login: {e}")
+        app.logger.error(f"{datetime.now(timezone.utc)} Error /check-login: {e}")
         print("Error /check-login", e)
         exit(1)
 
@@ -199,7 +160,7 @@ def highscore():
         return output
     except Exception as e:
         print("Error get /highscore", e)
-        app.logger.error(f"Error /highscore: {e}")
+        app.logger.error(f"{datetime.now(timezone.utc)} Error /highscore: {e}")
         return jsonify({"error": "Failed to connect to the database."}), 500
 
 
@@ -215,7 +176,7 @@ def login():
         if user == None :
             return jsonify({"error": "User name not found."}), 400
         if(not check_password_hash(password=user_password, pwhash = user.password_hash)):
-            app.logger.error(f"Login error no password \n {user.password_hash} vs {generate_password_hash(user_password)}")
+            app.logger.error(f"{datetime.now(timezone.utc)} Login error no password \n {user.password_hash} vs {generate_password_hash(user_password)}")
             return jsonify({"error": "Login Failed, no password match"}), 400
         login_user(user, remember = True)
         user_id = user.id
@@ -226,7 +187,7 @@ def login():
         return jsonify({"sucess": f"Logged in {user_name}", "score": score}), 200
     except Exception as e:
         print("Error get /login", e)
-        app.logger.error(f"Error /login: {e}")
+        app.logger.error(f"{datetime.now(timezone.utc)} Error /login: {e}")
         return "error /login", 500   
     
 
@@ -248,14 +209,14 @@ def register():
         if(user_exists):
             return jsonify({"error": "User name already exists."}), 400
         hashed_password = generate_password_hash(user_password)
-        app.logger.info({hash:hashed_password})
+        
         user = User(name=user_name, password_hash=hashed_password)
         session.add(user)
         session.commit()
         login_user(user, remember = True)
         return jsonify({"sucess": f"Created user {user_name}."}), 200
     except Exception as e:
-        app.logger.error(f"Error /register: {e}")
+        app.logger.error(f"{datetime.now(timezone.utc)} Error /register: {e}")
         return jsonify({"error": "Failed to create user"}), 500
     
 
@@ -312,7 +273,7 @@ def submit_score():
         #return jsonify(high_score_table), 200
     
     except Exception as e:
-        app.logger.error(f"Error /submit_score: {e}", exc_info=True)
+        app.logger.error(f"{datetime.now(timezone.utc)} Error /submit_score: {e}", exc_info=True)
         #print({"error /submit_score": str(e)})
         return jsonify({"error": "Error in submit score"} ), 500
 
@@ -356,7 +317,7 @@ def save_score(session_id, score, time_stamp):
         session.commit()
 
     except Exception as e:
-        app.logger.error(f"Error in save_score: {e}")
+        app.logger.error(f"{datetime.now(timezone.utc)} Error in save_score: {e}")
         print({'error in save_score':e})
         session.rollback()
 
