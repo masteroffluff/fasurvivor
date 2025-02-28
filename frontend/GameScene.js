@@ -204,12 +204,6 @@ class GameScene extends Phaser.Scene {
         healthBugChance: 0.5,
       },
       {
-        enemyPool: ["enemy1"],
-        maxEnemies: 50,
-        waveLengthSeconds: 15,
-        healthBugChance: 0.5,
-      },
-      {
         enemyPool: ["enemy2", "enemy2", "enemy2", "enemy2", "enemy1", "enemy1"],
         maxEnemies: 30,
         waveLengthSeconds: 90,
